@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { loadVisitsFromStorage, saveVisitsToStorage } from '../lib/storage';
 
 const technicians = ['Carlos Romero Vega', 'Ana Belén Fuentes', 'Miguel Ángel Díaz'];
@@ -19,6 +19,15 @@ const visitTypes = [
   'Verificación para ayudas, certificaciones o seguros',
   'Otro'
 ];
+const visitTypeShort = {
+  'Evaluación del estado del cultivo': 'Evaluación',
+  'Diagnóstico de plagas o enfermedades': 'Diagnóstico',
+  'Valoración de daños meteorológicos': 'Daños meteor.',
+  'Seguimiento de labores agrícolas': 'Seguimiento',
+  'Asesoramiento sobre riego, fertilización o manejo': 'Asesoramiento',
+  'Verificación para ayudas, certificaciones o seguros': 'Verificación',
+  'Otro': 'Otro'
+};
 const irrigationSystems = ['Goteo subsuperficial', 'Goteo superficial', 'Aspersión', 'Gravedad', 'Secano'];
 const soilTypes = ['Franco arenoso', 'Franco arcilloso', 'Arenoso', 'Arcilloso', 'Limoso', 'Franco'];
 const phenologyStates = ['Brotación', 'Floración', 'Cuajado', 'Desarrollo de fruto', 'Maduración', 'Post-cosecha', 'Reposo vegetativo'];
@@ -134,43 +143,57 @@ const requiredFieldsByStep = {
   4: []
 };
 
+const emptyForm = {
+  code: '',
+  date: '',
+  technician: technicians[0],
+  farm: farms[0].name,
+  surface: farms[0].surface,
+  visitType: visitTypes[0],
+  visitDescription: '',
+  previousCrop: previousCrops[0],
+  previousTreatments: '',
+  crop: farms[0].crop,
+  sowingDate: '',
+  irrigation: irrigationSystems[0],
+  soilType: soilTypes[0],
+  phenology: phenologyStates[0],
+  generalState: '',
+  growthState: '',
+  weedToggle: false,
+  weedDescription: '',
+  pestsDiseases: '',
+  damageDescription: '',
+  fruitSize: '',
+  kgPerHa: '',
+  totalHarvest: '0',
+  waterStatus: '',
+  recommendFito: '',
+  recommendNutrition: '',
+  recommendIrrigation: '',
+  finalNotes: '',
+  photos: []
+};
+
+function formatDate(date) {
+  return new Date(date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function generateCode(list) {
+  const year = new Date().getFullYear();
+  const next = (list.length + 1).toString().padStart(5, '0');
+  return `VT-${year}-${next}`;
+}
+
 export default function Home() {
   const [visits, setVisits] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [view, setView] = useState('home');
-  const [form, setForm] = useState({
-    code: '',
-    date: '',
-    technician: technicians[0],
-    farm: farms[0].name,
-    surface: farms[0].surface,
-    visitType: visitTypes[0],
-    visitDescription: '',
-    previousCrop: previousCrops[0],
-    previousTreatments: '',
-    crop: farms[0].crop,
-    sowingDate: '',
-    irrigation: irrigationSystems[0],
-    soilType: soilTypes[0],
-    phenology: phenologyStates[0],
-    generalState: '',
-    growthState: '',
-    weedToggle: false,
-    weedDescription: '',
-    pestsDiseases: '',
-    damageDescription: '',
-    fruitSize: '',
-    kgPerHa: '',
-    totalHarvest: '0',
-    waterStatus: '',
-    recommendFito: '',
-    recommendNutrition: '',
-    recommendIrrigation: '',
-    finalNotes: '',
-    photos: []
-  });
+  const [form, setForm] = useState(emptyForm);
   const [damageSelection, setDamageSelection] = useState(['Ninguno']);
   const [summaryVisit, setSummaryVisit] = useState(null);
+  const [stepError, setStepError] = useState('');
+  const photoInputRef = useRef(null);
 
   useEffect(() => {
     const stored = loadVisitsFromStorage();
@@ -181,29 +204,6 @@ export default function Home() {
       saveVisitsToStorage(sampleVisits);
     }
   }, []);
-
-  useEffect(() => {
-    if (view === 'form') {
-      setForm(prev => ({
-        ...prev,
-        code: generateCode(visits),
-        date: new Date().toISOString().slice(0, 10),
-        technician: technicians[0],
-        farm: farms[0].name,
-        surface: farms[0].surface,
-        crop: farms[0].crop,
-        visitType: visitTypes[0],
-        previousCrop: previousCrops[0],
-        irrigation: irrigationSystems[0],
-        soilType: soilTypes[0],
-        phenology: phenologyStates[0],
-        totalHarvest: '0',
-        photos: []
-      }));
-      setCurrentStep(0);
-      setDamageSelection(['Ninguno']);
-    }
-  }, [view, visits]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
@@ -217,46 +217,28 @@ export default function Home() {
     setForm(prev => ({ ...prev, totalHarvest: (surface * kgPerHa).toFixed(1) }));
   }, [form.surface, form.kgPerHa]);
 
-  const countLabel = useMemo(() => `${visits.length} visita${visits.length === 1 ? '' : 's'} registradas`, [visits.length]);
-
-  const renderList = () => visits.slice().reverse().map(visit => (
-    <article key={visit.code} className="visit-card">
-      <header>
-        <div>
-          <h2>{visit.code} · {formatDate(visit.date)}</h2>
-          <p>{visit.farm} · {visit.technician}</p>
-        </div>
-        <span className="badge">{visit.visitType}</span>
-      </header>
-      <div className="detail-grid">
-        <div><strong>Finca</strong><p>{visit.farm}</p></div>
-        <div><strong>Técnico</strong><p>{visit.technician}</p></div>
-        <div><strong>Tipo</strong><p>{visit.visitType}</p></div>
-        <div><strong>Estado</strong><p>{visit.damageSelection.includes('Ninguno') ? 'Sin daños relevantes' : 'Requiere seguimiento'}</p></div>
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '.75rem' }}>
-        <button type="button" className="button secondary" onClick={() => openSummary(visit.code)}>Ver resumen</button>
-      </div>
-    </article>
-  ));
-
-  function generateCode(list) {
-    const year = new Date().getFullYear();
-    const next = (list.length + 1).toString().padStart(5, '0');
-    return `VT-${year}-${next}`;
-  }
-
-  function formatDate(date) {
-    return new Date(date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  function openForm() {
+    setForm({
+      ...emptyForm,
+      code: generateCode(visits),
+      date: new Date().toISOString().slice(0, 10),
+    });
+    setCurrentStep(0);
+    setDamageSelection(['Ninguno']);
+    setStepError('');
+    setView('form');
   }
 
   function handleFieldChange(key, value) {
-    setForm(prev => ({ ...prev, [key]: value }));
     if (key === 'farm') {
-      const farm = farms.find(item => item.name === value);
-      if (farm) {
-        setForm(prev => ({ ...prev, surface: farm.surface, crop: farm.crop }));
-      }
+      const farm = farms.find(f => f.name === value);
+      setForm(prev => ({
+        ...prev,
+        farm: value,
+        ...(farm ? { surface: farm.surface, crop: farm.crop } : {})
+      }));
+    } else {
+      setForm(prev => ({ ...prev, [key]: value }));
     }
   }
 
@@ -279,26 +261,19 @@ export default function Home() {
     reader.onload = () => {
       const photo = { dataUrl: reader.result, description: '', coords: null };
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
-          photo.coords = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          };
-          setForm(prev => ({ ...prev, photos: [...prev.photos, photo] }));
-        }, () => setForm(prev => ({ ...prev, photos: [...prev.photos, photo] })), { timeout: 8000 });
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            photo.coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+            setForm(prev => ({ ...prev, photos: [...prev.photos, photo] }));
+          },
+          () => setForm(prev => ({ ...prev, photos: [...prev.photos, photo] })),
+          { timeout: 8000 }
+        );
       } else {
         setForm(prev => ({ ...prev, photos: [...prev.photos, photo] }));
       }
     };
     reader.readAsDataURL(file);
-  }
-
-  function updatePhotoDescription(index, description) {
-    setForm(prev => {
-      const photos = [...prev.photos];
-      photos[index] = { ...photos[index], description };
-      return { ...prev, photos };
-    });
   }
 
   function removePhoto(index) {
@@ -309,22 +284,24 @@ export default function Home() {
     });
   }
 
-  function canNavigateStep(index) {
-    return index <= currentStep;
-  }
-
   function validateStep(index) {
     const required = requiredFieldsByStep[index] || [];
-    let valid = true;
-    required.forEach(field => {
-      if (!form[field] || String(form[field]).trim() === '') {
-        valid = false;
-      }
-    });
-    if (!valid) {
-      alert('Completa todos los campos obligatorios del paso actual antes de avanzar.');
+    const missing = required.some(f => !form[f] || String(form[f]).trim() === '');
+    if (missing) {
+      setStepError('Completa los campos obligatorios (*) antes de continuar.');
+      return false;
     }
-    return valid;
+    setStepError('');
+    return true;
+  }
+
+  function handleNext() {
+    if (validateStep(currentStep)) setCurrentStep(s => s + 1);
+  }
+
+  function handleBack() {
+    setStepError('');
+    setCurrentStep(s => s - 1);
   }
 
   function submitVisit() {
@@ -337,202 +314,651 @@ export default function Home() {
       kgPerHa: parseFloat(form.kgPerHa) || 0,
       totalHarvest: parseFloat(form.totalHarvest) || 0
     };
-    const nextVisits = [...visits, visit];
-    setVisits(nextVisits);
-    saveVisitsToStorage(nextVisits);
+    const next = [...visits, visit];
+    setVisits(next);
+    saveVisitsToStorage(next);
     setView('home');
   }
 
   function openSummary(code) {
-    const visit = visits.find(item => item.code === code);
-    setSummaryVisit(visit);
+    setSummaryVisit(visits.find(v => v.code === code));
     setView('summary');
+  }
+
+  function deleteVisit(code) {
+    if (!confirm(`¿Eliminar la visita ${code}? Esta acción no se puede deshacer.`)) return;
+    const next = visits.filter(v => v.code !== code);
+    setVisits(next);
+    saveVisitsToStorage(next);
   }
 
   return (
     <>
       <Head>
         <title>Visitas Técnicas Agrícolas</title>
-        <meta name="description" content="Prototipo PWA para registro de visitas técnicas agrícolas." />
+        <meta name="description" content="PWA para registro de visitas técnicas agrícolas." />
         <meta name="theme-color" content="#2e6b2e" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <link rel="manifest" href="/manifest.json" />
       </Head>
+
       <div className="app">
-        <header>
-          <div>
-            <h1>Visitas Técnicas Agrícolas</h1>
-            <p className="meta">Registro offline para visitas de campo con persistencia local.</p>
-          </div>
-          <button className="button" type="button" onClick={() => setView('form')}>Nueva Visita</button>
+
+        {/* ── App Bar ── */}
+        <header className="app-bar">
+          {view === 'home' && (
+            <>
+              <div className="app-bar-main">
+                <div className="app-bar-title">Visitas de Campo</div>
+              </div>
+              <span className="count-pill">{visits.length}</span>
+            </>
+          )}
+          {view === 'form' && (
+            <>
+              <button className="icon-btn" onClick={() => setView('home')} aria-label="Cancelar">←</button>
+              <div className="app-bar-main">
+                <div className="app-bar-title">Nueva visita</div>
+                <div className="app-bar-sub">Paso {currentStep + 1}/{steps.length} · {steps[currentStep]}</div>
+              </div>
+            </>
+          )}
+          {view === 'summary' && summaryVisit && (
+            <>
+              <button className="icon-btn" onClick={() => setView('home')} aria-label="Volver">←</button>
+              <div className="app-bar-main">
+                <div className="app-bar-title">{summaryVisit.code}</div>
+                <div className="app-bar-sub">{summaryVisit.farm} · {formatDate(summaryVisit.date)}</div>
+              </div>
+              <button className="icon-btn" onClick={() => window.print()} aria-label="Exportar PDF" title="Exportar PDF">⎙</button>
+            </>
+          )}
         </header>
 
+        {/* ── Home View ── */}
         {view === 'home' && (
-          <section id="homeView" className="card">
-            <div className="hero">
-              <h2>Resumen de visitas guardadas</h2>
-              <p>Registra y revisa visitas técnicas agrarias con detalles, fotos y recomendaciones. El contenido se guarda localmente en el navegador.</p>
-            </div>
-            <div className="list-toolbar">
-              <span>{countLabel}</span>
-              <button type="button" className="button secondary" onClick={() => setVisits(loadVisitsFromStorage() || sampleVisits)}>Refrescar lista</button>
-            </div>
-            <div className="visit-list">{renderList()}</div>
-            {!visits.length && <p style={{ color: 'var(--muted)' }}>No hay visitas guardadas. Comienza con "Nueva Visita".</p>}
-          </section>
+          <main className="content no-bot">
+            {visits.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state-icon">🌱</div>
+                <p>No hay visitas registradas.</p>
+                <small>Pulsa el botón + para comenzar.</small>
+              </div>
+            ) : (
+              <div className="visit-list">
+                {visits.slice().reverse().map(visit => (
+                  <article key={visit.code} className="visit-card">
+                    <div className="visit-card-tap" onClick={() => openSummary(visit.code)}>
+                      <div className="vc-row">
+                        <span className="vc-code">{visit.code}</span>
+                        <span className="vc-date">{formatDate(visit.date)}</span>
+                      </div>
+                      <div className="vc-farm">{visit.farm} · {visit.surface} ha</div>
+                      <div className="vc-tech">{visit.technician}</div>
+                      <div className="vc-badges">
+                        <span className="badge">{visitTypeShort[visit.visitType] || visit.visitType}</span>
+                        {!visit.damageSelection.includes('Ninguno') && (
+                          <span className="badge alert">⚠ Daños</span>
+                        )}
+                        {visit.photos?.length > 0 && (
+                          <span className="badge">📷 {visit.photos.length}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="visit-card-actions">
+                      <button className="btn btn-danger btn-sm" onClick={() => deleteVisit(visit.code)}>Eliminar</button>
+                      <button className="btn btn-primary btn-sm" onClick={() => openSummary(visit.code)}>Ver resumen →</button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </main>
         )}
 
+        {/* ── Form View ── */}
         {view === 'form' && (
-          <section id="formView" className="card">
-            <div className="progress-bar" aria-hidden="true"><span className="progress-fill" style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }} /></div>
-            <div className="wizard-body">
-              <aside className="navigation-panel hidden-print">
-                <div className="steps">
-                  {steps.map((title, index) => (
-                    <button key={title} type="button" className={`step-pill ${currentStep === index ? 'active' : ''}`} onClick={() => canNavigateStep(index) && setCurrentStep(index)}>
-                      {index + 1}. {title}
-                    </button>
-                  ))}
+          <main className="content">
+
+            {/* Step progress */}
+            <div className="step-header">
+              <div className="step-track">
+                {steps.map((_, i) => (
+                  <div key={i} className={`step-seg${i < currentStep ? ' done' : i === currentStep ? ' active' : ''}`} />
+                ))}
+              </div>
+              <div className="step-meta">Paso {currentStep + 1} de {steps.length}</div>
+              <div className="step-name">{steps[currentStep]}</div>
+            </div>
+
+            {/* Step 0: Identificación */}
+            {currentStep === 0 && (
+              <div className="form-grid">
+                <div className="field">
+                  <label>Código</label>
+                  <input type="text" value={form.code} readOnly />
                 </div>
-              </aside>
-              <div>
-                {currentStep === 0 && (
-                  <div className="detail-grid">
-                    <div className="field"><label className="req">Código</label><input type="text" value={form.code} readOnly /></div>
-                    <div className="field"><label className="req">Fecha</label><input type="date" value={form.date} onChange={e => handleFieldChange('date', e.target.value)} required /></div>
-                    <div className="field"><label className="req">Técnico</label><select value={form.technician} onChange={e => handleFieldChange('technician', e.target.value)} required>{technicians.map(name => <option key={name} value={name}>{name}</option>)}</select></div>
-                    <div className="field"><label className="req">Finca</label><select value={form.farm} onChange={e => handleFieldChange('farm', e.target.value)} required>{farms.map(farm => <option key={farm.name} value={farm.name}>{farm.name} ({farm.crop})</option>)}</select></div>
-                    <div className="field"><label className="req">Superficie (ha)</label><input type="number" step="0.1" value={form.surface} onChange={e => handleFieldChange('surface', e.target.value)} required /></div>
+                <div className="field">
+                  <label className="req">Fecha de visita</label>
+                  <input type="date" value={form.date} onChange={e => handleFieldChange('date', e.target.value)} />
+                </div>
+                <div className="field">
+                  <label className="req">Técnico responsable</label>
+                  <select value={form.technician} onChange={e => handleFieldChange('technician', e.target.value)}>
+                    {technicians.map(name => <option key={name} value={name}>{name}</option>)}
+                  </select>
+                </div>
+                <div className="field">
+                  <label className="req">Finca</label>
+                  <select value={form.farm} onChange={e => handleFieldChange('farm', e.target.value)}>
+                    {farms.map(f => (
+                      <option key={f.name} value={f.name}>{f.name} — {f.location}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label className="req">Superficie (ha)</label>
+                  <input type="number" step="0.1" min="0" value={form.surface} onChange={e => handleFieldChange('surface', e.target.value)} />
+                </div>
+              </div>
+            )}
+
+            {/* Step 1: Objeto y antecedentes */}
+            {currentStep === 1 && (
+              <div className="form-grid">
+                <div className="field">
+                  <label className="req">Tipo de visita</label>
+                  <select value={form.visitType} onChange={e => handleFieldChange('visitType', e.target.value)}>
+                    {visitTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div className="field">
+                  <label className="req">Descripción del objeto</label>
+                  <textarea
+                    value={form.visitDescription}
+                    onChange={e => handleFieldChange('visitDescription', e.target.value)}
+                    placeholder="Describe el motivo y alcance de la visita..."
+                  />
+                </div>
+                <div className="field">
+                  <label className="req">Cultivo anterior</label>
+                  <select value={form.previousCrop} onChange={e => handleFieldChange('previousCrop', e.target.value)}>
+                    {previousCrops.map(name => <option key={name} value={name}>{name}</option>)}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Tratamientos previos</label>
+                  <textarea
+                    value={form.previousTreatments}
+                    onChange={e => handleFieldChange('previousTreatments', e.target.value)}
+                    placeholder="Fitosanitarios o fertilizantes anteriores..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Descripción explotación */}
+            {currentStep === 2 && (
+              <div className="form-grid">
+                <div className="field">
+                  <label className="req">Cultivo actual</label>
+                  <input type="text" value={form.crop} onChange={e => handleFieldChange('crop', e.target.value)} />
+                </div>
+                <div className="field">
+                  <label className="req">Fecha de siembra / plantación</label>
+                  <input type="date" value={form.sowingDate} onChange={e => handleFieldChange('sowingDate', e.target.value)} />
+                </div>
+                <div className="field">
+                  <label className="req">Sistema de riego</label>
+                  <select value={form.irrigation} onChange={e => handleFieldChange('irrigation', e.target.value)}>
+                    {irrigationSystems.map(item => <option key={item} value={item}>{item}</option>)}
+                  </select>
+                </div>
+                <div className="field">
+                  <label className="req">Tipo de suelo</label>
+                  <select value={form.soilType} onChange={e => handleFieldChange('soilType', e.target.value)}>
+                    {soilTypes.map(item => <option key={item} value={item}>{item}</option>)}
+                  </select>
+                </div>
+                <div className="field">
+                  <label className="req">Estado fenológico</label>
+                  <select value={form.phenology} onChange={e => handleFieldChange('phenology', e.target.value)}>
+                    {phenologyStates.map(item => <option key={item} value={item}>{item}</option>)}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Observaciones de campo */}
+            {currentStep === 3 && (
+              <div className="form-grid">
+                <div className="field">
+                  <label className="req">Estado general del cultivo</label>
+                  <textarea
+                    value={form.generalState}
+                    onChange={e => handleFieldChange('generalState', e.target.value)}
+                    placeholder="Describe el estado general observado..."
+                  />
+                </div>
+                <div className="field">
+                  <label className="req">Desarrollo vegetativo</label>
+                  <textarea
+                    value={form.growthState}
+                    onChange={e => handleFieldChange('growthState', e.target.value)}
+                    placeholder="Estado de la vegetación, brotes, hojas..."
+                  />
+                </div>
+                <div className="field">
+                  <label>Malas hierbas</label>
+                  <label className="toggle-field" htmlFor="weedToggle">
+                    <span>Presencia de malas hierbas</span>
+                    <input
+                      id="weedToggle"
+                      type="checkbox"
+                      checked={form.weedToggle}
+                      onChange={e => handleFieldChange('weedToggle', e.target.checked)}
+                    />
+                  </label>
+                  {form.weedToggle && (
+                    <textarea
+                      value={form.weedDescription}
+                      onChange={e => handleFieldChange('weedDescription', e.target.value)}
+                      placeholder="Especies, densidad, distribución..."
+                      style={{ marginTop: '.4rem' }}
+                    />
+                  )}
+                </div>
+                <div className="field">
+                  <label>Plagas y enfermedades</label>
+                  <textarea
+                    value={form.pestsDiseases}
+                    onChange={e => handleFieldChange('pestsDiseases', e.target.value)}
+                    placeholder="Organismos identificados, síntomas, incidencia..."
+                  />
+                </div>
+                <div className="field">
+                  <label>Tipo de daño meteorológico</label>
+                  <div className="chips">
+                    {damageOptions.map(option => (
+                      <button
+                        key={option}
+                        type="button"
+                        className={`chip${damageSelection.includes(option) ? ' selected' : ''}`}
+                        onClick={() => toggleDamage(option)}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {!damageSelection.includes('Ninguno') && (
+                  <div className="field">
+                    <label>Descripción de daños</label>
+                    <textarea
+                      value={form.damageDescription}
+                      onChange={e => handleFieldChange('damageDescription', e.target.value)}
+                      placeholder="Extensión y gravedad de los daños..."
+                    />
                   </div>
                 )}
-                {currentStep === 1 && (
-                  <div className="detail-grid">
-                    <div className="field"><label className="req">Tipo de visita</label><select value={form.visitType} onChange={e => handleFieldChange('visitType', e.target.value)} required>{visitTypes.map(type => <option key={type} value={type}>{type}</option>)}</select></div>
-                    <div className="field"><label className="req">Descripción libre</label><textarea value={form.visitDescription} onChange={e => handleFieldChange('visitDescription', e.target.value)} required /></div>
-                    <div className="field"><label className="req">Cultivo anterior</label><select value={form.previousCrop} onChange={e => handleFieldChange('previousCrop', e.target.value)} required>{previousCrops.map(name => <option key={name} value={name}>{name}</option>)}</select></div>
-                    <div className="field"><label>Tratamientos previos</label><textarea value={form.previousTreatments} onChange={e => handleFieldChange('previousTreatments', e.target.value)} /></div>
+                <div className="inline-2">
+                  <div className="field">
+                    <label>Calibre (mm)</label>
+                    <input
+                      type="number"
+                      step="1"
+                      min="0"
+                      value={form.fruitSize}
+                      onChange={e => handleFieldChange('fruitSize', e.target.value)}
+                      placeholder="0"
+                    />
                   </div>
-                )}
-                {currentStep === 2 && (
-                  <div className="detail-grid">
-                    <div className="field"><label className="req">Cultivo</label><input type="text" value={form.crop} onChange={e => handleFieldChange('crop', e.target.value)} required /></div>
-                    <div className="field"><label className="req">Fecha de siembra</label><input type="date" value={form.sowingDate} onChange={e => handleFieldChange('sowingDate', e.target.value)} required /></div>
-                    <div className="field"><label className="req">Sistema de riego</label><select value={form.irrigation} onChange={e => handleFieldChange('irrigation', e.target.value)} required>{irrigationSystems.map(item => <option key={item} value={item}>{item}</option>)}</select></div>
-                    <div className="field"><label className="req">Tipo de suelo</label><select value={form.soilType} onChange={e => handleFieldChange('soilType', e.target.value)} required>{soilTypes.map(item => <option key={item} value={item}>{item}</option>)}</select></div>
-                    <div className="field"><label className="req">Estado fenológico</label><select value={form.phenology} onChange={e => handleFieldChange('phenology', e.target.value)} required>{phenologyStates.map(item => <option key={item} value={item}>{item}</option>)}</select></div>
+                  <div className="field">
+                    <label>Kg est. / ha</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={form.kgPerHa}
+                      onChange={e => handleFieldChange('kgPerHa', e.target.value)}
+                      placeholder="0"
+                    />
                   </div>
-                )}
-                {currentStep === 3 && (
-                  <div className="detail-grid">
-                    <div className="field"><label className="req">Estado general</label><textarea value={form.generalState} onChange={e => handleFieldChange('generalState', e.target.value)} required /></div>
-                    <div className="field"><label className="req">Desarrollo vegetativo</label><textarea value={form.growthState} onChange={e => handleFieldChange('growthState', e.target.value)} required /></div>
-                    <div className="field"><label>Presencia de malas hierbas</label><div><label style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem' }}><input type="checkbox" checked={form.weedToggle} onChange={e => handleFieldChange('weedToggle', e.target.checked)} /> Sí</label></div></div>
-                    {form.weedToggle && <div className="field"><label>Descripción de malas hierbas</label><textarea value={form.weedDescription} onChange={e => handleFieldChange('weedDescription', e.target.value)} /></div>}
-                    <div className="field"><label>Plagas / enfermedades</label><textarea value={form.pestsDiseases} onChange={e => handleFieldChange('pestsDiseases', e.target.value)} /></div>
-                    <div className="field"><label>Tipo de daño</label><div className="chips">{damageOptions.map(option => <button key={option} type="button" className={`chip ${damageSelection.includes(option) ? 'selected' : ''}`} onClick={() => toggleDamage(option)}>{option}</button>)}</div></div>
-                    <div className="field"><label>Descripción daños</label><textarea value={form.damageDescription} onChange={e => handleFieldChange('damageDescription', e.target.value)} /></div>
-                    <div className="field"><label>Calibre frutos (mm)</label><input type="number" step="1" value={form.fruitSize} onChange={e => handleFieldChange('fruitSize', e.target.value)} /></div>
-                    <div className="field"><label>Kg estimados/ha</label><input type="number" step="0.1" value={form.kgPerHa} onChange={e => handleFieldChange('kgPerHa', e.target.value)} /></div>
-                    <div className="field"><label>Cosecha total estimada (kg)</label><input type="text" value={form.totalHarvest} readOnly /></div>
-                    <div className="field"><label>Estado hídrico</label><textarea value={form.waterStatus} onChange={e => handleFieldChange('waterStatus', e.target.value)} /></div>
-                  </div>
-                )}
-                {currentStep === 4 && (
-                  <div>
-                    <div className="detail-grid">
-                      <div className="field"><label>Recomendaciones fitosanitarias</label><textarea value={form.recommendFito} onChange={e => handleFieldChange('recommendFito', e.target.value)} /></div>
-                      <div className="field"><label>Recomendaciones nutricionales</label><textarea value={form.recommendNutrition} onChange={e => handleFieldChange('recommendNutrition', e.target.value)} /></div>
-                      <div className="field"><label>Recomendaciones de riego</label><textarea value={form.recommendIrrigation} onChange={e => handleFieldChange('recommendIrrigation', e.target.value)} /></div>
-                      <div className="field"><label>Observaciones finales</label><textarea value={form.finalNotes} onChange={e => handleFieldChange('finalNotes', e.target.value)} /></div>
+                </div>
+                <div className="field">
+                  <label>Cosecha total estimada (kg)</label>
+                  <input type="text" value={form.totalHarvest} readOnly />
+                  <span className="field-hint">{form.surface} ha × {form.kgPerHa || 0} kg/ha</span>
+                </div>
+                <div className="field">
+                  <label>Estado hídrico</label>
+                  <textarea
+                    value={form.waterStatus}
+                    onChange={e => handleFieldChange('waterStatus', e.target.value)}
+                    placeholder="Humedad del suelo, estado del riego..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Recomendaciones y fotos */}
+            {currentStep === 4 && (
+              <div className="form-grid">
+                <div className="field">
+                  <label>Recomendaciones fitosanitarias</label>
+                  <textarea
+                    value={form.recommendFito}
+                    onChange={e => handleFieldChange('recommendFito', e.target.value)}
+                    placeholder="Tratamientos, productos, dosis..."
+                  />
+                </div>
+                <div className="field">
+                  <label>Recomendaciones nutricionales</label>
+                  <textarea
+                    value={form.recommendNutrition}
+                    onChange={e => handleFieldChange('recommendNutrition', e.target.value)}
+                    placeholder="Abonado, correcciones, micronutrientes..."
+                  />
+                </div>
+                <div className="field">
+                  <label>Recomendaciones de riego</label>
+                  <textarea
+                    value={form.recommendIrrigation}
+                    onChange={e => handleFieldChange('recommendIrrigation', e.target.value)}
+                    placeholder="Dosis, frecuencia, ajustes..."
+                  />
+                </div>
+                <div className="field">
+                  <label>Observaciones finales</label>
+                  <textarea
+                    value={form.finalNotes}
+                    onChange={e => handleFieldChange('finalNotes', e.target.value)}
+                    placeholder="Cualquier nota adicional relevante..."
+                  />
+                </div>
+                <div className="field">
+                  <label>Fotos ({form.photos.length}/10)</label>
+                  {form.photos.length < 10 && (
+                    <>
+                      <button
+                        type="button"
+                        className="photo-add-btn"
+                        onClick={() => photoInputRef.current?.click()}
+                      >
+                        📷 Añadir foto
+                      </button>
+                      <input
+                        ref={photoInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        style={{ display: 'none' }}
+                        onChange={e => { handlePhoto(e.target.files?.[0]); e.target.value = ''; }}
+                      />
+                    </>
+                  )}
+                  {form.photos.length > 0 && (
+                    <div className="photo-grid">
+                      {form.photos.map((photo, i) => (
+                        <div key={i} className="photo-thumb">
+                          <img src={photo.dataUrl} alt={`Foto ${i + 1}`} />
+                          <button
+                            type="button"
+                            className="photo-del"
+                            onClick={() => removePhoto(i)}
+                            aria-label="Eliminar foto"
+                          >×</button>
+                        </div>
+                      ))}
                     </div>
-                    <div className="field">
-                      <label>Añadir foto</label>
-                      <input type="file" accept="image/*" capture="environment" onChange={e => handlePhoto(e.target.files?.[0])} />
-                      <small>Máximo 10 fotos. Cada foto captura coordenadas si están disponibles.</small>
-                    </div>
-                    <div className="photo-list">{form.photos.map((photo, index) => (
-                      <div key={index} className="photo-card">
-                        <img src={photo.dataUrl} alt={`Foto ${index + 1}`} />
-                        <div className="field"><label>Descripción de foto</label><textarea value={photo.description} onChange={e => updatePhotoDescription(index, e.target.value)} /></div>
-                        <div><strong>Coordenadas</strong><p>{photo.coords ? `${photo.coords.latitude.toFixed(5)}, ${photo.coords.longitude.toFixed(5)}` : 'No disponible'}</p></div>
-                        <button type="button" className="button secondary" onClick={() => removePhoto(index)}>Eliminar foto</button>
-                      </div>
-                    ))}</div>
+                  )}
+                  {form.photos.length > 0 && (
+                    <span className="field-hint">Se capturan coordenadas GPS si están disponibles.</span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {stepError && <div className="form-error">{stepError}</div>}
+          </main>
+        )}
+
+        {/* ── Summary View ── */}
+        {view === 'summary' && summaryVisit && (
+          <main className="content no-bot">
+
+            <div className="summary-section">
+              <div className="ss-header"><span className="ss-icon">🪪</span> Identificación</div>
+              <div className="ss-body">
+                <div className="ss-grid-2">
+                  <div className="ss-row">
+                    <div className="ss-label">Código</div>
+                    <div className="ss-value">{summaryVisit.code}</div>
                   </div>
-                )}
-                <div className="step-nav hidden-print">
-                  <button type="button" className="button secondary" onClick={() => setView('home')}>Cancelar</button>
-                  <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
-                    <button type="button" className="button secondary" onClick={() => setCurrentStep(Math.max(currentStep - 1, 0))} disabled={currentStep === 0}>Anterior</button>
-                    {currentStep < steps.length - 1 ? (
-                      <button type="button" className="button" onClick={() => validateStep(currentStep) && setCurrentStep(currentStep + 1)}>Siguiente</button>
-                    ) : (
-                      <button type="button" className="button" onClick={submitVisit}>Guardar visita</button>
-                    )}
+                  <div className="ss-row">
+                    <div className="ss-label">Fecha</div>
+                    <div className="ss-value">{formatDate(summaryVisit.date)}</div>
+                  </div>
+                </div>
+                <div className="ss-row">
+                  <div className="ss-label">Técnico</div>
+                  <div className="ss-value">{summaryVisit.technician}</div>
+                </div>
+                <div className="ss-grid-2">
+                  <div className="ss-row">
+                    <div className="ss-label">Finca</div>
+                    <div className="ss-value">{summaryVisit.farm}</div>
+                  </div>
+                  <div className="ss-row">
+                    <div className="ss-label">Superficie</div>
+                    <div className="ss-value">{summaryVisit.surface} ha</div>
                   </div>
                 </div>
               </div>
             </div>
-          </section>
+
+            <div className="summary-section">
+              <div className="ss-header"><span className="ss-icon">📋</span> Objeto y antecedentes</div>
+              <div className="ss-body">
+                <div className="ss-row">
+                  <div className="ss-label">Tipo de visita</div>
+                  <div className="ss-value">{summaryVisit.visitType}</div>
+                </div>
+                <div className="ss-row">
+                  <div className="ss-label">Descripción</div>
+                  <div className="ss-value">{summaryVisit.visitDescription}</div>
+                </div>
+                <div className="ss-row">
+                  <div className="ss-label">Cultivo anterior</div>
+                  <div className="ss-value">{summaryVisit.previousCrop}</div>
+                </div>
+                {summaryVisit.previousTreatments && (
+                  <div className="ss-row">
+                    <div className="ss-label">Tratamientos previos</div>
+                    <div className="ss-value">{summaryVisit.previousTreatments}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="summary-section">
+              <div className="ss-header"><span className="ss-icon">🌾</span> Descripción explotación</div>
+              <div className="ss-body">
+                <div className="ss-grid-2">
+                  <div className="ss-row">
+                    <div className="ss-label">Cultivo</div>
+                    <div className="ss-value">{summaryVisit.crop}</div>
+                  </div>
+                  <div className="ss-row">
+                    <div className="ss-label">Fecha siembra</div>
+                    <div className="ss-value">{formatDate(summaryVisit.sowingDate)}</div>
+                  </div>
+                  <div className="ss-row">
+                    <div className="ss-label">Riego</div>
+                    <div className="ss-value">{summaryVisit.irrigation}</div>
+                  </div>
+                  <div className="ss-row">
+                    <div className="ss-label">Suelo</div>
+                    <div className="ss-value">{summaryVisit.soilType}</div>
+                  </div>
+                </div>
+                <div className="ss-row">
+                  <div className="ss-label">Estado fenológico</div>
+                  <div className="ss-value">{summaryVisit.phenology}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="summary-section">
+              <div className="ss-header"><span className="ss-icon">🔍</span> Observaciones de campo</div>
+              <div className="ss-body">
+                <div className="ss-row">
+                  <div className="ss-label">Estado general</div>
+                  <div className="ss-value">{summaryVisit.generalState}</div>
+                </div>
+                <div className="ss-row">
+                  <div className="ss-label">Desarrollo vegetativo</div>
+                  <div className="ss-value">{summaryVisit.growthState}</div>
+                </div>
+                <div className="ss-row">
+                  <div className="ss-label">Malas hierbas</div>
+                  <div className="ss-value">
+                    {summaryVisit.weedToggle
+                      ? (summaryVisit.weedDescription || 'Sí — sin descripción')
+                      : 'No'}
+                  </div>
+                </div>
+                {summaryVisit.pestsDiseases && (
+                  <div className="ss-row">
+                    <div className="ss-label">Plagas / enfermedades</div>
+                    <div className="ss-value">{summaryVisit.pestsDiseases}</div>
+                  </div>
+                )}
+                <div className="ss-row">
+                  <div className="ss-label">Daños meteorológicos</div>
+                  <div className="ss-value">{summaryVisit.damageSelection.join(', ')}</div>
+                </div>
+                {summaryVisit.damageDescription && !summaryVisit.damageSelection.includes('Ninguno') && (
+                  <div className="ss-row">
+                    <div className="ss-label">Descripción daños</div>
+                    <div className="ss-value">{summaryVisit.damageDescription}</div>
+                  </div>
+                )}
+                {summaryVisit.kgPerHa > 0 && (
+                  <div className="ss-grid-2">
+                    {summaryVisit.fruitSize > 0 && (
+                      <div className="ss-row">
+                        <div className="ss-label">Calibre</div>
+                        <div className="ss-value">{summaryVisit.fruitSize} mm</div>
+                      </div>
+                    )}
+                    <div className="ss-row">
+                      <div className="ss-label">Kg / ha</div>
+                      <div className="ss-value">{summaryVisit.kgPerHa.toLocaleString()}</div>
+                    </div>
+                    <div className="ss-row">
+                      <div className="ss-label">Cosecha total</div>
+                      <div className="ss-value">{Number(summaryVisit.totalHarvest).toLocaleString()} kg</div>
+                    </div>
+                  </div>
+                )}
+                {summaryVisit.waterStatus && (
+                  <div className="ss-row">
+                    <div className="ss-label">Estado hídrico</div>
+                    <div className="ss-value">{summaryVisit.waterStatus}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="summary-section">
+              <div className="ss-header"><span className="ss-icon">💡</span> Recomendaciones</div>
+              <div className="ss-body">
+                {summaryVisit.recommendFito ? (
+                  <div className="ss-row">
+                    <div className="ss-label">Fitosanitarios</div>
+                    <div className="ss-value">{summaryVisit.recommendFito}</div>
+                  </div>
+                ) : null}
+                {summaryVisit.recommendNutrition ? (
+                  <div className="ss-row">
+                    <div className="ss-label">Nutricionales</div>
+                    <div className="ss-value">{summaryVisit.recommendNutrition}</div>
+                  </div>
+                ) : null}
+                {summaryVisit.recommendIrrigation ? (
+                  <div className="ss-row">
+                    <div className="ss-label">Riego</div>
+                    <div className="ss-value">{summaryVisit.recommendIrrigation}</div>
+                  </div>
+                ) : null}
+                {summaryVisit.finalNotes ? (
+                  <div className="ss-row">
+                    <div className="ss-label">Observaciones finales</div>
+                    <div className="ss-value">{summaryVisit.finalNotes}</div>
+                  </div>
+                ) : null}
+                {!summaryVisit.recommendFito && !summaryVisit.recommendNutrition && !summaryVisit.recommendIrrigation && !summaryVisit.finalNotes && (
+                  <div className="ss-row">
+                    <div className="ss-value" style={{ color: 'var(--muted)' }}>Sin recomendaciones registradas.</div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {summaryVisit.photos?.length > 0 && (
+              <div className="summary-section">
+                <div className="ss-header"><span className="ss-icon">📷</span> Fotos ({summaryVisit.photos.length})</div>
+                <div className="ss-body">
+                  <div className="photo-grid">
+                    {summaryVisit.photos.map((photo, i) => (
+                      <div key={i} className="photo-thumb">
+                        <img src={photo.dataUrl} alt={`Foto ${i + 1}`} />
+                      </div>
+                    ))}
+                  </div>
+                  {summaryVisit.photos.map((photo, i) =>
+                    photo.description || photo.coords ? (
+                      <div key={i} className="ss-row" style={{ marginTop: '.25rem' }}>
+                        <div className="ss-label">Foto {i + 1}</div>
+                        <div className="ss-value">
+                          {photo.description && <span>{photo.description}</span>}
+                          {photo.coords && (
+                            <span style={{ display: 'block', fontSize: '.8rem', color: 'var(--muted)', marginTop: '.1rem' }}>
+                              {photo.coords.latitude.toFixed(5)}, {photo.coords.longitude.toFixed(5)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ) : null
+                  )}
+                </div>
+              </div>
+            )}
+          </main>
         )}
 
-        {view === 'summary' && summaryVisit && (
-          <section id="summaryView" className="card">
-            <div className="list-toolbar hidden-print">
-              <button type="button" className="button secondary" onClick={() => setView('home')}>Cerrar</button>
-              <button type="button" className="button" onClick={() => window.print()}>Exportar PDF</button>
-            </div>
-            <div id="summaryContent">
-              <section className="summary-section"><h3>Identificación</h3><div className="summary-grid">
-                <div><strong>Código</strong><p>{summaryVisit.code}</p></div>
-                <div><strong>Fecha</strong><p>{formatDate(summaryVisit.date)}</p></div>
-                <div><strong>Técnico</strong><p>{summaryVisit.technician}</p></div>
-                <div><strong>Finca</strong><p>{summaryVisit.farm}</p></div>
-                <div><strong>Superficie</strong><p>{summaryVisit.surface} ha</p></div>
-              </div></section>
-              <section className="summary-section"><h3>Objeto y antecedentes</h3><div className="summary-grid">
-                <div><strong>Tipo de visita</strong><p>{summaryVisit.visitType}</p></div>
-                <div style={{ gridColumn: '1 / -1' }}><strong>Descripción</strong><p>{summaryVisit.visitDescription}</p></div>
-                <div><strong>Cultivo anterior</strong><p>{summaryVisit.previousCrop}</p></div>
-                <div style={{ gridColumn: '1 / -1' }}><strong>Tratamientos previos</strong><p>{summaryVisit.previousTreatments || 'Ninguno'}</p></div>
-              </div></section>
-              <section className="summary-section"><h3>Descripción explotación</h3><div className="summary-grid">
-                <div><strong>Cultivo</strong><p>{summaryVisit.crop}</p></div>
-                <div><strong>Fecha siembra</strong><p>{formatDate(summaryVisit.sowingDate)}</p></div>
-                <div><strong>Riego</strong><p>{summaryVisit.irrigation}</p></div>
-                <div><strong>Suelo</strong><p>{summaryVisit.soilType}</p></div>
-                <div><strong>Fenológico</strong><p>{summaryVisit.phenology}</p></div>
-              </div></section>
-              <section className="summary-section"><h3>Observaciones de campo</h3><div className="summary-grid">
-                <div style={{ gridColumn: '1 / -1' }}><strong>Estado general</strong><p>{summaryVisit.generalState}</p></div>
-                <div style={{ gridColumn: '1 / -1' }}><strong>Desarrollo vegetativo</strong><p>{summaryVisit.growthState}</p></div>
-                <div style={{ gridColumn: '1 / -1' }}><strong>Presencia de malas hierbas</strong><p>{summaryVisit.weedToggle ? 'Sí' : 'No'}</p></div>
-                {summaryVisit.weedToggle && <div style={{ gridColumn: '1 / -1' }}><strong>Detalle malas hierbas</strong><p>{summaryVisit.weedDescription}</p></div>}
-                <div style={{ gridColumn: '1 / -1' }}><strong>Plagas / enfermedades</strong><p>{summaryVisit.pestsDiseases}</p></div>
-                <div><strong>Daños</strong><p>{summaryVisit.damageSelection.join(', ')}</p></div>
-                <div style={{ gridColumn: '1 / -1' }}><strong>Descripción daños</strong><p>{summaryVisit.damageDescription}</p></div>
-                <div><strong>Calibre frutos</strong><p>{summaryVisit.fruitSize} mm</p></div>
-                <div><strong>Kg estimados/ha</strong><p>{summaryVisit.kgPerHa}</p></div>
-                <div><strong>Cosecha total</strong><p>{summaryVisit.totalHarvest} kg</p></div>
-                <div style={{ gridColumn: '1 / -1' }}><strong>Estado hídrico</strong><p>{summaryVisit.waterStatus}</p></div>
-              </div></section>
-              <section className="summary-section"><h3>Recomendaciones</h3><div className="summary-grid">
-                <div style={{ gridColumn: '1 / -1' }}><strong>Fitosanitarios</strong><p>{summaryVisit.recommendFito}</p></div>
-                <div style={{ gridColumn: '1 / -1' }}><strong>Nutricionales</strong><p>{summaryVisit.recommendNutrition}</p></div>
-                <div style={{ gridColumn: '1 / -1' }}><strong>Riego</strong><p>{summaryVisit.recommendIrrigation}</p></div>
-                <div style={{ gridColumn: '1 / -1' }}><strong>Observaciones finales</strong><p>{summaryVisit.finalNotes}</p></div>
-              </div></section>
-              {summaryVisit.photos?.length > 0 && (
-                <section className="summary-section"><h3>Fotos y geoposición</h3>{summaryVisit.photos.map((photo, index) => (
-                  <div key={index} className="photo-card">
-                    <img src={photo.dataUrl} alt={`Foto ${index + 1}`} />
-                    <div><strong>Descripción</strong><p>{photo.description || 'Sin descripción'}</p></div>
-                    <div><strong>Coordenadas</strong><p>{photo.coords ? `${photo.coords.latitude.toFixed(5)}, ${photo.coords.longitude.toFixed(5)}` : 'No disponible'}</p></div>
-                  </div>
-                ))}</section>
-              )}
-            </div>
-          </section>
+        {/* ── FAB (home only) ── */}
+        {view === 'home' && (
+          <button className="fab" onClick={openForm} aria-label="Nueva visita">+</button>
         )}
+
+        {/* ── Bottom Bar (form only) ── */}
+        {view === 'form' && (
+          <div className="bottom-bar">
+            <button className="btn btn-ghost" onClick={() => setView('home')}>Cancelar</button>
+            <div className="spacer" />
+            {currentStep > 0 && (
+              <button className="btn btn-ghost" onClick={handleBack}>← Anterior</button>
+            )}
+            {currentStep < steps.length - 1 ? (
+              <button className="btn btn-primary" onClick={handleNext}>Siguiente →</button>
+            ) : (
+              <button className="btn btn-primary" onClick={submitVisit}>Guardar ✓</button>
+            )}
+          </div>
+        )}
+
       </div>
     </>
   );
