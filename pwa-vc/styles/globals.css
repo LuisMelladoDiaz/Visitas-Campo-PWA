@@ -1,0 +1,413 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #e9f0e2;
+  color: #1f3320;
+  --bg: #f5f8f1;
+  --surface: #ffffff;
+  --surface-2: #eef3e6;
+  --surface-3: #d5e3c5;
+  --text: #1f3320;
+  --muted: #5d6c57;
+  --primary: #2e6b2e;
+  --primary-2: #4c8d4c;
+  --accent: #7ca77c;
+  --danger: #c03a3a;
+  --border: rgba(46,107,46,.18);
+  --shadow: 0 18px 40px rgba(31,51,32,.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: #e9f0e2;
+}
+
+body {
+  line-height: 1.5;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+button[disabled] {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 1rem 4rem;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+header .meta {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: .95rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.card > * {
+  padding: 1rem;
+}
+
+.hero {
+  display: grid;
+  gap: .75rem;
+  padding: 1rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(180deg,#edf6e9,#f7fbf7);
+}
+
+.button,
+.step-nav button {
+  border: none;
+  border-radius: .85rem;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: #fff;
+  padding: .95rem 1.2rem;
+  min-width: 10rem;
+  font-weight: 700;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 15px 20px rgba(46,107,46,.18);
+}
+
+.button.secondary {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.button.danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: .75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.visit-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.visit-card {
+  display: grid;
+  gap: .75rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+.visit-card header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: flex-start;
+}
+
+.visit-card h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.visit-card p {
+  margin: .35rem 0 0;
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .35rem .75rem;
+  border-radius: 999px;
+  background: rgba(46,107,46,.12);
+  color: var(--primary);
+  font-size: .85rem;
+}
+
+.detail-grid,
+.summary-grid {
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+
+.field label {
+  font-size: .92rem;
+  color: var(--muted);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: .8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: .85rem;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.field textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(46,107,46,.12);
+}
+
+.req::after {
+  content: '*';
+  color: #c03a3a;
+  margin-left: .2rem;
+}
+
+.steps {
+  display: grid;
+  gap: 1rem;
+}
+
+.step-nav {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: 1rem;
+}
+
+.step-pill {
+  border-radius: 999px;
+  padding: .55rem 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: .85rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.step-pill.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: transparent;
+}
+
+.progress-bar {
+  position: relative;
+  height: .65rem;
+  border-radius: .5rem;
+  background: rgba(46,107,46,.16);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,#2e6b2e,#4c8d4c);
+  transition: width .3s ease;
+}
+
+.photo-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.photo-card {
+  display: grid;
+  gap: .5rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface-2);
+}
+
+.photo-card img {
+  width: 100%;
+  border-radius: .85rem;
+  max-height: 220px;
+  object-fit: cover;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.chip {
+  padding: .55rem .85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-3);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform .15s ease;
+}
+
+.chip:hover {
+  transform: translateY(-1px);
+}
+
+.chip.selected {
+  background: var(--primary);
+  color: #fff;
+  border-color: transparent;
+}
+
+.summary-section {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+  margin-bottom: 1rem;
+}
+
+.summary-section h3 {
+  margin: 0 0 .75rem;
+  font-size: 1.05rem;
+}
+
+.summary-grid div {
+  padding: .7rem 1rem;
+  border-radius: .85rem;
+  background: var(--surface-2);
+}
+
+.print-only {
+  display: none;
+}
+
+@media (min-width: 820px) {
+  .app {
+    padding: 2rem 2rem 4rem;
+  }
+
+  .layout-wide {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 280px 1fr;
+  }
+
+  #formView .wizard-body {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr 320px;
+  }
+
+  .navigation-panel {
+    display: block;
+  }
+
+  .steps {
+    order: 2;
+  }
+
+  .step-pill {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media print {
+  body, .app {
+    background: #fff;
+    color: #000;
+  }
+
+  header,
+  .button,
+  .step-nav,
+  .input,
+  .field label,
+  .badge,
+  .photo-card img {
+    display: none !important;
+  }
+
+  .summary-section,
+  .visit-card {
+    border: 1px solid #999;
+    page-break-inside: avoid;
+  }
+
+  .print-only {
+    display: block;
+  }
+
+  .hidden-print {
+    display: none !important;
+  }
+}

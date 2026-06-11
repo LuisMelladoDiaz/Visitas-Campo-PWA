@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Visitas Técnicas Agrícolas</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2e6b2e">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #f5f8f1;
+      --surface: #ffffff;
+      --surface-2: #eef3e6;
+      --surface-3: #d5e3c5;
+      --text: #1f3320;
+      --muted: #5d6c57;
+      --primary: #2e6b2e;
+      --primary-2: #4c8d4c;
+      --accent: #7ca77c;
+      --danger: #c03a3a;
+      --border: rgba(46,107,46,.18);
+      --shadow: 0 18px 40px rgba(31,51,32,.08);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height:100%; margin:0; background:#e9f0e2; color:var(--text); }
+    body { padding:0; }
+    button, input, select, textarea { font: inherit; }
+    .app { max-width:1200px; margin:0 auto; padding:1rem 1rem 4rem; }
+    header { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; }
+    header h1 { margin:0; font-size:1.5rem; line-height:1.2; }
+    header .meta { color:var(--muted); font-size:.95rem; }
+    .hero { display:grid; gap:.75rem; padding:1rem; border:1px solid var(--border); border-radius:1.25rem; background:linear-gradient(180deg,#edf6e9,#f7fbf7); }
+    .hero p { margin:.5rem 0 0; color:var(--muted); }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:1.25rem; box-shadow:var(--shadow); overflow:hidden; }
+    .card > * { padding:1rem; }
+    .button, .step-nav button { border:none; border-radius:.85rem; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease; }
+    .button { background:var(--primary); color:#fff; padding:.95rem 1.2rem; min-width:10rem; font-weight:700; }
+    .button:hover { transform:translateY(-1px); box-shadow:0 15px 20px rgba(46,107,46,.18); }
+    .button.secondary { background:var(--surface-2); color:var(--text); border:1px solid var(--border); }
+    .button.danger { background:var(--danger); }
+    .hidden { display:none !important; }
+    .list-toolbar { display:flex; flex-wrap:wrap; justify-content:space-between; gap:.75rem; align-items:center; margin-bottom:1rem; }
+    .visit-list { display:grid; gap:1rem; }
+    .visit-card { display:grid; gap:.75rem; padding:1rem; border:1px solid var(--border); border-radius:1rem; background:var(--surface); }
+    .visit-card header { display:flex; justify-content:space-between; flex-wrap:wrap; gap:.5rem; align-items:start; }
+    .visit-card h2 { margin:0; font-size:1.05rem; }
+    .badge { display:inline-flex; align-items:center; gap:.35rem; padding:.35rem .75rem; border-radius:999px; background:rgba(46,107,46,.12); color:var(--primary); font-size:.85rem; }
+    .detail-grid { display:grid; gap:.75rem; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); }
+    .field { display:flex; flex-direction:column; gap:.35rem; }
+    .field label { font-size:.92rem; color:var(--muted); }
+    .field input, .field select, .field textarea { width:100%; min-height:2.6rem; padding:.8rem 1rem; border:1px solid var(--border); border-radius:.85rem; background:var(--surface-2); color:var(--text); }
+    .field textarea { min-height:7rem; resize:vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 4px rgba(46,107,46,.12); }
+    .req::after { content:'*'; color:#c03a3a; margin-left:.2rem; }
+    .steps { display:grid; gap:1rem; }
+    .step-nav { display:flex; justify-content:space-between; flex-wrap:wrap; gap:.75rem; margin-top:1rem; }
+    .step-pill { border-radius:999px; padding:.55rem 1rem; border:1px solid var(--border); background:var(--surface-2); color:var(--muted); font-size:.85rem; cursor:pointer; }
+    .step-pill.active { background:var(--primary); color:#fff; border-color:transparent; }
+    .progress-bar { position:relative; height:.65rem; border-radius:.5rem; background:rgba(46,107,46,.16); overflow:hidden; margin-bottom:1rem; }
+    .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,#2e6b2e,#4c8d4c); transition:width .3s ease; }
+    .photo-list { display:grid; gap:1rem; }
+    .photo-card { display:grid; gap:.5rem; padding:1rem; border:1px solid var(--border); border-radius:1rem; background:var(--surface-2); }
+    .photo-card img { width:100%; border-radius:.85rem; max-height:220px; object-fit:cover; }
+    .chips { display:flex; flex-wrap:wrap; gap:.4rem; }
+    .chip { padding:.55rem .85rem; border-radius:999px; border:1px solid var(--border); background:var(--surface-3); color:var(--text); cursor:pointer; transition:transform .15s ease; }
+    .chip.selected { background:var(--primary); color:#fff; border-color:transparent; }
+    .summary-section { padding:1rem; border:1px solid var(--border); border-radius:1rem; background:var(--surface); margin-bottom:1rem; }
+    .summary-section h3 { margin:0 0 .75rem; font-size:1.05rem; }
+    .summary-grid { display:grid; gap:.8rem; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); }
+    .summary-grid div { padding:.7rem 1rem; border-radius:.85rem; background:var(--surface-2); }
+    .print-only { display:none; }
+    @media (min-width:820px) {
+      header { flex-wrap:nowrap; }
+      .app { padding:2rem 2rem 4rem; }
+      .layout-wide { display:grid; gap:1rem; grid-template-columns:280px 1fr; }
+      #formView .wizard-body { display:grid; gap:1rem; grid-template-columns:1fr 320px; }
+      .navigation-panel { display:block; }
+      .steps { order:2; }
+      .step-pill { width:100%; justify-content:flex-start; }
+      .list-toolbar { align-items:center; }
+    }
+    @media print {
+      body, .app { background:#fff; color:#000; }
+      header, .button, .step-nav, .input, .field label, .badge, .photo-card img { display:none !important; }
+      .summary-section, .visit-card { border:1px solid #999; page-break-inside:avoid; }
+      .print-only { display:block; }
+      .hidden-print { display:none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Visitas Técnicas Agrícolas</h1>
+        <p class="meta">Prototipo offline para registro de visitas de campo.</p>
+      </div>
+      <button class="button" id="newVisitBtn">Nueva Visita</button>
+    </header>
+    <section id="homeView" class="card">
+      <div class="hero">
+        <h2>Resumen de visitas guardadas</h2>
+        <p>Registra y revisa visitas técnicas agrarias con detalles, fotos y recomendaciones. El contenido se guarda localmente en el navegador.</p>
+      </div>
+      <div class="list-toolbar">
+        <span id="countLabel"></span>
+        <button class="button secondary" id="refreshBtn">Refrescar lista</button>
+      </div>
+      <div id="visitList" class="visit-list"></div>
+      <p id="emptyMessage" class="muted" style="display:none;">No hay visitas guardadas. Comienza con "Nueva Visita".</p>
+    </section>
+
+    <section id="formView" class="card hidden">
+      <div class="progress-bar" aria-hidden="true"><span id="progressFill" class="progress-fill"></span></div>
+      <div class="wizard-body">
+        <aside class="navigation-panel hidden-print">
+          <div class="steps" id="stepPills"></div>
+        </aside>
+        <div>
+          <form id="visitForm">
+            <div class="step-panel" data-step="0">
+              <div class="detail-grid">
+                <div class="field"><label class="req">Código</label><input type="text" id="code" readonly></div>
+                <div class="field"><label class="req">Fecha</label><input type="date" id="date" required></div>
+                <div class="field"><label class="req">Técnico</label><select id="technician" required></select></div>
+                <div class="field"><label class="req">Finca</label><select id="farm" required></select></div>
+                <div class="field"><label class="req">Superficie (ha)</label><input type="number" step="0.1" id="surface" required></div>
+              </div>
+            </div>
+            <div class="step-panel hidden" data-step="1">
+              <div class="detail-grid">
+                <div class="field"><label class="req">Tipo de visita</label><select id="visitType" required></select></div>
+                <div class="field"><label class="req">Descripción libre</label><textarea id="visitDescription" required></textarea></div>
+                <div class="field"><label class="req">Cultivo anterior</label><select id="previousCrop" required></select></div>
+                <div class="field"><label>Tratamientos previos</label><textarea id="previousTreatments"></textarea></div>
+              </div>
+            </div>
+            <div class="step-panel hidden" data-step="2">
+              <div class="detail-grid">
+                <div class="field"><label class="req">Cultivo</label><input type="text" id="crop" required></div>
+                <div class="field"><label class="req">Fecha de siembra</label><input type="date" id="sowingDate" required></div>
+                <div class="field"><label class="req">Sistema de riego</label><select id="irrigation" required></select></div>
+                <div class="field"><label class="req">Tipo de suelo</label><select id="soilType" required></select></div>
+                <div class="field"><label class="req">Estado fenológico</label><select id="phenology" required></select></div>
+              </div>
+            </div>
+            <div class="step-panel hidden" data-step="3">
+              <div class="detail-grid">
+                <div class="field"><label class="req">Estado general</label><textarea id="generalState" required></textarea></div>
+                <div class="field"><label class="req">Desarrollo vegetativo</label><textarea id="growthState" required></textarea></div>
+                <div class="field"><label>Presencia de malas hierbas</label><div><label style="display:inline-flex;align-items:center;gap:.5rem"><input type="checkbox" id="weedToggle"> Sí</label></div></div>
+                <div class="field hidden" id="weedDetailField"><label>Descripción de malas hierbas</label><textarea id="weedDescription"></textarea></div>
+                <div class="field"><label>Plagas / enfermedades</label><textarea id="pestsDiseases"></textarea></div>
+                <div class="field"><label>Tipo de daño</label><div id="damageChips" class="chips"></div></div>
+                <div class="field"><label>Descripción daños</label><textarea id="damageDescription"></textarea></div>
+                <div class="field"><label>Calibre frutos (mm)</label><input type="number" step="1" id="fruitSize"></div>
+                <div class="field"><label>Kg estimados/ha</label><input type="number" step="0.1" id="kgPerHa"></div>
+                <div class="field"><label>Cosecha total estimada (kg)</label><input type="text" id="totalHarvest" readonly></div>
+                <div class="field"><label>Estado hídrico</label><textarea id="waterStatus"></textarea></div>
+              </div>
+            </div>
+            <div class="step-panel hidden" data-step="4">
+              <div class="detail-grid">
+                <div class="field"><label>Recomendaciones fitosanitarias</label><textarea id="recommendFito"></textarea></div>
+                <div class="field"><label>Recomendaciones nutricionales</label><textarea id="recommendNutrition"></textarea></div>
+                <div class="field"><label>Recomendaciones de riego</label><textarea id="recommendIrrigation"></textarea></div>
+                <div class="field"><label>Observaciones finales</label><textarea id="finalNotes"></textarea></div>
+              </div>
+              <div class="field">
+                <label>Añadir foto</label>
+                <input type="file" id="photoInput" accept="image/*" capture="environment">
+                <small>Máximo 10 fotos. Cada foto captura coordenadas disponibles.</small>
+              </div>
+              <div class="photo-list" id="photoList"></div>
+            </div>
+            <div class="step-nav hidden-print">
+              <button type="button" class="button secondary" id="prevStep">Anterior</button>
+              <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+                <button type="button" class="button secondary" id="cancelForm">Cancelar</button>
+                <button type="button" class="button" id="nextStep">Siguiente</button>
+                <button type="button" class="button" id="submitVisit">Guardar visita</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="summaryView" class="card hidden">
+      <div class="list-toolbar hidden-print">
+        <button class="button secondary" id="closeSummary">Cerrar</button>
+        <button class="button" id="printBtn">Exportar PDF</button>
+      </div>
+      <div id="summaryContent"></div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'visitasTecnicasAgricolas';
+    const technicians = ['Carlos Romero Vega','Ana Belén Fuentes','Miguel Ángel Díaz'];
+    const farms = [
+      {name:'Las Marismas Norte', surface:12.5, crop:'Fresa', location:'Rota'},
+      {name:'Pago del Pino', surface:8.3, crop:'Frambuesa', location:'Sanlúcar'},
+      {name:'Cortijo El Álamo', surface:22.1, crop:'Tomate Cherry', location:'Jerez'},
+      {name:'La Dehesilla', surface:6.8, crop:'Arándano', location:'Chipiona'},
+      {name:'Viña Los Remedios', surface:18.4, crop:'Vid Palomino', location:'El Puerto'}
+    ];
+    const visitTypes = [
+      'Evaluación del estado del cultivo',
+      'Diagnóstico de plagas o enfermedades',
+      'Valoración de daños meteorológicos',
+      'Seguimiento de labores agrícolas',
+      'Asesoramiento sobre riego, fertilización o manejo',
+      'Verificación para ayudas, certificaciones o seguros',
+      'Otro'
+    ];
+    const irrigationSystems = ['Goteo subsuperficial','Goteo superficial','Aspersión','Gravedad','Secano'];
+    const soilTypes = ['Franco arenoso','Franco arcilloso','Arenoso','Arcilloso','Limoso','Franco'];
+    const phenologyStates = ['Brotación','Floración','Cuajado','Desarrollo de fruto','Maduración','Post-cosecha','Reposo vegetativo'];
+    const previousCrops = ['Trigo','Girasol','Remolacha','Barbecho','Mismo cultivo','Maíz','Algodón'];
+    const damageOptions = ['Helada','Granizo','Viento','Lluvia intensa','Encharcamiento','Sequía','Golpe de calor','Ninguno'];
+    const homeView = document.getElementById('homeView');
+    const formView = document.getElementById('formView');
+    const summaryView = document.getElementById('summaryView');
+    const visitList = document.getElementById('visitList');
+    const countLabel = document.getElementById('countLabel');
+    const emptyMessage = document.getElementById('emptyMessage');
+    const newVisitBtn = document.getElementById('newVisitBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const cancelForm = document.getElementById('cancelForm');
+    const prevStep = document.getElementById('prevStep');
+    const nextStep = document.getElementById('nextStep');
+    const submitVisit = document.getElementById('submitVisit');
+    const stepPills = document.getElementById('stepPills');
+    const progressFill = document.getElementById('progressFill');
+    const photoInput = document.getElementById('photoInput');
+    const photoList = document.getElementById('photoList');
+    const stepPanels = Array.from(document.querySelectorAll('.step-panel'));
+    const summaryContent = document.getElementById('summaryContent');
+    const closeSummary = document.getElementById('closeSummary');
+    const printBtn = document.getElementById('printBtn');
+    const weedToggle = document.getElementById('weedToggle');
+    const weedDetailField = document.getElementById('weedDetailField');
+
+    const fields = {
+      code: document.getElementById('code'),
+      date: document.getElementById('date'),
+      technician: document.getElementById('technician'),
+      farm: document.getElementById('farm'),
+      surface: document.getElementById('surface'),
+      visitType: document.getElementById('visitType'),
+      visitDescription: document.getElementById('visitDescription'),
+      previousCrop: document.getElementById('previousCrop'),
+      previousTreatments: document.getElementById('previousTreatments'),
+      crop: document.getElementById('crop'),
+      sowingDate: document.getElementById('sowingDate'),
+      irrigation: document.getElementById('irrigation'),
+      soilType: document.getElementById('soilType'),
+      phenology: document.getElementById('phenology'),
+      generalState: document.getElementById('generalState'),
+      growthState: document.getElementById('growthState'),
+      weedDescription: document.getElementById('weedDescription'),
+      pestsDiseases: document.getElementById('pestsDiseases'),
+      damageDescription: document.getElementById('damageDescription'),
+      fruitSize: document.getElementById('fruitSize'),
+      kgPerHa: document.getElementById('kgPerHa'),
+      totalHarvest: document.getElementById('totalHarvest'),
+      waterStatus: document.getElementById('waterStatus'),
+      recommendFito: document.getElementById('recommendFito'),
+      recommendNutrition: document.getElementById('recommendNutrition'),
+      recommendIrrigation: document.getElementById('recommendIrrigation'),
+      finalNotes: document.getElementById('finalNotes')
+    };
+
+    let visits = [];
+    let currentStep = 0;
+    let currentPhotos = [];
+    let currentDamageSelection = [];
+
+    function sampleData() {
+      return [
+        {
+          code:'VT-2026-00001', date:'2026-05-24', technician:'Carlos Romero Vega', farm:'Las Marismas Norte', surface:12.5,
+          visitType:'Evaluación del estado del cultivo', visitDescription:'Revisión completa de la plantación de fresa. Buena brotación general.', previousCrop:'Mismo cultivo', previousTreatments:'Fungicida preventivo aplicado hace 10 días.', crop:'Fresa', sowingDate:'2025-10-15', irrigation:'Goteo superficial', soilType:'Franco arenoso', phenology:'Desarrollo de fruto', generalState:'Cultivo vigoroso con uniformidad en la parcela.', growthState:'Buena emergencia y formación de fruto.', weedToggle:false, weedDescription:'', pestsDiseases:'Sin síntomas relevantes; se observa leve picado de insectos.', damageSelection:['Ninguno'], damageDescription:'No se han detectado daños relevantes.', fruitSize:18, kgPerHa:9000, totalHarvest:112500, waterStatus:'Buena humedad de suelo, riego estable.', recommendFito:'Mantener monitorización de trips y ácaros.', recommendNutrition:'Aporte de potasio localizado en la zona de fruto.', recommendIrrigation:'Riego diario controlado por tensión de sustrato.', finalNotes:'Recomendable limpiar accesos antes de la próxima cosecha.', photos:[]
+        },
+        {
+          code:'VT-2026-00002', date:'2026-05-28', technician:'Ana Belén Fuentes', farm:'Viña Los Remedios', surface:18.4,
+          visitType:'Verificación para ayudas, certificaciones o seguros', visitDescription:'Visita para inspección de viña de palomino previo a auditoría.', previousCrop:'Trigo', previousTreatments:'Cubierta vegetal con herbicida localizado.', crop:'Vid Palomino', sowingDate:'2024-04-05', irrigation:'Gravedad', soilType:'Franco', phenology:'Floración', generalState:'Cierre de surcos adecuado, sanidad correcta.', growthState:'Floración homogénea con pocos racimos abortados.', weedToggle:true, weedDescription:'Hierbas espontáneas en laterales, se recomienda escarda mecánica.', pestsDiseases:'Presencia leve de araña roja en algunas hojas.', damageSelection:['Sequía'], damageDescription:'Estrés hídrico moderado en parcelas expuestas.', fruitSize:6, kgPerHa:5600, totalHarvest:103040, waterStatus:'Control de humedad necesario en sectores altos.', recommendFito:'Aplicar acaricida selectivo en áreas afectadas.', recommendNutrition:'Aporte de calcio para mejorar firmeza de fruto.', recommendIrrigation:'Revisar compuertas y renovar mangueras filtrantes.', finalNotes:'Documentar incidencia para certificación de seguro.', photos:[]
+        },
+        {
+          code:'VT-2026-00003', date:'2026-06-01', technician:'Miguel Ángel Díaz', farm:'Pago del Pino', surface:8.3,
+          visitType:'Diagnóstico de plagas o enfermedades', visitDescription:'Inspección de frambuesa con incidencias de manchas foliares.', previousCrop:'Barbecho', previousTreatments:'Ninguno reciente.', crop:'Frambuesa', sowingDate:'2025-09-20', irrigation:'Goteo subsuperficial', soilType:'Franco arcilloso', phenology:'Cuajado', generalState:'Áreas con manchas foliares y pérdida de vigor.', growthState:'Plantas con desarrollo irregular.', weedToggle:false, weedDescription:'', pestsDiseases:'Se observan manchas necróticas y posible oidio incipiente.', damageSelection:['Viento','Lluvia intensa'], damageDescription:'Daños mecánicos en brotes tras tormenta.', fruitSize:14, kgPerHa:8600, totalHarvest:71380, waterStatus:'Humedad adecuada en banco de riego.', recommendFito:'Tratamiento con fungicida preventivo y fungicida de contacto.', recommendNutrition:'Nutrientes de calcio y magnesio en pulverización.', recommendIrrigation:'Mantener riego regular evitando encharcamiento.', finalNotes:'Revisar evolución en 7 días y ajustar dosis.', photos:[]
+        }
+      ];
+    }
+
+    function loadVisits() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try { visits = JSON.parse(raw); } catch (e) { visits = sampleData(); }
+      } else {
+        visits = sampleData();
+        saveVisits();
+      }
+    }
+    function saveVisits() { localStorage.setItem(STORAGE_KEY, JSON.stringify(visits)); }
+    function formatDate(date) { return new Date(date).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+    function formatCode(code) { return code; }
+    function renderList() {
+      visitList.innerHTML = '';
+      countLabel.textContent = `${visits.length} visita${visits.length===1 ? '' : 's'} registradas`;
+      if (!visits.length) {
+        emptyMessage.style.display='block';
+        return;
+      }
+      emptyMessage.style.display='none';
+      visits.slice().reverse().forEach(visit => {
+        const card = document.createElement('article');
+        card.className='visit-card';
+        card.innerHTML = `
+          <header>
+            <div>
+              <h2>${visit.code} · ${formatDate(visit.date)}</h2>
+              <p>${visit.farm} · ${visit.technician}</p>
+            </div>
+            <span class="badge">${visit.visitType}</span>
+          </header>
+          <div class="detail-grid">
+            <div><strong>Finca</strong><p>${visit.farm}</p></div>
+            <div><strong>Técnico</strong><p>${visit.technician}</p></div>
+            <div><strong>Tipo</strong><p>${visit.visitType}</p></div>
+            <div><strong>Estado</strong><p>${visit.damageSelection.includes('Ninguno') ? 'Sin daños relevantes' : 'Requiere seguimiento'}</p></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:.75rem;">
+            <button class="button secondary" data-code="${visit.code}">Ver resumen</button>
+          </div>
+        `;
+        card.querySelector('button').addEventListener('click',()=>openSummary(visit.code));
+        visitList.appendChild(card);
+      });
+    }
+
+    function resetForm() {
+      currentStep = 0;
+      currentPhotos = [];
+      currentDamageSelection=[];
+      stepPanels.forEach(panel=>panel.classList.add('hidden'));
+      stepPanels[0].classList.remove('hidden');
+      updateProgress();
+      formView.querySelectorAll('input,select,textarea').forEach(input=>{
+        if (input.type==='checkbox') input.checked=false;
+        if (input.type==='file') input.value='';
+        else if (!input.readOnly) input.value='';
+      });
+      fields.date.value = new Date().toISOString().slice(0,10);
+      fields.code.value = generateCode();
+      fields.technician.value = technicians[0];
+      fields.farm.value = farms[0].name;
+      fields.surface.value = farms[0].surface;
+      fields.crop.value = farms[0].crop;
+      fields.visitType.value = visitTypes[0];
+      fields.previousCrop.value = previousCrops[0];
+      fields.irrigation.value = irrigationSystems[0];
+      fields.soilType.value = soilTypes[0];
+      fields.phenology.value = phenologyStates[0];
+      fields.totalHarvest.value = '0';
+      currentDamageSelection = ['Ninguno'];
+      renderDamageChips();
+      renderPhotos();
+      weedDetailField.classList.add('hidden');
+    }
+
+    function generateCode() {
+      const year = new Date().getFullYear();
+      const next = visits.length + 1;
+      return `VT-${year}-${String(next).padStart(5,'0')}`;
+    }
+
+    function renderDamageChips() {
+      const chipArea = document.getElementById('damageChips');
+      chipArea.innerHTML='';
+      damageOptions.forEach(label => {
+        const chip = document.createElement('button');
+        chip.type='button';
+        chip.className='chip'+(currentDamageSelection.includes(label)?' selected':'');
+        chip.textContent=label;
+        chip.addEventListener('click',()=>{
+          if (label==='Ninguno') { currentDamageSelection=['Ninguno']; }
+          else {
+            currentDamageSelection = currentDamageSelection.filter(item=>item!=='Ninguno');
+            if (currentDamageSelection.includes(label)) currentDamageSelection = currentDamageSelection.filter(item=>item!==label);
+            else currentDamageSelection.push(label);
+            if (!currentDamageSelection.length) currentDamageSelection=['Ninguno'];
+          }
+          renderDamageChips();
+        });
+        chipArea.appendChild(chip);
+      });
+    }
+
+    function renderPhotos() {
+      photoList.innerHTML='';
+      currentPhotos.forEach((photo,index)=>{
+        const card = document.createElement('div');
+        card.className='photo-card';
+        card.innerHTML = `
+          <img src="${photo.dataUrl}" alt="Foto ${index+1}">
+          <div class="field"><label>Descripción de foto</label><textarea data-index="${index}" class="photo-desc">${photo.description || ''}</textarea></div>
+          <div><strong>Coordenadas</strong><p>${photo.coords ? `${photo.coords.latitude.toFixed(5)}, ${photo.coords.longitude.toFixed(5)}` : 'No disponible'}</p></div>
+          <button type="button" class="button secondary" data-remove="${index}">Eliminar foto</button>
+        `;
+        card.querySelector('.photo-desc').addEventListener('input', e=>{
+          currentPhotos[Number(e.target.dataset.index)].description=e.target.value;
+        });
+        card.querySelector('[data-remove]').addEventListener('click',()=>{
+          currentPhotos.splice(index,1);
+          renderPhotos();
+        });
+        photoList.appendChild(card);
+      });
+    }
+
+    function updateProgress() {
+      const percent = ((currentStep + 1) / stepPanels.length) * 100;
+      progressFill.style.width = `${percent}%`;
+      stepPills.querySelectorAll('.step-pill').forEach((pill,i)=>{
+        pill.classList.toggle('active', i===currentStep);
+      });
+      prevStep.disabled = currentStep===0;
+      nextStep.classList.toggle('hidden', currentStep===stepPanels.length-1);
+      submitVisit.classList.toggle('hidden', currentStep!==stepPanels.length-1);
+    }
+
+    function showStep(index) {
+      currentStep = Math.max(0, Math.min(index, stepPanels.length-1));
+      stepPanels.forEach((panel,i)=>panel.classList.toggle('hidden', i!==currentStep));
+      updateProgress();
+    }
+
+    function validateStep(index) {
+      const step = stepPanels[index];
+      const required = Array.from(step.querySelectorAll('[id]')).filter(el=>{
+        if (el.tagName==='INPUT' || el.tagName==='TEXTAREA' || el.tagName==='SELECT') {
+          const label = step.querySelector(`label[for='${el.id}'], label[for='${el.id}']`);
+          return el.required || (label && label.classList.contains('req'));
+        }
+        return false;
+      });
+      let valid=true;
+      required.forEach(field=>{
+        if (field.offsetParent===null) return;
+        if (!field.value.trim()) {
+          field.style.borderColor = '#c03a3a';
+          valid=false;
+        } else {
+          field.style.borderColor = 'var(--border)';
+        }
+      });
+      if (!valid) window.scrollTo({top: step.offsetTop-70, behavior:'smooth'});
+      return valid;
+    }
+
+    function openForm() {
+      homeView.classList.add('hidden');
+      formView.classList.remove('hidden');
+      summaryView.classList.add('hidden');
+      resetForm();
+      updateProgress();
+    }
+
+    function closeForm() {
+      homeView.classList.remove('hidden');
+      formView.classList.add('hidden');
+      summaryView.classList.add('hidden');
+    }
+
+    function openSummary(code) {
+      const visit = visits.find(v=>v.code===code);
+      if (!visit) return;
+      homeView.classList.add('hidden');
+      formView.classList.add('hidden');
+      summaryView.classList.remove('hidden');
+      summaryContent.innerHTML = `
+        <section class="summary-section"><h3>Identificación</h3><div class="summary-grid">
+          <div><strong>Código</strong><p>${visit.code}</p></div>
+          <div><strong>Fecha</strong><p>${formatDate(visit.date)}</p></div>
+          <div><strong>Técnico</strong><p>${visit.technician}</p></div>
+          <div><strong>Finca</strong><p>${visit.farm}</p></div>
+          <div><strong>Superficie</strong><p>${visit.surface} ha</p></div>
+        </div></section>
+        <section class="summary-section"><h3>Objeto y antecedentes</h3><div class="summary-grid">
+          <div><strong>Tipo de visita</strong><p>${visit.visitType}</p></div>
+          <div style="grid-column:1/-1"><strong>Descripción</strong><p>${visit.visitDescription}</p></div>
+          <div><strong>Cultivo anterior</strong><p>${visit.previousCrop}</p></div>
+          <div style="grid-column:1/-1"><strong>Tratamientos previos</strong><p>${visit.previousTreatments || 'Ninguno'}</p></div>
+        </div></section>
+        <section class="summary-section"><h3>Descripción explotación</h3><div class="summary-grid">
+          <div><strong>Cultivo</strong><p>${visit.crop}</p></div>
+          <div><strong>Fecha siembra</strong><p>${formatDate(visit.sowingDate)}</p></div>
+          <div><strong>Riego</strong><p>${visit.irrigation}</p></div>
+          <div><strong>Suelo</strong><p>${visit.soilType}</p></div>
+          <div><strong>Fenológico</strong><p>${visit.phenology}</p></div>
+        </div></section>
+        <section class="summary-section"><h3>Observaciones de campo</h3><div class="summary-grid">
+          <div style="grid-column:1/-1"><strong>Estado general</strong><p>${visit.generalState}</p></div>
+          <div style="grid-column:1/-1"><strong>Desarrollo vegetativo</strong><p>${visit.growthState}</p></div>
+          <div style="grid-column:1/-1"><strong>Presencia de malas hierbas</strong><p>${visit.weedToggle ? 'Sí' : 'No'}</p></div>
+          ${visit.weedToggle ? `<div style="grid-column:1/-1"><strong>Detalle malas hierbas</strong><p>${visit.weedDescription}</p></div>` : ''}
+          <div style="grid-column:1/-1"><strong>Plagas / enfermedades</strong><p>${visit.pestsDiseases}</p></div>
+          <div><strong>Daños</strong><p>${visit.damageSelection.join(', ')}</p></div>
+          <div style="grid-column:1/-1"><strong>Descripción daños</strong><p>${visit.damageDescription}</p></div>
+          <div><strong>Calibre frutos</strong><p>${visit.fruitSize} mm</p></div>
+          <div><strong>Kg estimados/ha</strong><p>${visit.kgPerHa}</p></div>
+          <div><strong>Cosecha total</strong><p>${visit.totalHarvest} kg</p></div>
+          <div style="grid-column:1/-1"><strong>Estado hídrico</strong><p>${visit.waterStatus}</p></div>
+        </div></section>
+        <section class="summary-section"><h3>Recomendaciones</h3><div class="summary-grid">
+          <div style="grid-column:1/-1"><strong>Fitosanitarios</strong><p>${visit.recommendFito}</p></div>
+          <div style="grid-column:1/-1"><strong>Nutricionales</strong><p>${visit.recommendNutrition}</p></div>
+          <div style="grid-column:1/-1"><strong>Riego</strong><p>${visit.recommendIrrigation}</p></div>
+          <div style="grid-column:1/-1"><strong>Observaciones finales</strong><p>${visit.finalNotes}</p></div>
+        </div></section>
+        ${visit.photos.length ? `<section class="summary-section"><h3>Fotos y geoposición</h3>${visit.photos.map(photo=>`<div class="photo-card"><img src="${photo.dataUrl}" alt="Foto"><div><strong>Descripción</strong><p>${photo.description || 'Sin descripción'}</p></div><div><strong>Coordenadas</strong><p>${photo.coords ? `${photo.coords.latitude.toFixed(5)}, ${photo.coords.longitude.toFixed(5)}` : 'No disponible'}</p></div></div>`).join('')}</section>` : ''}
+      `;
+    }
+
+    function submitForm() {
+      if (!validateStep(currentStep)) return;
+      const visit = {
+        code: fields.code.value,
+        date: fields.date.value,
+        technician: fields.technician.value,
+        farm: fields.farm.value,
+        surface: parseFloat(fields.surface.value) || 0,
+        visitType: fields.visitType.value,
+        visitDescription: fields.visitDescription.value.trim(),
+        previousCrop: fields.previousCrop.value,
+        previousTreatments: fields.previousTreatments.value.trim(),
+        crop: fields.crop.value.trim(),
+        sowingDate: fields.sowingDate.value,
+        irrigation: fields.irrigation.value,
+        soilType: fields.soilType.value,
+        phenology: fields.phenology.value,
+        generalState: fields.generalState.value.trim(),
+        growthState: fields.growthState.value.trim(),
+        weedToggle: weedToggle.checked,
+        weedDescription: fields.weedDescription.value.trim(),
+        pestsDiseases: fields.pestsDiseases.value.trim(),
+        damageSelection: currentDamageSelection,
+        damageDescription: fields.damageDescription.value.trim(),
+        fruitSize: parseFloat(fields.fruitSize.value) || 0,
+        kgPerHa: parseFloat(fields.kgPerHa.value) || 0,
+        totalHarvest: parseFloat(fields.totalHarvest.value) || 0,
+        waterStatus: fields.waterStatus.value.trim(),
+        recommendFito: fields.recommendFito.value.trim(),
+        recommendNutrition: fields.recommendNutrition.value.trim(),
+        recommendIrrigation: fields.recommendIrrigation.value.trim(),
+        finalNotes: fields.finalNotes.value.trim(),
+        photos: currentPhotos
+      };
+      visits.push(visit);
+      saveVisits();
+      renderList();
+      closeForm();
+    }
+
+    function updateHarvest() {
+      const kg = parseFloat(fields.kgPerHa.value) || 0;
+      const surface = parseFloat(fields.surface.value) || 0;
+      fields.totalHarvest.value = (kg * surface).toFixed(1);
+    }
+
+    function loadSelectors() {
+      technicians.forEach(name=>{ const opt=document.createElement('option'); opt.value=name; opt.textContent=name; fields.technician.appendChild(opt); });
+      farms.forEach(farm=>{ const opt=document.createElement('option'); opt.value=farm.name; opt.textContent=`${farm.name} (${farm.crop})`; fields.farm.appendChild(opt); });
+      visitTypes.forEach(type=>{ const opt=document.createElement('option'); opt.value=type; opt.textContent=type; fields.visitType.appendChild(opt); });
+      previousCrops.forEach(crop=>{ const opt=document.createElement('option'); opt.value=crop; opt.textContent=crop; fields.previousCrop.appendChild(opt); });
+      irrigationSystems.forEach(item=>{ const opt=document.createElement('option'); opt.value=item; opt.textContent=item; fields.irrigation.appendChild(opt); });
+      soilTypes.forEach(item=>{ const opt=document.createElement('option'); opt.value=item; opt.textContent=item; fields.soilType.appendChild(opt); });
+      phenologyStates.forEach(item=>{ const opt=document.createElement('option'); opt.value=item; opt.textContent=item; fields.phenology.appendChild(opt); });
+      renderDamageChips();
+    }
+
+    function handleFarmChange() {
+      const farm = farms.find(item=>item.name===fields.farm.value);
+      if (farm) {
+        fields.surface.value = farm.surface;
+        fields.crop.value = farm.crop;
+        updateHarvest();
+      }
+    }
+
+    function handlePhotoFile(file) {
+      if (!file) return;
+      if (currentPhotos.length >= 10) { alert('Máximo 10 fotos por visita.'); return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        const photo = { dataUrl, description:'', coords:null };
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(pos=>{
+            photo.coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+            currentPhotos.push(photo);
+            renderPhotos();
+          }, ()=>{ currentPhotos.push(photo); renderPhotos(); }, { timeout:8000 });
+        } else {
+          currentPhotos.push(photo); renderPhotos();
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function initWizard() {
+      const titles=['Identificación','Objeto y antecedentes','Descripción explotación','Observaciones de campo','Recomendaciones'];
+      titles.forEach((title,index)=>{
+        const pill = document.createElement('button');
+        pill.type='button';
+        pill.className='step-pill';
+        pill.textContent = `${index+1}. ${title}`;
+        pill.addEventListener('click',()=>{ if (index <= currentStep) showStep(index); });
+        stepPills.appendChild(pill);
+      });
+      showStep(0);
+    }
+
+    newVisitBtn.addEventListener('click', openForm);
+    refreshBtn.addEventListener('click', renderList);
+    cancelForm.addEventListener('click', closeForm);
+    prevStep.addEventListener('click', ()=>{ showStep(currentStep-1); });
+    nextStep.addEventListener('click', ()=>{ if (validateStep(currentStep)) showStep(currentStep+1); });
+    submitVisit.addEventListener('click', ()=>{ if (validateStep(currentStep)) submitForm(); });
+    photoInput.addEventListener('change', e=>{ handlePhotoFile(e.target.files[0]); e.target.value=''; });
+    fields.farm.addEventListener('change', handleFarmChange);
+    fields.kgPerHa.addEventListener('input', updateHarvest);
+    fields.surface.addEventListener('input', updateHarvest);
+    weedToggle.addEventListener('change', ()=>{ weedDetailField.classList.toggle('hidden', !weedToggle.checked); });
+    closeSummary.addEventListener('click', ()=>{ summaryView.classList.add('hidden'); homeView.classList.remove('hidden'); });
+    printBtn.addEventListener('click', ()=>window.print());
+
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(()=>{});
+      }
+    }
+
+    loadSelectors();
+    initWizard();
+    loadVisits();
+    renderList();
+    registerServiceWorker();
+  </script>
+</body>
+</html>
