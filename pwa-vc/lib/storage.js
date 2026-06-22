@@ -1,20 +1,22 @@
-const STORAGE_KEY = 'visitasTecnicasAgricolas';
+// ─── Storage ─────────────────────────────────────────────────────────────────
+export const STORAGE_KEY = 'cc_tandas_v1';
+export const PCC_KEY     = 'cc_pccs_v1';
 
-export function loadVisitsFromStorage() {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+export function loadBatches() {
+  if (typeof window === 'undefined') return [];
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch { return []; }
 }
-
-export function saveVisitsToStorage(visits) {
+export function saveBatches(data) {
   if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(visits));
-  } catch {
-    // Silently ignore storage errors en modo prototipo
-  }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch { }
+}
+export function loadPCCs() {
+  if (typeof window === 'undefined') return [];
+  try { return JSON.parse(localStorage.getItem(PCC_KEY) || '[]'); }
+  catch { return []; }
+}
+export function savePCCs(data) {
+  if (typeof window === 'undefined') return;
+  try { localStorage.setItem(PCC_KEY, JSON.stringify(data)); } catch { }
 }

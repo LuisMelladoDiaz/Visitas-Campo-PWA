@@ -479,7 +479,60 @@ img { max-width: 100%; display: block; }
 .empty-icon { font-size: 3rem; margin-bottom: .75rem; }
 .empty p { font-size: .95rem; }
 
-/* ─── Tablet ─── */
+/* ─── Mobile (<640px) ─── */
+@media (max-width: 639px) {
+  :root { --bar-h: 52px; }
+  body { font-size: 15px; }
+  .top-bar { padding: 0 .75rem; gap: .5rem; }
+  .top-bar-title { font-size: .92rem; }
+  .top-bar-sub   { font-size: .72rem; }
+  .icon-btn { width: 34px; height: 34px; font-size: 1rem; }
+  .content { padding: .85rem; }
+  .section-h { font-size: .72rem; }
+
+  /* Variety/menu grids single column on small phones */
+  .variety-grid { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+  .variety-card { padding: 1.1rem .75rem; }
+  .menu-grid    { grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+  /* Tables – horizontal scroll already on .table-wrap, shrink font */
+  .readings-table { font-size: .78rem; }
+  .readings-table th, .readings-table td { padding: .45rem .5rem; }
+
+  /* Compact lectura form: stack vertically */
+  .lc-main { height: auto !important; overflow: visible !important; }
+  .lectura-compact {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .lc-col { height: auto !important; overflow-y: visible !important; }
+  .lc-col-result { grid-column: 1; }
+
+  /* Charts: allow horizontal scroll on small screens */
+  .mini-chart-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Buttons */
+  .btn-lg { padding: .65rem 1.1rem; font-size: .95rem; }
+  .action-bar { gap: .5rem; }
+
+  /* Detail header: single column */
+  .detail-header-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ─── Tablet portrait (640–1023px): 2 columns for lectura ─── */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .lc-main { height: auto !important; overflow: visible !important; }
+  .lectura-compact {
+    grid-template-columns: 1fr 1fr !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .lc-col { height: auto !important; overflow-y: visible !important; }
+  .lc-col-result { grid-column: 1 / -1; border-top: 1px solid var(--border); }
+}
+
+/* ─── Tablet (768px+) ─── */
 @media (min-width: 768px) {
   body { font-size: 17px; }
   .content { padding: 1.5rem 2rem; }
@@ -489,6 +542,13 @@ img { max-width: 100%; display: block; }
   .menu-grid { max-width: 760px; }
   .lectura-layout { grid-template-columns: 1fr 320px; align-items: start; }
   .result-card { position: sticky; top: calc(64px + 1.25rem); }
+}
+
+/* ─── Tablet landscape (1024px+): compact 3-col lectura fully active ─── */
+@media (min-width: 1024px) {
+  .lc-main { height: calc(100vh - var(--bar-h)); overflow: hidden; }
+  .lectura-compact { height: 100%; overflow: hidden; }
+  .lc-col { height: 100%; overflow-y: auto; }
 }
 
 @media (min-width: 1100px) {
@@ -701,10 +761,9 @@ img { max-width: 100%; display: block; }
   * { color: #000 !important; background: #fff !important; box-shadow: none !important; }
 }
 
-/* ─── Compact lectura layout (tablet horizontal) ─── */
+/* ─── Compact lectura layout ─── */
 .lc-main {
   padding: 0 !important;
-  overflow: hidden !important;
   max-width: none !important;
   margin: 0 !important;
   width: 100% !important;
@@ -715,13 +774,10 @@ img { max-width: 100%; display: block; }
   display: grid;
   grid-template-columns: 240px 1fr 260px;
   flex: 1;
-  overflow: hidden;
 }
 .lc-col {
   padding: .85rem 1.1rem;
   border-right: 1px solid var(--border);
-  overflow-y: auto;
-  height: 100%;
 }
 .lc-col:last-child { border-right: none; }
 .lc-col-result { background: var(--surface); }
