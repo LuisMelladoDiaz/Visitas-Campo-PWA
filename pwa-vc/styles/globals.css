@@ -75,22 +75,23 @@ img { max-width: 100%; display: block; }
 .icon-btn:hover { background: rgba(255,255,255,.28); }
 
 /* ─── Content ─── */
-.content { flex: 1; padding: 1.25rem; }
+.content { flex: 1; padding: 1.25rem; width: 100%; height: 100%; display: flex; flex-direction: column;}
 
 /* ─── Variety Picker ─── */
 .picker-intro {
   text-align: center;
   padding: 1.5rem 0 1.25rem;
   color: var(--muted);
-  font-size: .95rem;
+  font-size: 1.5rem;
+  font-weight: bolder;
 }
 
 .variety-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: .9rem;
-  max-width: 680px;
+  gap: 1.25rem;
   margin: 0 auto;
+  width: 100%;
 }
 
 .variety-card {
@@ -121,13 +122,18 @@ img { max-width: 100%; display: block; }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
-  max-width: 680px;
+  width: 100%;
   margin: 1.5rem auto 0;
+  flex-direction: column;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
 }
 
 .menu-card {
   background: var(--surface);
-  border: 2px solid var(--border);
+  border: 1px solid var(--border);
+  border-color: #000;
   border-radius: var(--radius);
   padding: 2.25rem 1.5rem;
   display: flex;
@@ -539,7 +545,7 @@ img { max-width: 100%; display: block; }
   .top-bar { height: 64px; padding: 0 1.5rem; }
   .top-bar-title { font-size: 1.15rem; }
   .variety-grid { grid-template-columns: repeat(3, 1fr); max-width: 860px; }
-  .menu-grid { max-width: 760px; }
+  .menu-grid { width: 100%; }
   .lectura-layout { grid-template-columns: 1fr 320px; align-items: start; }
   .result-card { position: sticky; top: calc(64px + 1.25rem); }
 }
