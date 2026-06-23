@@ -46,11 +46,27 @@ export default function App() {
     setPccs(loadPCCs());
   }, []);
 
+  const [swUpdate, setSwUpdate] = useState(null);
+
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-      navigator.serviceWorker.register('/sw.js').catch(() => null);
+      navigator.serviceWorker.register('/sw.js').then(reg => {
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+              setSwUpdate(newSW);
+            }
+          });
+        });
+      }).catch(() => null);
     }
   }, []);
+
+  function applyUpdate() {
+    if (swUpdate) swUpdate.postMessage({ type: 'SKIP_WAITING' });
+    window.location.reload();
+  }
 
   // ── Vida Útil nav ─────────────────────────────────────────────────────────
   function goVariety() { setView('variety'); setVariety(null); }
@@ -204,6 +220,13 @@ export default function App() {
       </Head>
 
       <div className="app">
+        {swUpdate && (
+          <div className="update-banner">
+            Nueva versión disponible
+            <button className="update-banner-btn" onClick={applyUpdate}>Actualizar</button>
+          </div>
+        )}
+
         {view === 'variety' && (
           <VarietyPicker onSelect={goMenu} />
         )}

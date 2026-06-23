@@ -39,6 +39,29 @@ img { max-width: 100%; display: block; }
 /* ─── Shell ─── */
 .app { min-height: 100dvh; display: flex; flex-direction: column; }
 
+/* ─── Update banner ─── */
+.update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .65rem 1.25rem;
+  background: var(--primary);
+  color: #fff;
+  font-size: .9rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.update-banner-btn {
+  background: #fff;
+  color: var(--primary);
+  border-radius: .5rem;
+  padding: .35rem .9rem;
+  font-weight: 700;
+  font-size: .85rem;
+  white-space: nowrap;
+}
+
 /* ─── Top Bar ─── */
 .top-bar {
   position: sticky;
