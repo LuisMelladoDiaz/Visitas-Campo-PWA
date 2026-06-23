@@ -1,5 +1,6 @@
 import { fmtNum, thresholdStatus, classCss } from '../lib/utils';
 import { CVU_LEVES, CVU_GRAVES, CVU_ELIM } from '../lib/cvu';
+import Stepper from '../components/Stepper';
 
 export default function NuevaLectura({ batch, lForm, lCalc, editingIdx, error, onBack, onSave, lSet }) {
   return (
@@ -31,15 +32,68 @@ export default function NuevaLectura({ batch, lForm, lCalc, editingIdx, error, o
             </div>
             <div className="lc-field">
               <label>Peso diario (kg) *</label>
-              <input type="number" step="0.01" min="0" value={lForm.pesoDiario} onChange={e=>lSet('pesoDiario',e.target.value)} placeholder="0.00" style={{fontSize:'1.1rem',fontWeight:700}}/>
+              <Stepper value={lForm.pesoDiario} onChange={v=>lSet('pesoDiario',v)} step={0.5} min={0} max={9999} decimals={1} inputStyle={{fontSize:'1.1rem',fontWeight:700}}/>
             </div>
             <div className="lc-field">
               <label>Tª conservación (°C)</label>
-              <input type="number" step="0.1" value={lForm.tempConservacion} onChange={e=>lSet('tempConservacion',e.target.value)} placeholder="Ej. 6.0"/>
+              <Stepper value={lForm.tempConservacion} onChange={v=>lSet('tempConservacion',v)} step={0.5} min={-20} max={30} decimals={1}/>
             </div>
             <div className="lc-field">
               <label>% Varianza calibre</label>
-              <input type="number" step="0.1" min="0" value={lForm.pctFueraCalibre} onChange={e=>lSet('pctFueraCalibre',e.target.value)} placeholder="0.0"/>
+              <Stepper value={lForm.pctFueraCalibre} onChange={v=>lSet('pctFueraCalibre',v)} step={0.5} min={0} max={100} decimals={1}/>
+            </div>
+            <div className="lc-field">
+              <label>Foto del día</label>
+              <input
+                id="photo-input"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                style={{display:'none'}}
+                onChange={async e => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = ev => {
+                    const img = new Image();
+                    img.onload = () => {
+                      const MAX = 800;
+                      let w = img.width, h = img.height;
+                      if (w > MAX || h > MAX) {
+                        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+                        else { w = Math.round(w * MAX / h); h = MAX; }
+                      }
+                      const canvas = document.createElement('canvas');
+                      canvas.width = w; canvas.height = h;
+                      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                      lSet('photo', canvas.toDataURL('image/jpeg', 0.65));
+                    };
+                    img.src = ev.target.result;
+                  };
+                  reader.readAsDataURL(file);
+                }}
+              />
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{width:'100%'}}
+                onClick={() => document.getElementById('photo-input').click()}
+              >
+                {lForm.photo ? 'Cambiar foto' : 'Añadir foto'}
+              </button>
+              {lForm.photo && (
+                <>
+                  <img src={lForm.photo} style={{maxWidth:'100%',borderRadius:'.5rem',marginTop:'.5rem'}}/>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{marginTop:'.35rem',fontSize:'.8rem'}}
+                    onClick={() => lSet('photo', '')}
+                  >
+                    ✕ Quitar
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -61,7 +115,7 @@ export default function NuevaLectura({ batch, lForm, lCalc, editingIdx, error, o
             })}
             <div className="lc-weight-row">
               <label>Peso faltas leves (kg)</label>
-              <input type="number" step="0.01" min="0" value={lForm.pesoFaltasLeves} onChange={e=>lSet('pesoFaltasLeves',e.target.value)} placeholder="0.00"/>
+              <Stepper value={lForm.pesoFaltasLeves} onChange={v=>lSet('pesoFaltasLeves',v)} step={0.1} min={0} max={9999} decimals={1} style={{flex:1}}/>
               <span className={`lc-pct ${thresholdStatus(lCalc.pctLeves, 10)}`}>
                 {lCalc.pd>0 ? `${fmtNum(lCalc.pctLeves,1)}%` : '—'}
               </span>
@@ -83,7 +137,7 @@ export default function NuevaLectura({ batch, lForm, lCalc, editingIdx, error, o
             })}
             <div className="lc-weight-row">
               <label>Peso faltas graves (kg)</label>
-              <input type="number" step="0.01" min="0" value={lForm.pesoFaltasGraves} onChange={e=>lSet('pesoFaltasGraves',e.target.value)} placeholder="0.00"/>
+              <Stepper value={lForm.pesoFaltasGraves} onChange={v=>lSet('pesoFaltasGraves',v)} step={0.1} min={0} max={9999} decimals={1} style={{flex:1}}/>
               <span className={`lc-pct ${thresholdStatus(lCalc.pctGraves, 5)}`}>
                 {lCalc.pd>0 ? `${fmtNum(lCalc.pctGraves,1)}%` : '—'}
               </span>
@@ -105,7 +159,7 @@ export default function NuevaLectura({ batch, lForm, lCalc, editingIdx, error, o
             })}
             <div className="lc-weight-row">
               <label>Peso faltas elim. (kg)</label>
-              <input type="number" step="0.01" min="0" value={lForm.pesoFaltasElim} onChange={e=>lSet('pesoFaltasElim',e.target.value)} placeholder="0.00"/>
+              <Stepper value={lForm.pesoFaltasElim} onChange={v=>lSet('pesoFaltasElim',v)} step={0.1} min={0} max={9999} decimals={1} style={{flex:1}}/>
               <span className={`lc-pct ${thresholdStatus(lCalc.pctElim, 0)}`}>
                 {lCalc.pd>0 ? `${fmtNum(lCalc.pctElim,1)}%` : '—'}
               </span>

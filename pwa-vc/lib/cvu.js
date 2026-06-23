@@ -231,6 +231,20 @@ export function printBatch(b) {
     </div>`;
   })() : '';
 
+  const photoPage = b.readings.some(r => r.photo) ? (() => {
+    const withPhoto = b.readings.filter(r => r.photo);
+    const cells = withPhoto.map(r => `
+      <div style="break-inside:avoid;margin-bottom:1.5rem">
+        <div style="font-size:8pt;font-weight:700;color:#2e6b2e;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Día ${r.dia} — ${fmtDate(r.fecha)}</div>
+        <img src="${r.photo}" style="width:100%;border-radius:6px;display:block;border:1px solid #ddd"/>
+      </div>`).join('');
+    return `
+      <div style="page-break-before:always">
+        <h2 style="margin-bottom:1.2rem">Evolución Fotográfica</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem 2rem">${cells}</div>
+      </div>`;
+  })() : '';
+
   const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
     <title>Vida Útil ${b.id}</title><style>${PR_CSS}</style></head><body>
     <div class="hdr">
@@ -254,6 +268,7 @@ export function printBatch(b) {
       <th>% Leves</th><th>% Graves</th><th>% Elim.</th><th>% Total</th><th>Calidad</th>
     </tr></thead><tbody>${rows}${smRow}</tbody></table>`}
     ${charts}
+    ${photoPage}
     <div class="sign-area">
       <div class="sign-line">Responsable de calidad</div>
       <div class="sign-line">Responsable de línea</div>

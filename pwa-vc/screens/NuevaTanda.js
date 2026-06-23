@@ -1,5 +1,6 @@
 import { categorias } from '../lib/cvu';
 import { VARIEDADES_PCC } from '../lib/pcc';
+import Stepper from '../components/Stepper';
 
 export default function NuevaTanda({ tandaForm, error, onCancel, onSave, tSet }) {
   return (
@@ -16,7 +17,7 @@ export default function NuevaTanda({ tandaForm, error, onCancel, onSave, tSet })
           <div className="field"><label className="req">Categoría inicial</label><select value={tandaForm.categoriaInicial||'Extra'} onChange={e=>tSet('categoriaInicial',e.target.value)}>{categorias.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
           <div className="field"><label className="req">Trazabilidad</label><input type="text" value={tandaForm.trazabilidad||''} onChange={e=>tSet('trazabilidad',e.target.value)} placeholder="Código de trazabilidad"/></div>
           <div className="field"><label className="req">Fecha de entrada</label><input type="date" value={tandaForm.fecha||''} onChange={e=>tSet('fecha',e.target.value)}/></div>
-          <div className="field"><label className="req">Peso exacto inicial (kg)</label><input type="number" step="0.01" min="0" value={tandaForm.pesoInicial||''} onChange={e=>tSet('pesoInicial',e.target.value)} placeholder="0.00"/></div>
+          <div className="field"><label className="req">Peso exacto inicial (kg)</label><Stepper value={tandaForm.pesoInicial||''} onChange={v=>tSet('pesoInicial',v)} step={0.5} min={0} max={9999} decimals={1}/></div>
           <div className="field"><label>Nota</label><input type="text" value={tandaForm.nota||''} onChange={e=>tSet('nota',e.target.value)} placeholder="Opcional"/></div>
         </div>
         <p className="section-h">Variedad</p>

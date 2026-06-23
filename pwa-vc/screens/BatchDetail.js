@@ -11,7 +11,8 @@ export default function BatchDetail({ batch, onBack, onNuevaLectura, onEditLectu
           <div className="top-bar-title">{batch.confeccion}</div>
           <div className="top-bar-sub">{batch.id} · {batch.categoriaInicial} · {batch.trazabilidad}</div>
         </div>
-        <button className="btn btn-sm" style={{ background: 'rgba(255,255,255,.2)', color: '#fff', fontWeight: 700 }} onClick={onNuevaLectura}>+ Lectura</button>
+        <button className="icon-btn" onClick={() => printBatch(batch)} title="Imprimir informe">🖨</button>
+        <button className="icon-btn" style={{ background: 'rgba(192,48,48,.25)' }} onClick={() => onDeleteBatch(batch.id)} title="Eliminar tanda">🗑</button>
       </header>
       <main className="content">
         <div className="detail-header">
@@ -29,7 +30,8 @@ export default function BatchDetail({ batch, onBack, onNuevaLectura, onEditLectu
         {batch.readings.length === 0 ? (
           <div className="empty" style={{ padding: '2rem 1rem' }}>
             <div className="empty-icon" style={{ fontSize: '2rem' }}>📋</div>
-            <p>Sin lecturas. Pulsa <strong>+ Lectura</strong> para registrar el primer control.</p>
+            <p>Sin lecturas registradas.</p>
+            <button className="cta-btn" onClick={onNuevaLectura}>+ Nueva lectura</button>
           </div>
         ) : (
           <>
@@ -67,7 +69,10 @@ export default function BatchDetail({ batch, onBack, onNuevaLectura, onEditLectu
                       <td style={{color:r.pctElim>0?'var(--danger)':'var(--ok)',fontWeight:700}}>{r.pctElim!=null?`${fmtNum(r.pctElim,2)}%`:'—'}</td>
                       <td style={{color:pctColor(r.pctTotal||0,10,20),fontWeight:700}}>{r.pctTotal!=null?`${fmtNum(r.pctTotal,1)}%`:'—'}</td>
                       <td><span className={`badge ${calBadge(r.clasificacion)}`}>{r.clasificacion||'—'}</span></td>
-                      <td><button className="btn-edit-row" onClick={() => onEditLectura(ri)} title="Editar">✎</button></td>
+                      <td style={{display:'flex',alignItems:'center',gap:'.25rem'}}>
+                        {r.photo && <img src={r.photo} style={{width:'28px',height:'28px',objectFit:'cover',borderRadius:'4px'}} alt=""/>}
+                        <button className="btn-edit-row" onClick={() => onEditLectura(ri)} title="Editar">✎</button>
+                      </td>
                     </tr>
                   ));
                 })()}
@@ -130,13 +135,9 @@ export default function BatchDetail({ batch, onBack, onNuevaLectura, onEditLectu
               </div>
             );
           })()}
+          <button className="fab" onClick={onNuevaLectura}>+</button>
           </>
         )}
-        <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
-          <button className="btn btn-danger btn-sm" onClick={() => onDeleteBatch(batch.id)}>Eliminar tanda</button>
-          <div style={{ flex: 1 }} />
-          <button className="btn btn-ghost btn-sm" onClick={() => printBatch(batch)}>🖨 Imprimir informe</button>
-        </div>
       </main>
     </>
   );

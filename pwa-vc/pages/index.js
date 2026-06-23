@@ -91,6 +91,7 @@ export default function App() {
       pesoDiario: '', tempConservacion: '', pctFueraCalibre: '',
       ...siNoDefaults,
       pesoFaltasLeves: '', pesoFaltasGraves: '', pesoFaltasElim: '',
+      photo: '',
     });
     setEditingIdx(null);
     setError('');
@@ -111,6 +112,7 @@ export default function App() {
       pesoFaltasLeves:  r.pesoFaltasLeves  != null ? String(r.pesoFaltasLeves)  : '',
       pesoFaltasGraves: r.pesoFaltasGraves != null ? String(r.pesoFaltasGraves) : '',
       pesoFaltasElim:   r.pesoFaltasElim   != null ? String(r.pesoFaltasElim)   : '',
+      photo: r.photo || '',
     });
     setEditingIdx(idx);
     setError('');
@@ -182,6 +184,7 @@ export default function App() {
       pesoFaltasLeves:  parseFloat(lForm.pesoFaltasLeves)  || 0,
       pesoFaltasGraves: parseFloat(lForm.pesoFaltasGraves) || 0,
       pesoFaltasElim:   parseFloat(lForm.pesoFaltasElim)   || 0,
+      photo: lForm.photo || null,
       ...calc,
     };
     const updatedReadings = editingIdx !== null

@@ -1,16 +1,24 @@
 {
-  "name": "Visitas Técnicas Agrícolas",
-  "short_name": "Visitas Agrícolas",
-  "start_url": ".",
+  "name": "Control de Calidad",
+  "short_name": "Ctrl. Calidad",
+  "id": "/",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#f5f8f1",
+  "background_color": "#f2f5f2",
   "theme_color": "#2e6b2e",
-  "description": "Prototipo PWA para registro de visitas técnicas agrícolas con persistencia local.",
+  "description": "PWA para control de calidad en líneas de producción.",
   "icons": [
     {
-      "src": "/icon.svg",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

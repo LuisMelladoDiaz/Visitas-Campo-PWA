@@ -1,5 +1,6 @@
 import { fmtNum } from '../lib/utils';
 import { DEFECTOS_BAYAS, calcMuestraRes } from '../lib/pcc';
+import Stepper from '../components/Stepper';
 
 export default function PccMuestra({
   muestraForms, muestraIdx, mCalc, pccSetupForm, fmtActivo,
@@ -42,33 +43,19 @@ export default function PccMuestra({
               </div>
               <div className="field" style={{gridColumn:'1/-1'}}>
                 <label>Peso (gr){fmtActivo?.pesoRef != null ? ` — ref. ${fmtActivo.pesoRef} gr` : ''}</label>
-                <input type="number" step="1" min="0"
-                  value={muestraForms[muestraIdx].peso}
-                  onChange={e=>mSet('peso',e.target.value)}
-                  placeholder="0"
-                  style={{fontSize:'1.15rem',fontWeight:700}}/>
+                <Stepper value={muestraForms[muestraIdx].peso} onChange={v=>mSet('peso',v)} step={5} min={0} max={5000} decimals={0} inputStyle={{fontSize:'1.15rem',fontWeight:700}}/>
               </div>
               <div className="field">
                 <label>Calibre (mm)</label>
-                <input type="number" step="0.1" min="0"
-                  value={muestraForms[muestraIdx].calibre}
-                  onChange={e=>mSet('calibre',e.target.value)}
-                  placeholder="mm"/>
+                <Stepper value={muestraForms[muestraIdx].calibre} onChange={v=>mSet('calibre',v)} step={0.5} min={0} max={50} decimals={1}/>
               </div>
               <div className="field">
                 <label>% Fuera calibre <span style={{color:'var(--muted)',fontWeight:400,textTransform:'none'}}>(máx 5%)</span></label>
-                <input type="number" step="0.1" min="0" max="100"
-                  value={muestraForms[muestraIdx].pctFueraCalibre}
-                  onChange={e=>mSet('pctFueraCalibre',e.target.value)}
-                  placeholder="0.0"
-                  style={{color:parseFloat(muestraForms[muestraIdx].pctFueraCalibre)>=5?'var(--danger)':'inherit'}}/>
+                <Stepper value={muestraForms[muestraIdx].pctFueraCalibre} onChange={v=>mSet('pctFueraCalibre',v)} step={0.5} min={0} max={100} decimals={1} inputStyle={{color:parseFloat(muestraForms[muestraIdx].pctFueraCalibre)>=5?'var(--danger)':'inherit'}}/>
               </div>
               <div className="field">
                 <label>Nº racimos</label>
-                <input type="number" step="1" min="0"
-                  value={muestraForms[muestraIdx].numRacimos}
-                  onChange={e=>mSet('numRacimos',e.target.value)}
-                  placeholder="0"/>
+                <Stepper value={muestraForms[muestraIdx].numRacimos} onChange={v=>mSet('numRacimos',v)} step={1} min={0} max={200} decimals={0}/>
               </div>
             </div>
 
@@ -113,15 +100,7 @@ export default function PccMuestra({
 
             <div className="field">
               <label>ºBrix <span style={{color:'var(--muted)',fontWeight:400,textTransform:'none'}}>(mín. 12°, tol. ±1°)</span></label>
-              <input type="number" step="0.1" min="0"
-                value={muestraForms[muestraIdx].brix}
-                onChange={e=>mSet('brix',e.target.value)}
-                placeholder="12.0"
-                style={{
-                  fontSize:'1.15rem', fontWeight:700,
-                  color: muestraForms[muestraIdx].brix!==''&&parseFloat(muestraForms[muestraIdx].brix)<11?'var(--danger)':'inherit',
-                  borderColor: muestraForms[muestraIdx].brix!==''&&parseFloat(muestraForms[muestraIdx].brix)<11?'var(--danger)':undefined,
-                }}/>
+              <Stepper value={muestraForms[muestraIdx].brix} onChange={v=>mSet('brix',v)} step={0.1} min={0} max={30} decimals={1} inputStyle={{fontSize:'1.15rem',fontWeight:700,color:muestraForms[muestraIdx].brix!==''&&parseFloat(muestraForms[muestraIdx].brix)<11?'var(--danger)':'inherit'}}/>
               {muestraForms[muestraIdx].brix!==''&&parseFloat(muestraForms[muestraIdx].brix)<11&&(
                 <span className="field-hint" style={{color:'var(--danger)'}}>Por debajo del mínimo admisible (11°)</span>
               )}
@@ -134,11 +113,7 @@ export default function PccMuestra({
 
             <div className="field" style={{ marginBottom: '1rem' }}>
               <label className="req">Total bayas contadas</label>
-              <input type="number" step="1" min="0"
-                value={muestraForms[muestraIdx].totalBayas}
-                onChange={e=>mSet('totalBayas',e.target.value)}
-                placeholder="0"
-                style={{fontSize:'1.3rem',fontWeight:800,textAlign:'center'}}/>
+              <Stepper value={muestraForms[muestraIdx].totalBayas} onChange={v=>mSet('totalBayas',v)} step={1} min={0} max={1000} decimals={0} inputStyle={{fontSize:'1.3rem',fontWeight:800}}/>
             </div>
 
             <div className="baya-card">
@@ -151,11 +126,7 @@ export default function PccMuestra({
                       <span className="baya-label">{d.label}</span>
                       {d.cero && <span className="baya-cero-tag">TOL 0%</span>}
                     </div>
-                    <input type="number" step="1" min="0"
-                      className="baya-input"
-                      value={muestraForms[muestraIdx][d.key]}
-                      onChange={e=>mSet(d.key,e.target.value)}
-                      style={{borderColor:isViol?'var(--danger)':undefined,color:isViol?'var(--danger)':undefined}}/>
+                    <Stepper value={muestraForms[muestraIdx][d.key]} onChange={v=>mSet(d.key,v)} step={1} min={0} max={999} decimals={0} compact style={{width:'120px'}} inputStyle={{color:isViol?'var(--danger)':undefined}}/>
                   </div>
                 );
               })}

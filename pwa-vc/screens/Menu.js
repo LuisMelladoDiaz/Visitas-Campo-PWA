@@ -7,7 +7,7 @@ export default function Menu({ variety, onBack, onGoList, onGoPCCList }) {
         <button className="icon-btn" onClick={onBack}>←</button>
         <div className="top-bar-title">{varieties.find(v => v.id === variety)?.label}</div>
       </header>
-      <main className="content">
+      <main className="content content--centered">
         <div className="menu-grid">
           <button className="menu-card" onClick={onGoList}>
             <span className="menu-card-icon">⏱</span>
