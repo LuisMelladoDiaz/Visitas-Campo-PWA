@@ -1,11 +1,14 @@
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // ── API (Supabase + localStorage fallback) ───────────────────────────────────
 import {
   loadBatches, saveBatch, deleteBatch as apiDeleteBatch,
   loadPCCs,   savePCC,   deletePCC   as apiDeletePCC,
 } from '../lib/api';
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+import { getSession, signOut, isAdmin } from '../lib/auth';
 
 // ── Lib ──────────────────────────────────────────────────────────────────────
 import { today, nowTime } from '../lib/utils';
@@ -16,6 +19,7 @@ import { DEFAULT_CONFIG } from '../lib/config';
 
 // ── Screens ──────────────────────────────────────────────────────────────────
 import VarietyPicker from '../screens/VarietyPicker';
+import Login         from '../screens/Login';
 import Menu          from '../screens/Menu';
 import VidaUtilList  from '../screens/VidaUtilList';
 import NuevaTanda    from '../screens/NuevaTanda';
@@ -26,6 +30,41 @@ import NuevaPcc      from '../screens/NuevaPcc';
 import PccMuestra    from '../screens/PccMuestra';
 import PccResumen    from '../screens/PccResumen';
 import Admin         from '../screens/Admin';
+
+// ─── User indicator (overlay fijo sobre todas las pantallas) ─────────────────
+function UserIndicator({ user, onLogout, onAdmin }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
+  const admin = isAdmin(user);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  return (
+    <div className="user-chip" ref={ref}>
+      {admin && (
+        <button className="icon-btn" onClick={onAdmin} title="Administración">⚙</button>
+      )}
+      <button className="user-chip-btn" onClick={() => setOpen(o => !o)}>
+        <span className="user-chip-avatar">{name[0].toUpperCase()}</span>
+        <span className="user-chip-name">{name}</span>
+      </button>
+      {open && (
+        <div className="user-chip-menu">
+          <div className="user-chip-email">{user.email}</div>
+          <button className="user-chip-logout" onClick={() => { setOpen(false); onLogout(); }}>
+            Cerrar sesión
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -45,6 +84,10 @@ export default function App() {
   const [muestraForms, setMuestraForms] = useState([]);
   const [muestraIdx,   setMuestraIdx]   = useState(0);
   const [savedPcc,     setSavedPcc]     = useState(null);
+  const [editingPcc,   setEditingPcc]   = useState(null);
+
+  // ── Auth ─────────────────────────────────────────────────────────────────
+  const [user, setUser] = useState(null);
 
   // ── Config ───────────────────────────────────────────────────────────────
   const [cfg, setCfg] = useState(DEFAULT_CONFIG);
@@ -56,14 +99,16 @@ export default function App() {
   useEffect(() => {
     async function bootstrap() {
       try {
-        const [b, p, c] = await Promise.all([
+        const [b, p, c, u] = await Promise.all([
           loadBatches(),
           loadPCCs(),
           loadConfigFromDB(),
+          getSession(),
         ]);
         setBatches(b);
         setPccs(p);
         setCfg(c);
+        setUser(u);
       } catch (e) {
         console.error('Error cargando datos:', e);
       } finally {
@@ -99,7 +144,15 @@ export default function App() {
   function goVariety() { setView('variety'); setVariety(null); }
   function goMenu(vid) { setVariety(vid); setView('menu'); }
   function goList()    { setView('vida-util-list'); }
-  function goAdmin()   { setView('admin'); }
+  function goAdmin()   { if (isAdmin(user)) setView('admin'); }
+
+  function handleLogin(u) { setUser(u); setView('variety'); }
+
+  async function handleLogout() {
+    await signOut();
+    setUser(null);
+    setView('variety');
+  }
 
   function goNuevaTanda() {
     setTandaForm({ confeccion: '', variedad: '', categoriaInicial: 'Extra', trazabilidad: '', pesoInicial: '', fecha: today(), nota: '' });
@@ -151,7 +204,8 @@ export default function App() {
   function goPCCList() { setView('pcc-list'); }
 
   function goNuevaPCC() {
-    setPccSetupForm({ fecha: today(), hora: nowTime(), responsable: '', variedad: '', trazabilidad: '', cinaNum: '', mesaNum: '', formato: '', paraSO2: false });
+    const responsable = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || '';
+    setPccSetupForm({ fecha: today(), hora: nowTime(), responsable, variedad: '', trazabilidad: '', cinaNum: '', mesaNum: '', formato: '', paraSO2: false });
     setError('');
     setView('nueva-pcc');
   }
@@ -168,18 +222,40 @@ export default function App() {
   }
 
   function guardarPCC() {
-    const formatos = cfg?.pcc?.formatos ?? [];
-    const fmt = formatos.find(f => f.id === pccSetupForm.formato);
     const umbrales = cfg?.pcc?.umbrales;
     const resultado = calcPCCResultado(muestraForms, umbrales);
-    const year = new Date().getFullYear();
-    const id = `PC-${year}-${String(pccs.length + 1).padStart(4, '0')}`;
-    const np = { id, ...pccSetupForm, nMuestras: fmt?.nMuestras || 10, muestras: muestraForms, resultado };
-    const next = [...pccs, np];
-    setPccs(next);
-    setSavedPcc(np);
-    setView('pcc-resumen');
-    savePCC(np).catch(e => console.error('Error sincronizando PCC:', e));
+
+    if (editingPcc) {
+      // Edición de muestras de un parte existente
+      const updated = { ...editingPcc, muestras: muestraForms, resultado };
+      const next = pccs.map(p => p.id === updated.id ? updated : p);
+      setPccs(next); setSavedPcc(updated); setEditingPcc(null); setView('pcc-resumen');
+      savePCC(updated).catch(e => console.error('Error sincronizando PCC:', e));
+    } else {
+      // Nuevo parte
+      const formatos = cfg?.pcc?.formatos ?? [];
+      const fmt = formatos.find(f => f.id === pccSetupForm.formato);
+      const year = new Date().getFullYear();
+      const id = `PC-${year}-${String(pccs.length + 1).padStart(4, '0')}`;
+      const np = { id, ...pccSetupForm, nMuestras: fmt?.nMuestras || 10, muestras: muestraForms, resultado };
+      const next = [...pccs, np];
+      setPccs(next); setSavedPcc(np); setView('pcc-resumen');
+      savePCC(np).catch(e => console.error('Error sincronizando PCC:', e));
+    }
+  }
+
+  function goEditMuestra(pcc, idx) {
+    setMuestraForms([...pcc.muestras]);
+    setMuestraIdx(idx);
+    setEditingPcc(pcc);
+    setView('pcc-muestra');
+  }
+
+  function deletePCC(id) {
+    if (!confirm('¿Eliminar este parte de control?')) return;
+    const next = pccs.filter(p => p.id !== id);
+    setPccs(next); setView('pcc-list');
+    apiDeletePCC(id).catch(e => console.error('Error eliminando PCC:', e));
   }
 
   function mSet(key, val) {
@@ -256,7 +332,8 @@ export default function App() {
         <link rel="manifest" href="/manifest.json" />
       </Head>
 
-      <div className="app">
+      <div className={`app${user ? ' user-logged' : ''}`}>
+        {user && <UserIndicator user={user} onLogout={handleLogout} onAdmin={goAdmin} />}
         {swUpdate && (
           <div className="update-banner">
             Nueva versión disponible
@@ -271,11 +348,20 @@ export default function App() {
           </div>
         )}
 
-        {!loading && view === 'variety' && (
-          <VarietyPicker onSelect={goMenu} onAdmin={goAdmin} />
+        {!loading && view === 'login' && (
+          <Login onLogin={handleLogin} onBack={goVariety} />
         )}
 
-        {!loading && view === 'admin' && (
+        {!loading && view === 'variety' && (
+          <VarietyPicker
+            onSelect={goMenu}
+            onAdmin={goAdmin}
+            onLoginClick={() => setView('login')}
+            user={user}
+          />
+        )}
+
+        {!loading && view === 'admin' && isAdmin(user) && (
           <Admin onBack={async () => { setCfg(await loadConfigFromDB()); setView('variety'); }} />
         )}
 
@@ -314,7 +400,7 @@ export default function App() {
             onBack={goList}
             onNuevaLectura={goNuevaLectura}
             onEditLectura={goEditLectura}
-            onDeleteBatch={deleteBatch}
+            onDeleteBatch={isAdmin(user) ? deleteBatch : null}
           />
         )}
 
@@ -372,6 +458,8 @@ export default function App() {
             savedPcc={savedPcc}
             onBack={goPCCList}
             onNuevoParte={goNuevaPCC}
+            onDeletePcc={isAdmin(user) ? deletePCC : null}
+            onEditMuestra={goEditMuestra}
           />
         )}
       </div>

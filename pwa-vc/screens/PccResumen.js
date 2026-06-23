@@ -1,8 +1,8 @@
 import { fmtDate, fmtNum } from '../lib/utils';
 import { DEFECTOS_BAYAS, calcMuestraRes, calcPCCMedias, printPCC, FORMATOS_PCC } from '../lib/pcc';
 
-export default function PccResumen({ savedPcc, onBack, onNuevoParte }) {
-  const f = FORMATOS_PCC.find(fmt => fmt.id === savedPcc.formato);
+export default function PccResumen({ savedPcc, onBack, onNuevoParte, onDeletePcc, onEditMuestra }) {
+  const f   = FORMATOS_PCC.find(fmt => fmt.id === savedPcc.formato);
   const med = calcPCCMedias(savedPcc.muestras);
 
   return (
@@ -13,9 +13,14 @@ export default function PccResumen({ savedPcc, onBack, onNuevoParte }) {
           <div className="top-bar-title">{savedPcc.id}</div>
           <div className="top-bar-sub">{fmtDate(savedPcc.fecha)} {savedPcc.hora}{savedPcc.responsable?` · ${savedPcc.responsable}`:''}</div>
         </div>
+        <button className="icon-btn" onClick={() => printPCC(savedPcc)} title="Imprimir informe">🖨</button>
+        {onDeletePcc && (
+          <button className="icon-btn" style={{ background: 'rgba(192,48,48,.25)' }}
+            onClick={() => onDeletePcc(savedPcc.id)} title="Eliminar parte">🗑</button>
+        )}
       </header>
-      <main className="content">
 
+      <main className="content">
         <div className={`pcc-resultado pcc-resultado--${savedPcc.resultado==='C'?'c':savedPcc.resultado==='NC'?'nc':'pending'}`}>
           <div className="pcc-res-label">Resultado global</div>
           <div className="pcc-res-value">
@@ -34,14 +39,16 @@ export default function PccResumen({ savedPcc, onBack, onNuevoParte }) {
           </div>
         </div>
 
-        <p className="section-h" style={{ marginTop: '1.25rem' }}>Detalle por muestra</p>
+        <p className="section-h" style={{ marginTop: '1.25rem' }}>
+          Detalle por muestra ({savedPcc.muestras.filter(m => m.peso !== '' || parseInt(m.totalBayas) > 0).length}/{savedPcc.nMuestras})
+        </p>
         <div className="table-wrap">
           <table className="readings-table">
             <thead>
               <tr>
                 <th>M.</th><th>Hora</th><th>Peso (gr)</th><th>Cal.</th><th>%Cal.</th>
                 <th>Brix</th><th>Color</th><th>Escobajo</th><th>Homog.</th>
-                <th>Racimos</th><th>Bayas</th><th>Def.%</th><th>Res.</th>
+                <th>Racimos</th><th>Bayas</th><th>Def.%</th><th>Res.</th><th></th>
               </tr>
             </thead>
             <tbody>
@@ -62,6 +69,9 @@ export default function PccResumen({ savedPcc, onBack, onNuevoParte }) {
                     <td>{m.totalBayas||'—'}</td>
                     <td style={{color:c.pct>5?'var(--danger)':c.pct>4?'var(--warn)':c.total>0?'var(--ok)':'inherit',fontWeight:700}}>{c.total>0?`${fmtNum(c.pct,1)}%`:'—'}</td>
                     <td><span className={`badge ${!c.resultado?'badge-neutral':c.resultado==='C'?'badge-ok':'badge-danger'}`} style={{fontSize:'.72rem',padding:'.2rem .5rem'}}>{c.resultado||'—'}</span></td>
+                    <td>
+                      <button className="btn-edit-row" onClick={() => onEditMuestra && onEditMuestra(savedPcc, i)} title="Editar muestra">✎</button>
+                    </td>
                   </tr>
                 );
               })}
@@ -80,6 +90,7 @@ export default function PccResumen({ savedPcc, onBack, onNuevoParte }) {
                   <td style={{fontWeight:800}}>{med.totalBayasAll}</td>
                   <td style={{color:med.pctGlobal>5?'var(--danger)':med.pctGlobal>4?'var(--warn)':'var(--ok)',fontWeight:800}}>{med.totalBayasAll>0?`${fmtNum(med.pctGlobal,1)}%`:'—'}</td>
                   <td>—</td>
+                  <td></td>
                 </tr>
               )}
             </tbody>
@@ -125,12 +136,7 @@ export default function PccResumen({ savedPcc, onBack, onNuevoParte }) {
           </>
         )}
 
-        <div className="action-bar">
-          <button className="btn btn-ghost" onClick={onBack}>← Lista</button>
-          <div className="spacer"/>
-          <button className="btn btn-ghost" onClick={() => printPCC(savedPcc)}>🖨 Imprimir informe</button>
-          <button className="btn btn-primary" onClick={onNuevoParte}>+ Nuevo parte</button>
-        </div>
+        <button className="fab" onClick={onNuevoParte}>+</button>
       </main>
     </>
   );

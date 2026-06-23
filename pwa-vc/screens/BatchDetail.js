@@ -12,7 +12,7 @@ export default function BatchDetail({ batch, config, onBack, onNuevaLectura, onE
           <div className="top-bar-sub">{batch.id} · {batch.categoriaInicial} · {batch.trazabilidad}</div>
         </div>
         <button className="icon-btn" onClick={() => printBatch(batch, config)} title="Imprimir informe">🖨</button>
-        <button className="icon-btn" style={{ background: 'rgba(192,48,48,.25)' }} onClick={() => onDeleteBatch(batch.id)} title="Eliminar tanda">🗑</button>
+        {onDeleteBatch && <button className="icon-btn" style={{ background: 'rgba(192,48,48,.25)' }} onClick={() => onDeleteBatch(batch.id)} title="Eliminar tanda">🗑</button>}
       </header>
       <main className="content">
         <div className="detail-header">
