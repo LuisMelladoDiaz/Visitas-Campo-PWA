@@ -508,6 +508,48 @@ img { max-width: 100%; display: block; }
 .empty-icon { font-size: 3rem; margin-bottom: .75rem; }
 .empty p { font-size: .95rem; }
 
+/* ─── CTA button (empty state) ─── */
+.cta-btn {
+  margin-top: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 1.25rem;
+  padding: 1.1rem 2.5rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  box-shadow: 0 4px 20px rgba(46,107,46,.3);
+  transition: transform .15s, box-shadow .15s;
+}
+.cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(46,107,46,.35); }
+.cta-btn:active { transform: scale(.97); }
+
+/* ─── FAB ─── */
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 2.2rem;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 24px rgba(46,107,46,.4);
+  transition: transform .15s, box-shadow .15s;
+  z-index: 50;
+  line-height: 1;
+}
+.fab:hover { transform: scale(1.08); box-shadow: 0 10px 32px rgba(46,107,46,.45); }
+.fab:active { transform: scale(.95); }
+
 /* ─── Mobile (<640px) ─── */
 @media (max-width: 639px) {
   :root { --bar-h: 52px; }

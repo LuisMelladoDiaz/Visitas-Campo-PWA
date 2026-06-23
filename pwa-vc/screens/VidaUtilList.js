@@ -12,18 +12,16 @@ export default function VidaUtilList({ batches, onBack, onNuevaTanda, onOpenBatc
           <div className="top-bar-title">Control de Vida Útil</div>
           <div className="top-bar-sub">Uva de Mesa · {uvaBatches.length} tandas</div>
         </div>
-        <button className="btn btn-sm" style={{ background: 'rgba(255,255,255,.2)', color: '#fff', fontWeight: 700 }} onClick={onNuevaTanda}>
-          + Nueva tanda
-        </button>
       </header>
       <main className="content">
         {uvaBatches.length === 0 ? (
           <div className="empty">
             <div className="empty-icon">📦</div>
             <p>No hay tandas registradas.</p>
-            <p style={{ marginTop: '.5rem', fontSize: '.85rem' }}>Pulsa <strong>+ Nueva tanda</strong> para comenzar.</p>
+            <button className="cta-btn" onClick={onNuevaTanda}>+ Nueva tanda</button>
           </div>
         ) : (
+          <>
           <div className="batch-list">
             {uvaBatches.slice().reverse().map(b => {
               const status = batchStatusBadge(b);
@@ -47,6 +45,8 @@ export default function VidaUtilList({ batches, onBack, onNuevaTanda, onOpenBatc
               );
             })}
           </div>
+          <button className="fab" onClick={onNuevaTanda}>+</button>
+          </>
         )}
       </main>
     </>

@@ -10,18 +10,16 @@ export default function PccList({ pccs, onBack, onNuevoParte, onOpenPcc }) {
           <div className="top-bar-title">Parte de Control · Uva de Mesa</div>
           <div className="top-bar-sub">{pccs.length} partes registrados</div>
         </div>
-        <button className="btn btn-sm" style={{ background: 'rgba(255,255,255,.2)', color: '#fff', fontWeight: 700 }} onClick={onNuevoParte}>
-          + Nuevo parte
-        </button>
       </header>
       <main className="content">
         {pccs.length === 0 ? (
           <div className="empty">
             <div className="empty-icon">📋</div>
             <p>No hay partes registrados.</p>
-            <p style={{ marginTop: '.5rem', fontSize: '.85rem' }}>Pulsa <strong>+ Nuevo parte</strong> para comenzar.</p>
+            <button className="cta-btn" onClick={onNuevoParte}>+ Nuevo parte</button>
           </div>
         ) : (
+          <>
           <div className="batch-list">
             {pccs.slice().reverse().map(p => {
               const fmt = FORMATOS_PCC.find(f => f.id === p.formato);
@@ -51,6 +49,8 @@ export default function PccList({ pccs, onBack, onNuevoParte, onOpenPcc }) {
               );
             })}
           </div>
+          <button className="fab" onClick={onNuevoParte}>+</button>
+          </>
         )}
       </main>
     </>
