@@ -1,14 +1,18 @@
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 
-// ── Storage ──────────────────────────────────────────────────────────────────
-import { loadBatches, saveBatches, loadPCCs, savePCCs } from '../lib/storage';
+// ── API (Supabase + localStorage fallback) ───────────────────────────────────
+import {
+  loadBatches, saveBatch, deleteBatch as apiDeleteBatch,
+  loadPCCs,   savePCC,   deletePCC   as apiDeletePCC,
+} from '../lib/api';
 
 // ── Lib ──────────────────────────────────────────────────────────────────────
 import { today, nowTime } from '../lib/utils';
 import { CVU_SINO_FIELDS, calcLectura } from '../lib/cvu';
 import { emptyMuestra, calcMuestraRes, calcPCCResultado } from '../lib/pcc';
-import { loadConfig } from '../lib/config';
+import { loadConfigFromDB } from '../lib/configApi';
+import { DEFAULT_CONFIG } from '../lib/config';
 
 // ── Screens ──────────────────────────────────────────────────────────────────
 import VarietyPicker from '../screens/VarietyPicker';
@@ -21,7 +25,7 @@ import PccList       from '../screens/PccList';
 import NuevaPcc      from '../screens/NuevaPcc';
 import PccMuestra    from '../screens/PccMuestra';
 import PccResumen    from '../screens/PccResumen';
-import Admin        from '../screens/Admin';
+import Admin         from '../screens/Admin';
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -43,13 +47,30 @@ export default function App() {
   const [savedPcc,     setSavedPcc]     = useState(null);
 
   // ── Config ───────────────────────────────────────────────────────────────
-  const [cfg, setCfg] = useState(() => typeof window !== 'undefined' ? loadConfig() : null);
-  useEffect(() => { setCfg(loadConfig()); }, []);
+  const [cfg, setCfg] = useState(DEFAULT_CONFIG);
+
+  // ── Loading ──────────────────────────────────────────────────────────────
+  const [loading, setLoading] = useState(true);
 
   // ── Bootstrap ────────────────────────────────────────────────────────────
   useEffect(() => {
-    setBatches(loadBatches());
-    setPccs(loadPCCs());
+    async function bootstrap() {
+      try {
+        const [b, p, c] = await Promise.all([
+          loadBatches(),
+          loadPCCs(),
+          loadConfigFromDB(),
+        ]);
+        setBatches(b);
+        setPccs(p);
+        setCfg(c);
+      } catch (e) {
+        console.error('Error cargando datos:', e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    bootstrap();
   }, []);
 
   const [swUpdate, setSwUpdate] = useState(null);
@@ -156,9 +177,9 @@ export default function App() {
     const np = { id, ...pccSetupForm, nMuestras: fmt?.nMuestras || 10, muestras: muestraForms, resultado };
     const next = [...pccs, np];
     setPccs(next);
-    savePCCs(next);
     setSavedPcc(np);
     setView('pcc-resumen');
+    savePCC(np).catch(e => console.error('Error sincronizando PCC:', e));
   }
 
   function mSet(key, val) {
@@ -177,7 +198,8 @@ export default function App() {
     const id = `TA-${year}-${String(batches.length + 1).padStart(4, '0')}`;
     const nb = { id, variety, confeccion: tandaForm.confeccion, variedad: tandaForm.variedad, categoriaInicial: tandaForm.categoriaInicial, trazabilidad: tandaForm.trazabilidad, pesoInicial: parseFloat(tandaForm.pesoInicial), fecha: tandaForm.fecha, nota: tandaForm.nota, readings: [] };
     const next = [...batches, nb];
-    setBatches(next); saveBatches(next); setBatch(nb); setError(''); setView('batch');
+    setBatches(next); setBatch(nb); setError(''); setView('batch');
+    saveBatch(nb).catch(e => console.error('Error sincronizando tanda:', e));
   }
 
   function saveLectura() {
@@ -202,13 +224,15 @@ export default function App() {
       : [...batch.readings, nr];
     const updated = { ...batch, readings: updatedReadings };
     const next = batches.map(b => b.id === batch.id ? updated : b);
-    setBatches(next); saveBatches(next); setBatch(updated); setEditingIdx(null); setError(''); setView('batch');
+    setBatches(next); setBatch(updated); setEditingIdx(null); setError(''); setView('batch');
+    saveBatch(updated).catch(e => console.error('Error sincronizando lectura:', e));
   }
 
   function deleteBatch(id) {
     if (!confirm('¿Eliminar esta tanda y todas sus lecturas?')) return;
     const next = batches.filter(b => b.id !== id);
-    setBatches(next); saveBatches(next); setView('vida-util-list');
+    setBatches(next); setView('vida-util-list');
+    apiDeleteBatch(id).catch(e => console.error('Error eliminando tanda:', e));
   }
 
   // ── Live calcs ────────────────────────────────────────────────────────────
@@ -240,13 +264,22 @@ export default function App() {
           </div>
         )}
 
-        {view === 'variety' && (
+        {loading && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: '1rem', color: 'var(--muted)' }}>
+            <div style={{ fontSize: '2rem' }}>🍇</div>
+            <div style={{ fontSize: '.9rem' }}>Cargando datos…</div>
+          </div>
+        )}
+
+        {!loading && view === 'variety' && (
           <VarietyPicker onSelect={goMenu} onAdmin={goAdmin} />
         )}
 
-        {view === 'admin' && <Admin onBack={() => { setCfg(loadConfig()); setView('variety'); }} />}
+        {!loading && view === 'admin' && (
+          <Admin onBack={async () => { setCfg(await loadConfigFromDB()); setView('variety'); }} />
+        )}
 
-        {view === 'menu' && (
+        {!loading && view === 'menu' && (
           <Menu
             variety={variety}
             onBack={goVariety}
@@ -255,7 +288,7 @@ export default function App() {
           />
         )}
 
-        {view === 'vida-util-list' && (
+        {!loading && view === 'vida-util-list' && (
           <VidaUtilList
             batches={batches}
             onBack={() => setView('menu')}
@@ -264,7 +297,7 @@ export default function App() {
           />
         )}
 
-        {view === 'nueva-tanda' && (
+        {!loading && view === 'nueva-tanda' && (
           <NuevaTanda
             tandaForm={tandaForm}
             error={error}
@@ -274,7 +307,7 @@ export default function App() {
           />
         )}
 
-        {view === 'batch' && batch && (
+        {!loading && view === 'batch' && batch && (
           <BatchDetail
             batch={batch}
             config={cfg}
@@ -285,7 +318,7 @@ export default function App() {
           />
         )}
 
-        {view === 'nueva-lectura' && batch && lCalc && (
+        {!loading && view === 'nueva-lectura' && batch && lCalc && (
           <NuevaLectura
             batch={batch}
             lForm={lForm}
@@ -298,7 +331,7 @@ export default function App() {
           />
         )}
 
-        {view === 'pcc-list' && (
+        {!loading && view === 'pcc-list' && (
           <PccList
             pccs={pccs}
             onBack={() => setView('menu')}
@@ -307,7 +340,7 @@ export default function App() {
           />
         )}
 
-        {view === 'nueva-pcc' && (
+        {!loading && view === 'nueva-pcc' && (
           <NuevaPcc
             pccSetupForm={pccSetupForm}
             error={error}
@@ -319,7 +352,7 @@ export default function App() {
           />
         )}
 
-        {view === 'pcc-muestra' && muestraForms.length > 0 && mCalc && (
+        {!loading && view === 'pcc-muestra' && muestraForms.length > 0 && mCalc && (
           <PccMuestra
             muestraForms={muestraForms}
             muestraIdx={muestraIdx}
@@ -334,7 +367,7 @@ export default function App() {
           />
         )}
 
-        {view === 'pcc-resumen' && savedPcc && (
+        {!loading && view === 'pcc-resumen' && savedPcc && (
           <PccResumen
             savedPcc={savedPcc}
             onBack={goPCCList}
