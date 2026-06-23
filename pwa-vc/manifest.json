@@ -8,9 +8,16 @@
   "description": "Prototipo PWA para registro de visitas técnicas agrícolas con persistencia local.",
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%232e6b2e'/%3E%3Cpath d='M112 144h288v224H112z' fill='%23d8efd0'/%3E%3Cpath d='M144 176h224v32H144z' fill='%232e6b2e'/%3E%3Cpath d='M144 240h224v32H144z' fill='%232e6b2e'/%3E%3Cpath d='M144 304h224v32H144z' fill='%232e6b2e'/%3E%3C/svg%3E",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
