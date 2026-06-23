@@ -44,7 +44,7 @@ export const CVU_CALIDAD = [
 ];
 
 // ─── Vida Útil logic ──────────────────────────────────────────────────────────
-export function calcLectura(f, pesoInicial) {
+export function calcLectura(f, pesoInicial, clases = CVU_CALIDAD) {
   const pd         = parseFloat(f.pesoDiario) || 0;
   const pi         = pesoInicial || 0;
   const pctPerdida = pi > 0 && pd > 0 ? ((pi - pd) / pi) * 100 : 0;
@@ -56,7 +56,14 @@ export function calcLectura(f, pesoInicial) {
   const pctGraves  = pd > 0 ? (pesoGraves / pd) * 100 : 0;
   const pctElim    = pd > 0 ? (pesoElim   / pd) * 100 : 0;
   const pctTotal   = pctLeves + pctGraves + pctElim;
-  const found      = pd > 0 ? CVU_CALIDAD.find(c => c.check(pctLeves, pctGraves, pctElim, pctTotal, pctCalibre)) : null;
+  const found = pd > 0 ? clases.find(c => {
+    if (typeof c.check === 'function') return c.check(pctLeves, pctGraves, pctElim, pctTotal, pctCalibre);
+    const eOk = c.maxElim == null || pctElim <= c.maxElim;
+    const gOk = c.maxGraves == null || pctGraves <= c.maxGraves;
+    const tOk = c.maxTotal == null || pctTotal <= c.maxTotal;
+    const calOk = c.maxCalibre == null || pctCalibre <= c.maxCalibre;
+    return eOk && gOk && tOk && calOk;
+  }) : null;
   const clasificacion = pd > 0 ? (found ? found.label : 'No conforme') : null;
   return { pd, pctPerdida, pesoLeves, pesoGraves, pesoElim, pctLeves, pctGraves, pctElim, pctTotal, pctCalibre, clasificacion };
 }
@@ -161,7 +168,7 @@ export function svgChartStr(readings, series, width, height) {
 }
 
 // ─── Print batch ─────────────────────────────────────────────────────────────
-export function printBatch(b) {
+export function printBatch(b, config = {}) {
   const yn = v => v === 'Si' ? '<span style="color:#1c7a40;font-weight:700">Sí</span>'
                 : v === 'No' ? '<span style="color:#c03030;font-weight:700">No</span>' : '—';
 
@@ -248,7 +255,7 @@ export function printBatch(b) {
   const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
     <title>Vida Útil ${b.id}</title><style>${PR_CSS}</style></head><body>
     <div class="hdr">
-      <div class="co">Torremesa</div>
+      <div class="co">${config?.empresa?.nombre ?? 'Torremesa'}</div>
       <div class="doc"><div class="doc-title">Control de Vida Útil</div><div class="doc-sub">Uva de Mesa</div></div>
     </div>
     <div class="mg">

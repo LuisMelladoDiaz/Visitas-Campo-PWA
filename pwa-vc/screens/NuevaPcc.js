@@ -1,6 +1,8 @@
 import { VARIEDADES_PCC, FORMATOS_PCC } from '../lib/pcc';
 
-export default function NuevaPcc({ pccSetupForm, error, onCancel, onIniciarMuestras, pSet }) {
+export default function NuevaPcc({ pccSetupForm, error, variedades, formatos, onCancel, onIniciarMuestras, pSet }) {
+  const VARS = variedades ?? VARIEDADES_PCC;
+  const FMTS = formatos ?? FORMATOS_PCC;
   return (
     <>
       <header className="top-bar">
@@ -12,7 +14,7 @@ export default function NuevaPcc({ pccSetupForm, error, onCancel, onIniciarMuest
 
         <p className="section-h">Formato de envase</p>
         <div className="formato-grid">
-          {FORMATOS_PCC.map(f => (
+          {FMTS.map(f => (
             <button key={f.id}
               className={`formato-card${pccSetupForm.formato===f.id?' formato-card--selected':''}`}
               onClick={() => pSet('formato', f.id)}>
@@ -25,7 +27,7 @@ export default function NuevaPcc({ pccSetupForm, error, onCancel, onIniciarMuest
 
         <p className="section-h" style={{ marginTop: '1.5rem' }}>Variedad</p>
         <div className="toggle-group" style={{ marginBottom: '1.25rem' }}>
-          {VARIEDADES_PCC.map(v => (
+          {VARS.map(v => (
             <button key={v}
               className={`toggle-btn${pccSetupForm.variedad===v?' toggle-btn--on':''}`}
               onClick={() => pSet('variedad', pccSetupForm.variedad===v?'':v)}>

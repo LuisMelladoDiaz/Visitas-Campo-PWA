@@ -2,7 +2,7 @@ import { fmtDate, fmtNum } from '../lib/utils';
 import { CVU_CALIDAD, calcBatchSummary, MiniLineChart } from '../lib/cvu';
 import { printBatch } from '../lib/cvu';
 
-export default function BatchDetail({ batch, onBack, onNuevaLectura, onEditLectura, onDeleteBatch }) {
+export default function BatchDetail({ batch, config, onBack, onNuevaLectura, onEditLectura, onDeleteBatch }) {
   return (
     <>
       <header className="top-bar">
@@ -11,7 +11,7 @@ export default function BatchDetail({ batch, onBack, onNuevaLectura, onEditLectu
           <div className="top-bar-title">{batch.confeccion}</div>
           <div className="top-bar-sub">{batch.id} · {batch.categoriaInicial} · {batch.trazabilidad}</div>
         </div>
-        <button className="icon-btn" onClick={() => printBatch(batch)} title="Imprimir informe">🖨</button>
+        <button className="icon-btn" onClick={() => printBatch(batch, config)} title="Imprimir informe">🖨</button>
         <button className="icon-btn" style={{ background: 'rgba(192,48,48,.25)' }} onClick={() => onDeleteBatch(batch.id)} title="Eliminar tanda">🗑</button>
       </header>
       <main className="content">

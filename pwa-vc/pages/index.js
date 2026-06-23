@@ -7,7 +7,8 @@ import { loadBatches, saveBatches, loadPCCs, savePCCs } from '../lib/storage';
 // ── Lib ──────────────────────────────────────────────────────────────────────
 import { today, nowTime } from '../lib/utils';
 import { CVU_SINO_FIELDS, calcLectura } from '../lib/cvu';
-import { emptyMuestra, calcMuestraRes, calcPCCResultado, FORMATOS_PCC } from '../lib/pcc';
+import { emptyMuestra, calcMuestraRes, calcPCCResultado } from '../lib/pcc';
+import { loadConfig } from '../lib/config';
 
 // ── Screens ──────────────────────────────────────────────────────────────────
 import VarietyPicker from '../screens/VarietyPicker';
@@ -20,6 +21,7 @@ import PccList       from '../screens/PccList';
 import NuevaPcc      from '../screens/NuevaPcc';
 import PccMuestra    from '../screens/PccMuestra';
 import PccResumen    from '../screens/PccResumen';
+import Admin        from '../screens/Admin';
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -39,6 +41,10 @@ export default function App() {
   const [muestraForms, setMuestraForms] = useState([]);
   const [muestraIdx,   setMuestraIdx]   = useState(0);
   const [savedPcc,     setSavedPcc]     = useState(null);
+
+  // ── Config ───────────────────────────────────────────────────────────────
+  const [cfg, setCfg] = useState(() => typeof window !== 'undefined' ? loadConfig() : null);
+  useEffect(() => { setCfg(loadConfig()); }, []);
 
   // ── Bootstrap ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -72,6 +78,7 @@ export default function App() {
   function goVariety() { setView('variety'); setVariety(null); }
   function goMenu(vid) { setVariety(vid); setView('menu'); }
   function goList()    { setView('vida-util-list'); }
+  function goAdmin()   { setView('admin'); }
 
   function goNuevaTanda() {
     setTandaForm({ confeccion: '', variedad: '', categoriaInicial: 'Extra', trazabilidad: '', pesoInicial: '', fecha: today(), nota: '' });
@@ -130,17 +137,20 @@ export default function App() {
 
   function iniciarMuestras() {
     if (!pccSetupForm.formato) { setError('Selecciona un formato de envase.'); return; }
-    const fmt = FORMATOS_PCC.find(f => f.id === pccSetupForm.formato);
+    const formatos = cfg?.pcc?.formatos ?? [];
+    const fmt = formatos.find(f => f.id === pccSetupForm.formato);
     const t = nowTime();
-    setMuestraForms(Array.from({ length: fmt.nMuestras }, (_, i) => emptyMuestra(i + 1, t)));
+    setMuestraForms(Array.from({ length: fmt?.nMuestras ?? 10 }, (_, i) => emptyMuestra(i + 1, t)));
     setMuestraIdx(0);
     setError('');
     setView('pcc-muestra');
   }
 
   function guardarPCC() {
-    const fmt = FORMATOS_PCC.find(f => f.id === pccSetupForm.formato);
-    const resultado = calcPCCResultado(muestraForms);
+    const formatos = cfg?.pcc?.formatos ?? [];
+    const fmt = formatos.find(f => f.id === pccSetupForm.formato);
+    const umbrales = cfg?.pcc?.umbrales;
+    const resultado = calcPCCResultado(muestraForms, umbrales);
     const year = new Date().getFullYear();
     const id = `PC-${year}-${String(pccs.length + 1).padStart(4, '0')}`;
     const np = { id, ...pccSetupForm, nMuestras: fmt?.nMuestras || 10, muestras: muestraForms, resultado };
@@ -202,15 +212,15 @@ export default function App() {
   }
 
   // ── Live calcs ────────────────────────────────────────────────────────────
-  const lCalc = batch ? calcLectura(lForm, batch.pesoInicial) : null;
-  const mCalc = muestraForms[muestraIdx] ? calcMuestraRes(muestraForms[muestraIdx]) : null;
+  const lCalc = batch ? calcLectura(lForm, batch.pesoInicial, cfg?.cvu?.clases) : null;
+  const mCalc = muestraForms[muestraIdx] ? calcMuestraRes(muestraForms[muestraIdx], cfg?.pcc?.umbrales) : null;
 
   // ── Setters ───────────────────────────────────────────────────────────────
   function lSet(k, v) { setLForm(p => ({ ...p, [k]: v })); }
   function tSet(k, v) { setTandaForm(p => ({ ...p, [k]: v })); }
   function pSet(k, v) { setPccSetupForm(p => ({ ...p, [k]: v })); }
 
-  const fmtActivo = FORMATOS_PCC.find(f => f.id === pccSetupForm.formato);
+  const fmtActivo = (cfg?.pcc?.formatos ?? []).find(f => f.id === pccSetupForm.formato);
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
@@ -231,8 +241,10 @@ export default function App() {
         )}
 
         {view === 'variety' && (
-          <VarietyPicker onSelect={goMenu} />
+          <VarietyPicker onSelect={goMenu} onAdmin={goAdmin} />
         )}
+
+        {view === 'admin' && <Admin onBack={() => { setCfg(loadConfig()); setView('variety'); }} />}
 
         {view === 'menu' && (
           <Menu
@@ -265,6 +277,7 @@ export default function App() {
         {view === 'batch' && batch && (
           <BatchDetail
             batch={batch}
+            config={cfg}
             onBack={goList}
             onNuevaLectura={goNuevaLectura}
             onEditLectura={goEditLectura}
@@ -298,6 +311,8 @@ export default function App() {
           <NuevaPcc
             pccSetupForm={pccSetupForm}
             error={error}
+            variedades={cfg?.pcc?.variedades}
+            formatos={cfg?.pcc?.formatos}
             onCancel={goPCCList}
             onIniciarMuestras={iniciarMuestras}
             pSet={pSet}

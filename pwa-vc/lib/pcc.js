@@ -34,25 +34,25 @@ export function emptyMuestra(num, hora) {
   };
 }
 
-export function calcMuestraRes(m) {
+export function calcMuestraRes(m, umbrales = { maxDefectosPct: 5, minBrix: 11, maxCalibrePct: 5 }) {
   const total     = parseInt(m.totalBayas) || 0;
   const defs      = DEFECTOS_BAYAS.reduce((s, d) => s + (parseInt(m[d.key]) || 0), 0);
   const pct       = total > 0 ? (defs / total) * 100 : 0;
   const ceroViol  = DEFECTOS_BAYAS.filter(d => d.cero).some(d => (parseInt(m[d.key]) || 0) > 0);
-  const calibreViol = m.pctFueraCalibre !== '' && parseFloat(m.pctFueraCalibre) >= 5;
-  const brixViol  = m.brix !== '' && parseFloat(m.brix) < 11;
-  const resultado = !total ? null : (ceroViol || pct > 5 || calibreViol || brixViol) ? 'NC' : 'C';
+  const calibreViol = m.pctFueraCalibre !== '' && parseFloat(m.pctFueraCalibre) >= umbrales.maxCalibrePct;
+  const brixViol  = m.brix !== '' && parseFloat(m.brix) < umbrales.minBrix;
+  const resultado = !total ? null : (ceroViol || pct > umbrales.maxDefectosPct || calibreViol || brixViol) ? 'NC' : 'C';
   return { total, defs, pct, ceroViol, calibreViol, brixViol, resultado };
 }
 
-export function calcPCCResultado(muestras) {
+export function calcPCCResultado(muestras, umbrales = { maxDefectosPct: 5 }) {
   const filled = muestras.filter(m => parseInt(m.totalBayas) > 0 || m.peso !== '');
   if (!filled.length) return null;
   const totalBayas = filled.reduce((s, m) => s + (parseInt(m.totalBayas) || 0), 0);
   if (totalBayas === 0) return null;
   const totalDefs = DEFECTOS_BAYAS.reduce((s, d) =>
     s + filled.reduce((ss, m) => ss + (parseInt(m[d.key]) || 0), 0), 0);
-  return (totalDefs / totalBayas) * 100 < 5 ? 'C' : 'NC';
+  return (totalDefs / totalBayas) * 100 < umbrales.maxDefectosPct ? 'C' : 'NC';
 }
 
 function mediaMuestras(muestras, key) {
