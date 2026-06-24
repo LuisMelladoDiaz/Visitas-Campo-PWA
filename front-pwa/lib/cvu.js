@@ -4,10 +4,10 @@ import { PR_CSS } from './print';
 // ─── Vida Útil constants ──────────────────────────────────────────────────────
 export const varieties = [
   { id: 'uva',       label: 'Uva de Mesa', icon: '🍇' },
-  { id: 'calabaza',  label: 'Calabaza',    icon: '🎃', disabled: true },
-  { id: 'pimiento',  label: 'Pimiento',    icon: '🫑', disabled: true },
-  { id: 'remolacha', label: 'Remolacha',   icon: '🌸', disabled: true },
-  { id: 'boniato',   label: 'Boniato',     icon: '🍠', disabled: true },
+  { id: 'remolacha', label: 'Remolacha',   icon: '🔴' },
+  { id: 'boniato',   label: 'Boniato',     icon: '🍠' },
+  { id: 'calabaza',  label: 'Calabaza',    icon: '🎃' },
+  { id: 'pimiento',  label: 'Pimiento',    icon: '🫑' },
 ];
 
 export const categorias = ['Extra', 'Clase I', 'Clase II', 'Ind.'];
@@ -34,6 +34,19 @@ export const CVU_ELIM = [
   { key: 'podridos',        label: 'Podridos',          okVal: 'No' },
 ];
 export const CVU_SINO_FIELDS = [...CVU_LEVES, ...CVU_GRAVES, ...CVU_ELIM];
+
+export function getDefectosCvu(productoId, config) {
+  if (config?.defectosCvu?.[productoId]) {
+    const d = config.defectosCvu[productoId];
+    return {
+      leves:  d.leves  || [],
+      graves: d.graves || [],
+      elim:   d.elim   || [],
+      all:    [...(d.leves || []), ...(d.graves || []), ...(d.elim || [])],
+    };
+  }
+  return { leves: CVU_LEVES, graves: CVU_GRAVES, elim: CVU_ELIM, all: CVU_SINO_FIELDS };
+}
 
 // pL=% leves, pG=% graves, pE=% elim, pT=% total, cal=% fuera calibre
 export const CVU_CALIDAD = [
@@ -241,14 +254,14 @@ export function printBatch(b, config = {}) {
   const photoPage = b.readings.some(r => r.photo) ? (() => {
     const withPhoto = b.readings.filter(r => r.photo);
     const cells = withPhoto.map(r => `
-      <div style="break-inside:avoid;margin-bottom:1.5rem">
-        <div style="font-size:8pt;font-weight:700;color:#2e6b2e;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Día ${r.dia} — ${fmtDate(r.fecha)}</div>
-        <img src="${r.photo}" style="width:100%;border-radius:6px;display:block;border:1px solid #ddd"/>
+      <div style="break-inside:avoid;margin-bottom:8px">
+        <div style="font-size:7pt;font-weight:700;color:#2e6b2e;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">Día ${r.dia} — ${fmtDate(r.fecha)}</div>
+        <img src="${r.photo}" style="width:100%;height:140px;object-fit:cover;border-radius:4px;display:block;border:1px solid #ddd"/>
       </div>`).join('');
     return `
       <div style="page-break-before:always">
-        <h2 style="margin-bottom:1.2rem">Evolución Fotográfica</h2>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem 2rem">${cells}</div>
+        <h2 style="margin-bottom:10px">Evolución Fotográfica</h2>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px 12px">${cells}</div>
       </div>`;
   })() : '';
 

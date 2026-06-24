@@ -36,7 +36,7 @@ function cacheUpsertItem(key, item) {
 function tandaToRow(t) {
   return {
     id:                t.id,
-    variety:           t.variety,
+    producto_id:       t.variety || 'uva',
     confeccion:        t.confeccion,
     variedad:          t.variedad   || null,
     categoria_inicial: t.categoriaInicial,
@@ -47,33 +47,37 @@ function tandaToRow(t) {
   };
 }
 
+const LECTURA_NON_DEFECT_KEYS = new Set([
+  'dia', 'fecha', 'trazabilidad', 'pd', 'tempConservacion',
+  'pesoFaltasLeves', 'pesoFaltasGraves', 'pesoFaltasElim',
+  'pctFueraCalibre', 'pctPerdida', 'pctLeves', 'pctGraves', 'pctElim',
+  'pctTotal', 'pctCalibre', 'clasificacion', 'photo',
+]);
+
 function lecturaToRow(tanda_id, r) {
+  const defectos = {};
+  for (const key of Object.keys(r)) {
+    if (!LECTURA_NON_DEFECT_KEYS.has(key)) defectos[key] = r[key];
+  }
   return {
     tanda_id,
-    dia:                  r.dia,
-    fecha:                r.fecha,
-    trazabilidad:         r.trazabilidad         || null,
-    peso_diario:          r.pd                   ?? null,
-    temp_conservacion:    r.tempConservacion      ?? null,
-    desgrane:             r.desgrane             || null,
-    bayas_rotas:          r.bayasRotas           || null,
-    escobajo_marron:      r.escobajoMarron       || null,
-    bayas_deshidratadas:  r.bayasDeshidratadas   || null,
-    suciedad:             r.suciedad             || null,
-    plaga_picado:         r.plagaPicado          || null,
-    cuerpos_extranos:     r.cuerposExtranos      || null,
-    podridos:             r.podridos             || null,
-    peso_faltas_leves:    r.pesoFaltasLeves      ?? 0,
-    peso_faltas_graves:   r.pesoFaltasGraves     ?? 0,
-    peso_faltas_elim:     r.pesoFaltasElim       ?? 0,
-    pct_perdida:          r.pctPerdida           ?? null,
-    pct_leves:            r.pctLeves             ?? null,
-    pct_graves:           r.pctGraves            ?? null,
-    pct_elim:             r.pctElim              ?? null,
-    pct_total:            r.pctTotal             ?? null,
-    pct_calibre:          r.pctCalibre           ?? null,
-    clasificacion:        r.clasificacion        ?? null,
-    photo_url:            null, // gestionado por uploadPhoto()
+    dia:               r.dia,
+    fecha:             r.fecha,
+    trazabilidad:      r.trazabilidad      || null,
+    peso_diario:       r.pd               ?? null,
+    temp_conservacion: r.tempConservacion  ?? null,
+    defectos,
+    peso_faltas_leves:  r.pesoFaltasLeves  ?? 0,
+    peso_faltas_graves: r.pesoFaltasGraves ?? 0,
+    peso_faltas_elim:   r.pesoFaltasElim   ?? 0,
+    pct_perdida:       r.pctPerdida        ?? null,
+    pct_leves:         r.pctLeves          ?? null,
+    pct_graves:        r.pctGraves         ?? null,
+    pct_elim:          r.pctElim           ?? null,
+    pct_total:         r.pctTotal          ?? null,
+    pct_calibre:       r.pctCalibre        ?? null,
+    clasificacion:     r.clasificacion     ?? null,
+    photo_url:         null,
   };
 }
 
@@ -82,34 +86,27 @@ function lecturaFromRow(row) {
     dia:               row.dia,
     fecha:             row.fecha,
     trazabilidad:      row.trazabilidad,
-    pd:                row.peso_diario         != null ? parseFloat(row.peso_diario)         : 0,
-    tempConservacion:  row.temp_conservacion   != null ? parseFloat(row.temp_conservacion)   : null,
-    desgrane:          row.desgrane,
-    bayasRotas:        row.bayas_rotas,
-    escobajoMarron:    row.escobajo_marron,
-    bayasDeshidratadas:row.bayas_deshidratadas,
-    suciedad:          row.suciedad,
-    plagaPicado:       row.plaga_picado,
-    cuerposExtranos:   row.cuerpos_extranos,
-    podridos:          row.podridos,
+    pd:                row.peso_diario       != null ? parseFloat(row.peso_diario)       : 0,
+    tempConservacion:  row.temp_conservacion != null ? parseFloat(row.temp_conservacion) : null,
+    ...(row.defectos || {}),
     pesoFaltasLeves:   parseFloat(row.peso_faltas_leves)  || 0,
     pesoFaltasGraves:  parseFloat(row.peso_faltas_graves) || 0,
     pesoFaltasElim:    parseFloat(row.peso_faltas_elim)   || 0,
-    pctPerdida:        row.pct_perdida   != null ? parseFloat(row.pct_perdida)   : 0,
-    pctLeves:          row.pct_leves     != null ? parseFloat(row.pct_leves)     : 0,
-    pctGraves:         row.pct_graves    != null ? parseFloat(row.pct_graves)    : 0,
-    pctElim:           row.pct_elim      != null ? parseFloat(row.pct_elim)      : 0,
-    pctTotal:          row.pct_total     != null ? parseFloat(row.pct_total)     : 0,
-    pctCalibre:        row.pct_calibre   != null ? parseFloat(row.pct_calibre)   : 0,
+    pctPerdida:        row.pct_perdida  != null ? parseFloat(row.pct_perdida)  : 0,
+    pctLeves:          row.pct_leves    != null ? parseFloat(row.pct_leves)    : 0,
+    pctGraves:         row.pct_graves   != null ? parseFloat(row.pct_graves)   : 0,
+    pctElim:           row.pct_elim     != null ? parseFloat(row.pct_elim)     : 0,
+    pctTotal:          row.pct_total    != null ? parseFloat(row.pct_total)    : 0,
+    pctCalibre:        row.pct_calibre  != null ? parseFloat(row.pct_calibre)  : 0,
     clasificacion:     row.clasificacion,
-    photo:             row.photo_url     || null,
+    photo:             row.photo_url    || null,
   };
 }
 
 function tandaFromRows(row, lecturasRows) {
   return {
     id:               row.id,
-    variety:          row.variety,
+    variety:          row.producto_id,
     confeccion:       row.confeccion,
     variedad:         row.variedad,
     categoriaInicial: row.categoria_inicial,
@@ -134,63 +131,35 @@ function pccToRow(p) {
     cinta_num:   p.cinaNum     || null,
     mesa_num:    p.mesaNum     || null,
     formato_id:  p.formato     || null,
-    para_so2:    p.paraSO2     ?? false,
+    producto_id: p.variety     || 'uva',
+    datos_extra: p.datosExtra  || { para_so2: p.paraSO2 ?? false },
     n_muestras:  p.nMuestras   ?? 10,
     resultado:   p.resultado   || null,
   };
 }
 
+const MUESTRA_META_KEYS = new Set(['num', 'hora', 'resultado']);
+
 function muestraToRow(parte_id, m) {
+  const mediciones = {};
+  for (const key of Object.keys(m)) {
+    if (!MUESTRA_META_KEYS.has(key)) mediciones[key] = m[key];
+  }
   return {
     parte_id,
-    num:               m.num,
-    hora:              m.hora                          || null,
-    peso_g:            m.peso         ? parseFloat(m.peso)         : null,
-    calibre_mm:        m.calibre      ? parseFloat(m.calibre)      : null,
-    pct_fuera_calibre: m.pctFueraCalibre ? parseFloat(m.pctFueraCalibre) : null,
-    num_racimos:       m.numRacimos   ? parseInt(m.numRacimos)   : null,
-    homogeneidad:      m.homogeneidad || null,
-    condicion_escobajo:m.condicionEscobajo || null,
-    coloracion:        m.coloracion   ? parseInt(m.coloracion)   : null,
-    brix:              m.brix         ? parseFloat(m.brix)         : null,
-    total_bayas:       m.totalBayas   ? parseInt(m.totalBayas)   : null,
-    materia_extrana:   parseInt(m.materiaExtrana) || 0,
-    sucia_polvo:       parseInt(m.suciaPolvo)     || 0,
-    deshidratadas:     parseInt(m.deshidratadas)  || 0,
-    picadas:           parseInt(m.picadas)         || 0,
-    rotas:             parseInt(m.rotas)            || 0,
-    manchas_sol:       parseInt(m.manchasSol)      || 0,
-    podridas:          parseInt(m.podridas)         || 0,
-    otros:             parseInt(m.otros)            || 0,
-    otros_desc:        m.otrosDesc                 || null,
-    pct_defectos:      null,
-    resultado:         m.resultado                 || null,
+    num:       m.num,
+    hora:      m.hora      || null,
+    mediciones,
+    resultado: m.resultado || null,
   };
 }
 
 function muestraFromRow(row) {
   return {
-    num:               row.num,
-    hora:              row.hora,
-    peso:              row.peso_g          != null ? String(row.peso_g)          : '',
-    calibre:           row.calibre_mm      != null ? String(row.calibre_mm)      : '',
-    pctFueraCalibre:   row.pct_fuera_calibre != null ? String(row.pct_fuera_calibre) : '',
-    numRacimos:        row.num_racimos     != null ? String(row.num_racimos)     : '',
-    homogeneidad:      row.homogeneidad    || '',
-    condicionEscobajo: row.condicion_escobajo || '',
-    coloracion:        row.coloracion      != null ? String(row.coloracion)      : '',
-    brix:              row.brix            != null ? String(row.brix)            : '',
-    totalBayas:        row.total_bayas     != null ? String(row.total_bayas)     : '',
-    materiaExtrana:    String(row.materia_extrana || 0),
-    suciaPolvo:        String(row.sucia_polvo     || 0),
-    deshidratadas:     String(row.deshidratadas   || 0),
-    picadas:           String(row.picadas          || 0),
-    rotas:             String(row.rotas             || 0),
-    manchasSol:        String(row.manchas_sol      || 0),
-    podridas:          String(row.podridas          || 0),
-    otros:             String(row.otros             || 0),
-    otrosDesc:         row.otros_desc              || '',
-    resultado:         row.resultado,
+    num:       row.num,
+    hora:      row.hora,
+    ...(row.mediciones || {}),
+    resultado: row.resultado,
   };
 }
 
@@ -200,12 +169,14 @@ function pccFromRows(row, muestrasRows) {
     fecha:        row.fecha,
     hora:         row.hora,
     responsable:  row.responsable,
+    variety:      row.producto_id,
     variedad:     row.variedad,
     trazabilidad: row.trazabilidad,
     cinaNum:      row.cinta_num,
     mesaNum:      row.mesa_num,
     formato:      row.formato_id,
-    paraSO2:      row.para_so2,
+    datosExtra:   row.datos_extra || {},
+    paraSO2:      row.datos_extra?.para_so2 ?? false,
     nMuestras:    row.n_muestras,
     resultado:    row.resultado,
     muestras:     (muestrasRows || []).map(muestraFromRow).sort((a, b) => a.num - b.num),
