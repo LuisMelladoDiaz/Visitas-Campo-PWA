@@ -459,9 +459,6 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET public = true;
 
--- Habilitar RLS en storage.objects (Supabase lo hace por defecto, pero por si acaso)
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
-
 -- Políticas Storage
 DROP POLICY IF EXISTS "lectura_photos_select" ON storage.objects;
 DROP POLICY IF EXISTS "lectura_photos_insert" ON storage.objects;
