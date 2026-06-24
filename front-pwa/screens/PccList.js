@@ -2,9 +2,11 @@ import { fmtDate } from '../lib/utils';
 import { FORMATOS_PCC } from '../lib/pcc';
 import { varieties } from '../lib/cvu';
 
-export default function PccList({ pccs, variety, onBack, onNuevoParte, onOpenPcc, onRefresh, refreshing }) {
+export default function PccList({ pccs, variety, cfg, onBack, onNuevoParte, onOpenPcc, onRefresh, refreshing }) {
   const vInfo = varieties.find(v => v.id === variety) || { label: variety, icon: '📋' };
   const filtered = pccs.filter(p => p.variety === variety);
+  const formatosList = cfg?.formatos?.[variety] ?? cfg?.pcc?.formatos ?? FORMATOS_PCC;
+  const isUva = variety === 'uva';
 
   return (
     <>
@@ -30,8 +32,10 @@ export default function PccList({ pccs, variety, onBack, onNuevoParte, onOpenPcc
           <>
           <div className="batch-list">
             {filtered.slice().reverse().map(p => {
-              const fmt = FORMATOS_PCC.find(f => f.id === p.formato);
-              const filled = p.muestras.filter(m => m.peso !== '' || parseInt(m.totalBayas) > 0).length;
+              const fmt = formatosList.find(f => f.id === p.formato);
+              const filled = isUva
+                ? p.muestras.filter(m => m.peso !== '' || parseInt(m.totalBayas) > 0).length
+                : p.muestras.filter(m => parseInt(m.n_unidades) > 0).length;
               return (
                 <div key={p.id} className="batch-card" onClick={() => onOpenPcc(p)}>
                   <div className="batch-card-body">
@@ -42,9 +46,10 @@ export default function PccList({ pccs, variety, onBack, onNuevoParte, onOpenPcc
                     <div className="bc-conf">{fmt?.label} {fmt?.sub}{p.trazabilidad ? ` · ${p.trazabilidad}` : ''}</div>
                     <div className="bc-meta">
                       {p.variedad ? p.variedad : ''}
-                      {p.cinaNum ? ` · Cinta ${p.cinaNum}` : ''}{p.mesaNum ? ` · Mesa ${p.mesaNum}` : ''}
+                      {isUva && p.cinaNum ? ` · Cinta ${p.cinaNum}` : ''}
+                      {isUva && p.mesaNum ? ` · Mesa ${p.mesaNum}` : ''}
                       {p.responsable ? ` · ${p.responsable}` : ''}
-                      {(p.paraSO2||p.paraSoz) ? ' · SO2' : ''}
+                      {isUva && (p.paraSO2||p.paraSoz) ? ' · SO2' : ''}
                     </div>
                     <div className="bc-footer">
                       <span className={`badge ${p.resultado==='C'?'badge-ok':p.resultado==='NC'?'badge-danger':'badge-neutral'}`}>

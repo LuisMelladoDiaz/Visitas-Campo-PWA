@@ -13,7 +13,7 @@ import { getSession, signOut, isAdmin } from '../lib/auth';
 // ── Lib ──────────────────────────────────────────────────────────────────────
 import { today, nowTime } from '../lib/utils';
 import { CVU_SINO_FIELDS, calcLectura } from '../lib/cvu';
-import { emptyMuestra, calcMuestraRes, calcPCCResultado } from '../lib/pcc';
+import { emptyMuestra, emptyMuestraUnidades, calcMuestraRes, calcMuestraResUnidades, calcPCCResultado, calcResultadoUnidades } from '../lib/pcc';
 import { loadConfigFromDB } from '../lib/configApi';
 import { DEFAULT_CONFIG } from '../lib/config';
 
@@ -221,25 +221,32 @@ export default function App() {
 
   function goNuevaPCC() {
     const responsable = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || '';
-    setPccSetupForm({ fecha: today(), hora: nowTime(), responsable, variedad: '', trazabilidad: '', cinaNum: '', mesaNum: '', formato: '', paraSO2: false });
+    setPccSetupForm({ variety, fecha: today(), hora: nowTime(), responsable, variedad: '', trazabilidad: '', cinaNum: '', mesaNum: '', formato: '', paraSO2: false });
     setError('');
     setView('nueva-pcc');
   }
 
   function iniciarMuestras() {
     if (!pccSetupForm.formato) { setError('Selecciona un formato de envase.'); return; }
-    const formatos = cfg?.pcc?.formatos ?? [];
+    const formatos = cfg?.formatos?.[variety] ?? cfg?.pcc?.formatos ?? [];
     const fmt = formatos.find(f => f.id === pccSetupForm.formato);
+    const n = fmt?.nMuestras ?? 10;
     const t = nowTime();
-    setMuestraForms(Array.from({ length: fmt?.nMuestras ?? 10 }, (_, i) => emptyMuestra(i + 1, t)));
+    const defectosPcc = cfg?.defectosPcc?.[variety] ?? [];
+    const factory = variety === 'uva'
+      ? (i) => emptyMuestra(i + 1, t)
+      : (i) => emptyMuestraUnidades(i + 1, t, defectosPcc);
+    setMuestraForms(Array.from({ length: n }, (_, i) => factory(i)));
     setMuestraIdx(0);
     setError('');
     setView('pcc-muestra');
   }
 
   function guardarPCC() {
-    const umbrales = cfg?.pcc?.umbrales;
-    const resultado = calcPCCResultado(muestraForms, umbrales);
+    const umbrales = cfg?.umbrales?.[variety] ?? cfg?.pcc?.umbrales;
+    const resultado = variety === 'uva'
+      ? calcPCCResultado(muestraForms, umbrales)
+      : calcResultadoUnidades(muestraForms, umbrales);
 
     if (editingPcc) {
       // Edición de muestras de un parte existente
@@ -249,7 +256,7 @@ export default function App() {
       savePCC(updated).catch(e => console.error('Error sincronizando PCC:', e));
     } else {
       // Nuevo parte
-      const formatos = cfg?.pcc?.formatos ?? [];
+      const formatos = cfg?.formatos?.[variety] ?? cfg?.pcc?.formatos ?? [];
       const fmt = formatos.find(f => f.id === pccSetupForm.formato);
       const year = new Date().getFullYear();
       const id = `PC-${year}-${String(pccs.length + 1).padStart(4, '0')}`;
@@ -278,6 +285,23 @@ export default function App() {
     setMuestraForms(prev => {
       const next = [...prev];
       next[muestraIdx] = { ...next[muestraIdx], [key]: val };
+      return next;
+    });
+  }
+
+  function mSetDefecto(dKey, val) {
+    setMuestraForms(prev => {
+      const next = [...prev];
+      const m = next[muestraIdx];
+      const n = parseInt(m.n_unidades) || 0;
+      const u = parseInt(val) || 0;
+      next[muestraIdx] = {
+        ...m,
+        defectos: {
+          ...m.defectos,
+          [dKey]: { unidades: val, pct: n > 0 ? parseFloat(((u / n) * 100).toFixed(1)) : null },
+        },
+      };
       return next;
     });
   }
@@ -332,14 +356,19 @@ export default function App() {
 
   // ── Live calcs ────────────────────────────────────────────────────────────
   const lCalc = batch ? calcLectura(lForm, batch.pesoInicial, cfg?.cvu?.clases) : null;
-  const mCalc = muestraForms[muestraIdx] ? calcMuestraRes(muestraForms[muestraIdx], cfg?.pcc?.umbrales) : null;
+  const umbralesVariety = cfg?.umbrales?.[variety] ?? cfg?.pcc?.umbrales;
+  const mCalc = muestraForms[muestraIdx]
+    ? (variety === 'uva'
+        ? calcMuestraRes(muestraForms[muestraIdx], umbralesVariety)
+        : calcMuestraResUnidades(muestraForms[muestraIdx], umbralesVariety))
+    : null;
 
   // ── Setters ───────────────────────────────────────────────────────────────
   function lSet(k, v) { setLForm(p => ({ ...p, [k]: v })); }
   function tSet(k, v) { setTandaForm(p => ({ ...p, [k]: v })); }
   function pSet(k, v) { setPccSetupForm(p => ({ ...p, [k]: v })); }
 
-  const fmtActivo = (cfg?.pcc?.formatos ?? []).find(f => f.id === pccSetupForm.formato);
+  const fmtActivo = (cfg?.formatos?.[variety] ?? cfg?.pcc?.formatos ?? []).find(f => f.id === pccSetupForm.formato);
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
@@ -445,6 +474,7 @@ export default function App() {
           <PccList
             pccs={pccs}
             variety={variety}
+            cfg={cfg}
             onBack={() => setView('menu')}
             onNuevoParte={goNuevaPCC}
             onOpenPcc={p => { setSavedPcc(p); setView('pcc-resumen'); }}
@@ -457,8 +487,8 @@ export default function App() {
           <NuevaPcc
             pccSetupForm={pccSetupForm}
             error={error}
-            variedades={cfg?.pcc?.variedades}
-            formatos={cfg?.pcc?.formatos}
+            variety={variety}
+            cfg={cfg}
             onCancel={goPCCList}
             onIniciarMuestras={iniciarMuestras}
             pSet={pSet}
@@ -472,17 +502,26 @@ export default function App() {
             mCalc={mCalc}
             pccSetupForm={pccSetupForm}
             fmtActivo={fmtActivo}
-            onBack={() => muestraIdx > 0 ? setMuestraIdx(i => i - 1) : setView('nueva-pcc')}
+            variety={variety}
+            cfg={cfg}
+            onBack={() => {
+              if (muestraIdx > 0) setMuestraIdx(i => i - 1);
+              else if (editingPcc) setView('pcc-resumen');
+              else setView('nueva-pcc');
+            }}
             onNext={() => setMuestraIdx(i => i + 1)}
             onFinalizar={guardarPCC}
             setMuestraIdx={setMuestraIdx}
             mSet={mSet}
+            mSetDefecto={mSetDefecto}
           />
         )}
 
         {!loading && view === 'pcc-resumen' && savedPcc && (
           <PccResumen
             savedPcc={savedPcc}
+            variety={savedPcc?.variety || variety}
+            cfg={cfg}
             onBack={goPCCList}
             onNuevoParte={goNuevaPCC}
             onDeletePcc={isAdmin(user) ? deletePCC : null}

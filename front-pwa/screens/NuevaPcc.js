@@ -1,13 +1,20 @@
-import { VARIEDADES_PCC, FORMATOS_PCC } from '../lib/pcc';
+import { FORMATOS_PCC } from '../lib/pcc';
+import { varieties } from '../lib/cvu';
 
-export default function NuevaPcc({ pccSetupForm, error, variedades, formatos, onCancel, onIniciarMuestras, pSet }) {
-  const VARS = variedades ?? VARIEDADES_PCC;
-  const FMTS = formatos ?? FORMATOS_PCC;
+export default function NuevaPcc({ pccSetupForm, error, variety, cfg, onCancel, onIniciarMuestras, pSet }) {
+  const VARS = cfg?.variedades?.[variety] ?? [];
+  const FMTS = cfg?.formatos?.[variety] ?? cfg?.pcc?.formatos ?? FORMATOS_PCC;
+  const isUva = variety === 'uva';
+  const vInfo = varieties.find(v => v.id === variety) || { label: variety, icon: '📋' };
+
   return (
     <>
       <header className="top-bar">
         <button className="icon-btn" onClick={onCancel}>←</button>
-        <div className="top-bar-title">Nuevo parte de control</div>
+        <div style={{ flex: 1 }}>
+          <div className="top-bar-title">Nuevo parte de control</div>
+          <div className="top-bar-sub">{vInfo.icon} {vInfo.label}</div>
+        </div>
       </header>
       <main className="content">
         {error && <div className="form-error">{error}</div>}
@@ -25,16 +32,27 @@ export default function NuevaPcc({ pccSetupForm, error, variedades, formatos, on
           ))}
         </div>
 
-        <p className="section-h" style={{ marginTop: '1.5rem' }}>Variedad</p>
-        <div className="toggle-group" style={{ marginBottom: '1.25rem' }}>
-          {VARS.map(v => (
-            <button key={v}
-              className={`toggle-btn${pccSetupForm.variedad===v?' toggle-btn--on':''}`}
-              onClick={() => pSet('variedad', pccSetupForm.variedad===v?'':v)}>
-              {v}
-            </button>
-          ))}
-        </div>
+        {VARS.length > 0 ? (
+          <>
+            <p className="section-h" style={{ marginTop: '1.5rem' }}>Variedad</p>
+            <div className="toggle-group" style={{ marginBottom: '1.25rem' }}>
+              {VARS.map(v => (
+                <button key={v}
+                  className={`toggle-btn${pccSetupForm.variedad===v?' toggle-btn--on':''}`}
+                  onClick={() => pSet('variedad', pccSetupForm.variedad===v?'':v)}>
+                  {v}
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="section-h" style={{ marginTop: '1.5rem' }}>Variedad</p>
+            <div className="field" style={{ marginBottom: '1.25rem' }}>
+              <input type="text" value={pccSetupForm.variedad||''} onChange={e=>pSet('variedad',e.target.value)} placeholder="Variedad / tipo (opcional)"/>
+            </div>
+          </>
+        )}
 
         <p className="section-h">Identificación</p>
         <div className="form-grid g2">
@@ -42,17 +60,23 @@ export default function NuevaPcc({ pccSetupForm, error, variedades, formatos, on
           <div className="field"><label className="req">Hora</label><input type="time" value={pccSetupForm.hora||''} onChange={e=>pSet('hora',e.target.value)}/></div>
           <div className="field"><label>Responsable</label><input type="text" value={pccSetupForm.responsable||''} onChange={e=>pSet('responsable',e.target.value)} placeholder="Nombre del operario"/></div>
           <div className="field"><label>Trazabilidad</label><input type="text" value={pccSetupForm.trazabilidad||''} onChange={e=>pSet('trazabilidad',e.target.value)} placeholder="Código trazabilidad"/></div>
-          <div className="field"><label>Cinta Nº</label><input type="text" value={pccSetupForm.cinaNum||''} onChange={e=>pSet('cinaNum',e.target.value)} placeholder="Nº Cinta"/></div>
-          <div className="field"><label>Mesa Nº</label><input type="text" value={pccSetupForm.mesaNum||''} onChange={e=>pSet('mesaNum',e.target.value)} placeholder="Nº Mesa"/></div>
+          {isUva && (
+            <>
+              <div className="field"><label>Cinta Nº</label><input type="text" value={pccSetupForm.cinaNum||''} onChange={e=>pSet('cinaNum',e.target.value)} placeholder="Nº Cinta"/></div>
+              <div className="field"><label>Mesa Nº</label><input type="text" value={pccSetupForm.mesaNum||''} onChange={e=>pSet('mesaNum',e.target.value)} placeholder="Nº Mesa"/></div>
+            </>
+          )}
         </div>
 
-        <div style={{ marginTop: '1rem' }}>
-          <button className={`soz-toggle${pccSetupForm.paraSO2?' soz-toggle--on':''}`}
-            onClick={() => pSet('paraSO2', !pccSetupForm.paraSO2)}>
-            <span className="soz-dot"/>
-            <span>{pccSetupForm.paraSO2 ? '✓ Tratamiento SO2' : 'Marcar si lleva tratamiento SO2'}</span>
-          </button>
-        </div>
+        {isUva && (
+          <div style={{ marginTop: '1rem' }}>
+            <button className={`soz-toggle${pccSetupForm.paraSO2?' soz-toggle--on':''}`}
+              onClick={() => pSet('paraSO2', !pccSetupForm.paraSO2)}>
+              <span className="soz-dot"/>
+              <span>{pccSetupForm.paraSO2 ? '✓ Tratamiento SO2' : 'Marcar si lleva tratamiento SO2'}</span>
+            </button>
+          </div>
+        )}
 
         <div className="action-bar">
           <button className="btn btn-ghost" onClick={onCancel}>Cancelar</button>

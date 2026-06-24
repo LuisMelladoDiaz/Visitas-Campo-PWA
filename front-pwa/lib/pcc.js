@@ -90,6 +90,44 @@ export function calcPCCMedias(muestras) {
   };
 }
 
+// ─── Unit-counting (pimiento / calabaza) ──────────────────────────────────────
+export function emptyMuestraUnidades(num, hora, defectosConfig) {
+  const defectos = {};
+  for (const d of (defectosConfig || [])) defectos[d.key] = { unidades: '0' };
+  return { num, hora: hora || '', n_unidades: '', peso: '', temperatura: '', defectos, observaciones: '' };
+}
+
+export function calcMuestraResUnidades(m, umbrales) {
+  const n = parseInt(m.n_unidades) || 0;
+  if (!n) return { n: 0, totalDefs: 0, totalPct: 0, resultado: null };
+  let totalDefs = 0;
+  for (const k in (m.defectos || {})) totalDefs += parseInt(m.defectos[k]?.unidades) || 0;
+  const totalPct = (totalDefs / n) * 100;
+  return { n, totalDefs, totalPct, resultado: totalPct > (umbrales?.maxDefectosPct ?? 10) ? 'NC' : 'C' };
+}
+
+export function calcResultadoUnidades(muestras, umbrales) {
+  const filled = muestras.filter(m => parseInt(m.n_unidades) > 0);
+  if (!filled.length) return null;
+  return filled.some(m => calcMuestraResUnidades(m, umbrales).resultado === 'NC') ? 'NC' : 'C';
+}
+
+export function calcMediasUnidades(muestras, defectosConfig) {
+  const filled = muestras.filter(m => parseInt(m.n_unidades) > 0);
+  if (!filled.length) return null;
+  const totalN = filled.reduce((s, m) => s + (parseInt(m.n_unidades) || 0), 0);
+  const defTotals = {};
+  for (const d of (defectosConfig || [])) {
+    defTotals[d.key] = filled.reduce((s, m) => s + (parseInt(m.defectos?.[d.key]?.unidades) || 0), 0);
+  }
+  const totalDefs = Object.values(defTotals).reduce((a, b) => a + b, 0);
+  return {
+    n: filled.length, totalN, defTotals, totalDefs,
+    defPcts: Object.fromEntries(Object.keys(defTotals).map(k => [k, totalN > 0 ? (defTotals[k] / totalN) * 100 : 0])),
+    pctGlobal: totalN > 0 ? (totalDefs / totalN) * 100 : 0,
+  };
+}
+
 // ─── Print PCC ────────────────────────────────────────────────────────────────
 export function printPCC(p) {
   const fmt = FORMATOS_PCC.find(f => f.id === p.formato);
