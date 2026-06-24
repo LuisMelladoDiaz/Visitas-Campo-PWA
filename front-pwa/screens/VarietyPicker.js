@@ -13,7 +13,8 @@ export default function VarietyPicker({ onSelect, onAdmin, onLoginClick, user })
         <p className="picker-intro">Selecciona la variedad a controlar</p>
         <div className="variety-grid">
           {varieties.map(v => (
-            <button key={v.id} className="variety-card" disabled={v.disabled}
+            <button key={v.id} className={`variety-card${v.id==='uva'?' variety-card--photo':''}`}
+              disabled={v.disabled}
               onClick={() => !v.disabled && onSelect(v.id)}>
               <span className="variety-icon">{v.icon}</span>
               <span className="variety-name">{v.label}</span>

@@ -137,6 +137,15 @@ img { max-width: 100%; display: block; }
 .variety-card:active:not([disabled]) { transform: scale(.97); }
 .variety-card[disabled] { opacity: .5; cursor: default; }
 
+.variety-card--photo {
+  background-image: linear-gradient(rgba(255,255,255,.45), rgba(255,255,255,.45)), url(/uva-bg.jpg);
+  background-size: cover;
+  background-position: center;
+  border-color: rgba(130,40,80,.35);
+}
+.variety-card--photo .variety-icon { filter: drop-shadow(0 1px 3px rgba(0,0,0,.25)); }
+.variety-card--photo .variety-name { text-shadow: 0 1px 4px rgba(255,255,255,.8); }
+
 .variety-icon { font-size: 2.75rem; line-height: 1; }
 .variety-name { font-size: 1rem; font-weight: 700; }
 .variety-soon { font-size: .75rem; color: var(--muted); background: var(--surface-2); border-radius: 999px; padding: .2rem .65rem; }
