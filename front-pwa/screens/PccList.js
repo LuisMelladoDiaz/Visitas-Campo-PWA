@@ -1,14 +1,18 @@
 import { fmtDate } from '../lib/utils';
 import { FORMATOS_PCC } from '../lib/pcc';
+import { varieties } from '../lib/cvu';
 
-export default function PccList({ pccs, onBack, onNuevoParte, onOpenPcc, onRefresh, refreshing }) {
+export default function PccList({ pccs, variety, onBack, onNuevoParte, onOpenPcc, onRefresh, refreshing }) {
+  const vInfo = varieties.find(v => v.id === variety) || { label: variety, icon: '📋' };
+  const filtered = pccs.filter(p => p.variety === variety);
+
   return (
     <>
       <header className="top-bar">
         <button className="icon-btn" onClick={onBack}>←</button>
         <div style={{ flex: 1 }}>
-          <div className="top-bar-title">Parte de Control · Uva de Mesa</div>
-          <div className="top-bar-sub">{pccs.length} partes registrados</div>
+          <div className="top-bar-title">Parte de Control · {vInfo.icon} {vInfo.label}</div>
+          <div className="top-bar-sub">{filtered.length} partes registrados</div>
         </div>
         <button className="icon-btn" onClick={onRefresh} disabled={refreshing}
           title="Actualizar desde base de datos" style={{ opacity: refreshing ? .4 : 1 }}>
@@ -16,7 +20,7 @@ export default function PccList({ pccs, onBack, onNuevoParte, onOpenPcc, onRefre
         </button>
       </header>
       <main className="content">
-        {pccs.length === 0 ? (
+        {filtered.length === 0 ? (
           <div className="empty">
             <div className="empty-icon">📋</div>
             <p>No hay partes registrados.</p>
@@ -25,7 +29,7 @@ export default function PccList({ pccs, onBack, onNuevoParte, onOpenPcc, onRefre
         ) : (
           <>
           <div className="batch-list">
-            {pccs.slice().reverse().map(p => {
+            {filtered.slice().reverse().map(p => {
               const fmt = FORMATOS_PCC.find(f => f.id === p.formato);
               const filled = p.muestras.filter(m => m.peso !== '' || parseInt(m.totalBayas) > 0).length;
               return (

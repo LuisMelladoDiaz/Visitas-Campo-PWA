@@ -396,6 +396,7 @@ export default function App() {
         {!loading && view === 'vida-util-list' && (
           <VidaUtilList
             batches={batches}
+            variety={variety}
             onBack={() => setView('menu')}
             onNuevaTanda={goNuevaTanda}
             onOpenBatch={openBatch}
@@ -443,6 +444,7 @@ export default function App() {
         {!loading && view === 'pcc-list' && (
           <PccList
             pccs={pccs}
+            variety={variety}
             onBack={() => setView('menu')}
             onNuevoParte={goNuevaPCC}
             onOpenPcc={p => { setSavedPcc(p); setView('pcc-resumen'); }}

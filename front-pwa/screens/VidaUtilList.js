@@ -1,8 +1,9 @@
 import { fmtDate, fmtNum } from '../lib/utils';
-import { batchStatusBadge } from '../lib/cvu';
+import { batchStatusBadge, varieties } from '../lib/cvu';
 
-export default function VidaUtilList({ batches, onBack, onNuevaTanda, onOpenBatch, onRefresh, refreshing }) {
-  const uvaBatches = batches.filter(b => b.variety === 'uva');
+export default function VidaUtilList({ batches, variety, onBack, onNuevaTanda, onOpenBatch, onRefresh, refreshing }) {
+  const vInfo = varieties.find(v => v.id === variety) || { label: variety, icon: '📦' };
+  const filtered = batches.filter(b => b.variety === variety);
 
   return (
     <>
@@ -10,7 +11,7 @@ export default function VidaUtilList({ batches, onBack, onNuevaTanda, onOpenBatc
         <button className="icon-btn" onClick={onBack}>←</button>
         <div style={{ flex: 1 }}>
           <div className="top-bar-title">Control de Vida Útil</div>
-          <div className="top-bar-sub">Uva de Mesa · {uvaBatches.length} tandas</div>
+          <div className="top-bar-sub">{vInfo.icon} {vInfo.label} · {filtered.length} tandas</div>
         </div>
         <button className="icon-btn" onClick={onRefresh} disabled={refreshing}
           title="Actualizar desde base de datos" style={{ opacity: refreshing ? .4 : 1 }}>
@@ -18,7 +19,7 @@ export default function VidaUtilList({ batches, onBack, onNuevaTanda, onOpenBatc
         </button>
       </header>
       <main className="content">
-        {uvaBatches.length === 0 ? (
+        {filtered.length === 0 ? (
           <div className="empty">
             <div className="empty-icon">📦</div>
             <p>No hay tandas registradas.</p>
@@ -27,7 +28,7 @@ export default function VidaUtilList({ batches, onBack, onNuevaTanda, onOpenBatc
         ) : (
           <>
           <div className="batch-list">
-            {uvaBatches.slice().reverse().map(b => {
+            {filtered.slice().reverse().map(b => {
               const status = batchStatusBadge(b);
               const last = b.readings.at(-1);
               return (
