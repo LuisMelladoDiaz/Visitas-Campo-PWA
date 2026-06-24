@@ -93,7 +93,8 @@ export default function App() {
   const [cfg, setCfg] = useState(DEFAULT_CONFIG);
 
   // ── Loading ──────────────────────────────────────────────────────────────
-  const [loading, setLoading] = useState(true);
+  const [loading,    setLoading]    = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   // ── Bootstrap ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -141,6 +142,21 @@ export default function App() {
   }
 
   // ── Vida Útil nav ─────────────────────────────────────────────────────────
+  async function handleRefresh() {
+    setRefreshing(true);
+    try {
+      const [b, p] = await Promise.all([loadBatches(), loadPCCs()]);
+      setBatches(b);
+      setPccs(p);
+      if (batch)    { const upd = b.find(x => x.id === batch.id);    if (upd) setBatch(upd); }
+      if (savedPcc) { const upd = p.find(x => x.id === savedPcc.id); if (upd) setSavedPcc(upd); }
+    } catch (e) {
+      console.error('Error refrescando datos:', e);
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   function goVariety() { setView('variety'); setVariety(null); }
   function goMenu(vid) { setVariety(vid); setView('menu'); }
   function goList()    { setView('vida-util-list'); }
@@ -301,7 +317,10 @@ export default function App() {
     const updated = { ...batch, readings: updatedReadings };
     const next = batches.map(b => b.id === batch.id ? updated : b);
     setBatches(next); setBatch(updated); setEditingIdx(null); setError(''); setView('batch');
-    saveBatch(updated).catch(e => console.error('Error sincronizando lectura:', e));
+    saveBatch(updated).then(saved => {
+      setBatch(saved);
+      setBatches(prev => prev.map(b => b.id === saved.id ? saved : b));
+    }).catch(e => console.error('Error sincronizando lectura:', e));
   }
 
   function deleteBatch(id) {
@@ -380,6 +399,8 @@ export default function App() {
             onBack={() => setView('menu')}
             onNuevaTanda={goNuevaTanda}
             onOpenBatch={openBatch}
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
           />
         )}
 
@@ -401,6 +422,8 @@ export default function App() {
             onNuevaLectura={goNuevaLectura}
             onEditLectura={goEditLectura}
             onDeleteBatch={isAdmin(user) ? deleteBatch : null}
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
           />
         )}
 
@@ -423,6 +446,8 @@ export default function App() {
             onBack={() => setView('menu')}
             onNuevoParte={goNuevaPCC}
             onOpenPcc={p => { setSavedPcc(p); setView('pcc-resumen'); }}
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
           />
         )}
 
@@ -460,6 +485,8 @@ export default function App() {
             onNuevoParte={goNuevaPCC}
             onDeletePcc={isAdmin(user) ? deletePCC : null}
             onEditMuestra={goEditMuestra}
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
           />
         )}
       </div>

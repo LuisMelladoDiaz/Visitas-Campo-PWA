@@ -1,7 +1,7 @@
 import { fmtDate, fmtNum } from '../lib/utils';
 import { DEFECTOS_BAYAS, calcMuestraRes, calcPCCMedias, printPCC, FORMATOS_PCC } from '../lib/pcc';
 
-export default function PccResumen({ savedPcc, onBack, onNuevoParte, onDeletePcc, onEditMuestra }) {
+export default function PccResumen({ savedPcc, onBack, onNuevoParte, onDeletePcc, onEditMuestra, onRefresh, refreshing }) {
   const f   = FORMATOS_PCC.find(fmt => fmt.id === savedPcc.formato);
   const med = calcPCCMedias(savedPcc.muestras);
 
@@ -13,6 +13,10 @@ export default function PccResumen({ savedPcc, onBack, onNuevoParte, onDeletePcc
           <div className="top-bar-title">{savedPcc.id}</div>
           <div className="top-bar-sub">{fmtDate(savedPcc.fecha)} {savedPcc.hora}{savedPcc.responsable?` · ${savedPcc.responsable}`:''}</div>
         </div>
+        <button className="icon-btn" onClick={onRefresh} disabled={refreshing}
+          title="Actualizar desde base de datos" style={{ opacity: refreshing ? .4 : 1 }}>
+          {refreshing ? '…' : '↻'}
+        </button>
         <button className="icon-btn" onClick={() => printPCC(savedPcc)} title="Imprimir informe">🖨</button>
         {onDeletePcc && (
           <button className="icon-btn" style={{ background: 'rgba(192,48,48,.25)' }}

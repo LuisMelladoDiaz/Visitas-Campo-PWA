@@ -1,7 +1,7 @@
 import { fmtDate, fmtNum } from '../lib/utils';
 import { batchStatusBadge } from '../lib/cvu';
 
-export default function VidaUtilList({ batches, onBack, onNuevaTanda, onOpenBatch }) {
+export default function VidaUtilList({ batches, onBack, onNuevaTanda, onOpenBatch, onRefresh, refreshing }) {
   const uvaBatches = batches.filter(b => b.variety === 'uva');
 
   return (
@@ -12,6 +12,10 @@ export default function VidaUtilList({ batches, onBack, onNuevaTanda, onOpenBatc
           <div className="top-bar-title">Control de Vida Útil</div>
           <div className="top-bar-sub">Uva de Mesa · {uvaBatches.length} tandas</div>
         </div>
+        <button className="icon-btn" onClick={onRefresh} disabled={refreshing}
+          title="Actualizar desde base de datos" style={{ opacity: refreshing ? .4 : 1 }}>
+          {refreshing ? '…' : '↻'}
+        </button>
       </header>
       <main className="content">
         {uvaBatches.length === 0 ? (

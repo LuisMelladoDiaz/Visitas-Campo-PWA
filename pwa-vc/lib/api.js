@@ -223,10 +223,11 @@ async function uploadPhoto(tanda_id, dia, dataUrl) {
     const { error } = await supabase.storage
       .from('lectura-photos')
       .upload(path, bytes.buffer, { contentType: 'image/jpeg', upsert: true });
-    if (error) return null;
+    if (error) { console.error('uploadPhoto error:', error.message); return null; }
     const { data } = supabase.storage.from('lectura-photos').getPublicUrl(path);
     return data.publicUrl;
-  } catch {
+  } catch (e) {
+    console.error('uploadPhoto exception:', e);
     return null;
   }
 }

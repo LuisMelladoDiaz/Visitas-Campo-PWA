@@ -1,7 +1,7 @@
 import { fmtDate } from '../lib/utils';
 import { FORMATOS_PCC } from '../lib/pcc';
 
-export default function PccList({ pccs, onBack, onNuevoParte, onOpenPcc }) {
+export default function PccList({ pccs, onBack, onNuevoParte, onOpenPcc, onRefresh, refreshing }) {
   return (
     <>
       <header className="top-bar">
@@ -10,6 +10,10 @@ export default function PccList({ pccs, onBack, onNuevoParte, onOpenPcc }) {
           <div className="top-bar-title">Parte de Control · Uva de Mesa</div>
           <div className="top-bar-sub">{pccs.length} partes registrados</div>
         </div>
+        <button className="icon-btn" onClick={onRefresh} disabled={refreshing}
+          title="Actualizar desde base de datos" style={{ opacity: refreshing ? .4 : 1 }}>
+          {refreshing ? '…' : '↻'}
+        </button>
       </header>
       <main className="content">
         {pccs.length === 0 ? (
