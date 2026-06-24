@@ -1,14 +1,15 @@
 import { fmtDate, fmtNum } from '../lib/utils';
-import { CVU_CALIDAD, calcBatchSummary, MiniLineChart } from '../lib/cvu';
+import { CVU_CALIDAD, calcBatchSummary, MiniLineChart, varieties } from '../lib/cvu';
 import { printBatch } from '../lib/cvu';
 
-export default function BatchDetail({ batch, config, onBack, onNuevaLectura, onEditLectura, onDeleteBatch, onRefresh, refreshing }) {
+export default function BatchDetail({ batch, variety, config, onBack, onNuevaLectura, onEditLectura, onDeleteBatch, onRefresh, refreshing }) {
+  const vInfo = varieties.find(v => v.id === variety) || { icon: '📦' };
   return (
     <>
       <header className="top-bar">
         <button className="icon-btn" onClick={onBack}>←</button>
         <div style={{ flex: 1 }}>
-          <div className="top-bar-title">{batch.confeccion}</div>
+          <div className="top-bar-title">{vInfo.icon} {batch.confeccion}</div>
           <div className="top-bar-sub">{batch.id} · {batch.categoriaInicial} · {batch.trazabilidad}</div>
         </div>
         <button className="icon-btn" onClick={onRefresh} disabled={refreshing}

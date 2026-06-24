@@ -1,8 +1,24 @@
 import { fmtNum, thresholdStatus, classCss } from '../lib/utils';
-import { CVU_LEVES, CVU_GRAVES, CVU_ELIM } from '../lib/cvu';
+import { getDefectosCvu, varieties } from '../lib/cvu';
 import Stepper from '../components/Stepper';
 
-export default function NuevaLectura({ batch, lForm, lCalc, editingIdx, error, onBack, onSave, lSet }) {
+export default function NuevaLectura({ batch, lForm, lCalc, editingIdx, error, variety, cfg, onBack, onSave, lSet }) {
+  const defects = getDefectosCvu(variety, cfg);
+  const vInfo = varieties.find(v => v.id === variety) || { label: variety || '', icon: '📦' };
+
+  function renderDefectRow({ key, label }) {
+    const val = lForm[key];
+    return (
+      <div key={key} className="lc-toggle-row">
+        <span className="lc-toggle-label">{label}</span>
+        <div className="lc-toggle-group">
+          <button className={`lc-toggle${val==='Si'?' lc-nok':''}`} onClick={()=>lSet(key,'Si')}>Sí</button>
+          <button className={`lc-toggle${val==='No'?' lc-ok':''}`}  onClick={()=>lSet(key,'No')}>No</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <header className="top-bar">
@@ -11,7 +27,7 @@ export default function NuevaLectura({ batch, lForm, lCalc, editingIdx, error, o
           <div className="top-bar-title">
             {editingIdx !== null ? `Editar lectura · Día ${batch.readings[editingIdx]?.dia}` : `Nueva lectura · Día ${batch.readings.length + 1}`}
           </div>
-          <div className="top-bar-sub">{batch.confeccion} · Peso inicial {batch.pesoInicial} kg</div>
+          <div className="top-bar-sub">{vInfo.icon} {batch.confeccion} · Peso inicial {batch.pesoInicial} kg</div>
         </div>
         <button className="btn btn-primary" style={{marginLeft:'.5rem',whiteSpace:'nowrap'}} onClick={onSave}>Guardar ✓</button>
       </header>
@@ -100,19 +116,12 @@ export default function NuevaLectura({ batch, lForm, lCalc, editingIdx, error, o
           {/* Columna 2 — Controles por severidad */}
           <div className="lc-col">
             {/* ── Faltas Leves ── */}
-            <div className="lc-severity-hdr lc-leve">Faltas leves</div>
-            {CVU_LEVES.map(({key, label}) => {
-              const val = lForm[key];
-              return (
-                <div key={key} className="lc-toggle-row">
-                  <span className="lc-toggle-label">{label}</span>
-                  <div className="lc-toggle-group">
-                    <button className={`lc-toggle${val==='Si'?' lc-nok':''}`} onClick={()=>lSet(key,'Si')}>Sí</button>
-                    <button className={`lc-toggle${val==='No'?' lc-ok':''}`}  onClick={()=>lSet(key,'No')}>No</button>
-                  </div>
-                </div>
-              );
-            })}
+            {defects.leves.length > 0 && (
+              <>
+                <div className="lc-severity-hdr lc-leve">Faltas leves</div>
+                {defects.leves.map(renderDefectRow)}
+              </>
+            )}
             <div className="lc-weight-row">
               <label>Peso faltas leves (kg)</label>
               <Stepper value={lForm.pesoFaltasLeves} onChange={v=>lSet('pesoFaltasLeves',v)} step={0.1} min={0} max={9999} decimals={1} style={{flex:1}}/>
@@ -122,19 +131,12 @@ export default function NuevaLectura({ batch, lForm, lCalc, editingIdx, error, o
             </div>
 
             {/* ── Falta Grave ── */}
-            <div className="lc-severity-hdr lc-grave" style={{marginTop:'.65rem'}}>Falta grave</div>
-            {CVU_GRAVES.map(({key, label}) => {
-              const val = lForm[key];
-              return (
-                <div key={key} className="lc-toggle-row">
-                  <span className="lc-toggle-label">{label}</span>
-                  <div className="lc-toggle-group">
-                    <button className={`lc-toggle${val==='Si'?' lc-nok':''}`} onClick={()=>lSet(key,'Si')}>Sí</button>
-                    <button className={`lc-toggle${val==='No'?' lc-ok':''}`}  onClick={()=>lSet(key,'No')}>No</button>
-                  </div>
-                </div>
-              );
-            })}
+            {defects.graves.length > 0 && (
+              <>
+                <div className="lc-severity-hdr lc-grave" style={{marginTop:'.65rem'}}>Falta grave</div>
+                {defects.graves.map(renderDefectRow)}
+              </>
+            )}
             <div className="lc-weight-row">
               <label>Peso faltas graves (kg)</label>
               <Stepper value={lForm.pesoFaltasGraves} onChange={v=>lSet('pesoFaltasGraves',v)} step={0.1} min={0} max={9999} decimals={1} style={{flex:1}}/>
@@ -144,24 +146,17 @@ export default function NuevaLectura({ batch, lForm, lCalc, editingIdx, error, o
             </div>
 
             {/* ── Eliminatorias ── */}
-            <div className="lc-severity-hdr lc-elim" style={{marginTop:'.65rem'}}>Eliminatorias · tol. 0%</div>
-            {CVU_ELIM.map(({key, label}) => {
-              const val = lForm[key];
-              return (
-                <div key={key} className="lc-toggle-row">
-                  <span className="lc-toggle-label">{label}</span>
-                  <div className="lc-toggle-group">
-                    <button className={`lc-toggle${val==='Si'?' lc-nok':''}`} onClick={()=>lSet(key,'Si')}>Sí</button>
-                    <button className={`lc-toggle${val==='No'?' lc-ok':''}`}  onClick={()=>lSet(key,'No')}>No</button>
-                  </div>
-                </div>
-              );
-            })}
+            {defects.elim.length > 0 && (
+              <>
+                <div className="lc-severity-hdr lc-elim" style={{marginTop:'.65rem'}}>Eliminatorias · tol. 0%</div>
+                {defects.elim.map(renderDefectRow)}
+              </>
+            )}
             <div className="lc-weight-row">
               <label>Peso faltas elim. (kg)</label>
               <Stepper value={lForm.pesoFaltasElim} onChange={v=>lSet('pesoFaltasElim',v)} step={0.1} min={0} max={9999} decimals={1} style={{flex:1}}/>
               <span className={`lc-pct ${thresholdStatus(lCalc.pctElim, 0)}`}>
-                {lCalc.pd>0 ? `${fmtNum(lCalc.pctElim,1)}%` : '—'}
+                {lCalc.pd>0 ? `${fmtNum(lCalc.pctElim,2)}%` : '—'}
               </span>
             </div>
           </div>

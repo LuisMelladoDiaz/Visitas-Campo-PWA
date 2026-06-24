@@ -1,5 +1,6 @@
 import { fmtNum } from '../lib/utils';
 import { DEFECTOS_BAYAS, calcMuestraRes, calcMuestraResUnidades } from '../lib/pcc';
+import { varieties } from '../lib/cvu';
 import Stepper from '../components/Stepper';
 
 export default function PccMuestra({
@@ -8,6 +9,7 @@ export default function PccMuestra({
   onBack, onNext, onFinalizar, setMuestraIdx, mSet, mSetDefecto,
 }) {
   const isUva = variety === 'uva';
+  const vInfo = varieties.find(v => v.id === variety) || { icon: '📦' };
   const defectosConfig = cfg?.defectosPcc?.[variety] ?? [];
   const m = muestraForms[muestraIdx];
   const n_unidades = parseInt(m?.n_unidades) || 0;
@@ -19,7 +21,7 @@ export default function PccMuestra({
         <div style={{ flex: 1 }}>
           <div className="top-bar-title">Muestra {muestraIdx+1} de {muestraForms.length}</div>
           <div className="top-bar-sub">
-            {pccSetupForm.variedad||fmtActivo?.label}
+            {vInfo.icon} {pccSetupForm.variedad||fmtActivo?.label}
             {pccSetupForm.cinaNum?` · Cinta ${pccSetupForm.cinaNum}`:''}
             {pccSetupForm.mesaNum?` · Mesa ${pccSetupForm.mesaNum}`:''}
           </div>

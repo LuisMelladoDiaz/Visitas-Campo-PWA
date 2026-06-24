@@ -12,7 +12,7 @@ import { getSession, signOut, isAdmin } from '../lib/auth';
 
 // ── Lib ──────────────────────────────────────────────────────────────────────
 import { today, nowTime } from '../lib/utils';
-import { CVU_SINO_FIELDS, calcLectura } from '../lib/cvu';
+import { getDefectosCvu, varieties, calcLectura } from '../lib/cvu';
 import { emptyMuestra, emptyMuestraUnidades, calcMuestraRes, calcMuestraResUnidades, calcPCCResultado, calcResultadoUnidades } from '../lib/pcc';
 import { loadConfigFromDB } from '../lib/configApi';
 import { DEFAULT_CONFIG } from '../lib/config';
@@ -30,6 +30,17 @@ import NuevaPcc      from '../screens/NuevaPcc';
 import PccMuestra    from '../screens/PccMuestra';
 import PccResumen    from '../screens/PccResumen';
 import Admin         from '../screens/Admin';
+
+// ─── Variety indicator (overlay fijo sobre top-bar, fuera de cada screen) ────
+function VarietyIndicator({ variety }) {
+  const vInfo = varieties.find(v => v.id === variety);
+  if (!vInfo) return null;
+  return (
+    <div className="variety-nav" aria-hidden="true">
+      <span className="variety-nav-pill">{vInfo.icon} {vInfo.label}</span>
+    </div>
+  );
+}
 
 // ─── User indicator (overlay fijo sobre todas las pantallas) ─────────────────
 function UserIndicator({ user, onLogout, onAdmin }) {
@@ -182,7 +193,8 @@ export default function App() {
   }
 
   function goNuevaLectura() {
-    const siNoDefaults = Object.fromEntries(CVU_SINO_FIELDS.map(f => [f.key, f.okVal]));
+    const defects = getDefectosCvu(variety, cfg);
+    const siNoDefaults = Object.fromEntries(defects.all.map(d => [d.key, d.okVal]));
     setLForm({
       fecha: today(), trazabilidad: batch.trazabilidad,
       pesoDiario: '', tempConservacion: '', pctFueraCalibre: '',
@@ -197,15 +209,14 @@ export default function App() {
 
   function goEditLectura(idx) {
     const r = batch.readings[idx];
+    const defects = getDefectosCvu(variety, cfg);
+    const defectVals = Object.fromEntries(defects.all.map(d => [d.key, r[d.key] ?? d.okVal]));
     setLForm({
       fecha: r.fecha, trazabilidad: r.trazabilidad || '',
       pesoDiario: r.pd != null ? String(r.pd) : '',
       tempConservacion: r.tempConservacion != null ? String(r.tempConservacion) : '',
       pctFueraCalibre: r.pctCalibre != null ? String(r.pctCalibre) : '',
-      desgrane: r.desgrane || 'No', bayasRotas: r.bayasRotas || 'No',
-      escobajoMarron: r.escobajoMarron || 'No', bayasDeshidratadas: r.bayasDeshidratadas || 'No',
-      suciedad: r.suciedad || 'No', plagaPicado: r.plagaPicado || 'No',
-      cuerposExtranos: r.cuerposExtranos || 'No', podridos: r.podridos || 'No',
+      ...defectVals,
       pesoFaltasLeves:  r.pesoFaltasLeves  != null ? String(r.pesoFaltasLeves)  : '',
       pesoFaltasGraves: r.pesoFaltasGraves != null ? String(r.pesoFaltasGraves) : '',
       pesoFaltasElim:   r.pesoFaltasElim   != null ? String(r.pesoFaltasElim)   : '',
@@ -320,15 +331,14 @@ export default function App() {
 
   function saveLectura() {
     if (!lForm.fecha || !lForm.pesoDiario) { setError('La fecha y el peso diario son obligatorios.'); return; }
-    const calc = calcLectura(lForm, batch.pesoInicial);
+    const calc = calcLectura(lForm, batch.pesoInicial, cfg?.cvu?.clases);
+    const defects = getDefectosCvu(variety, cfg);
+    const defectFields = Object.fromEntries(defects.all.map(d => [d.key, lForm[d.key] ?? d.okVal]));
     const nr = {
       dia: editingIdx !== null ? batch.readings[editingIdx].dia : batch.readings.length + 1,
       fecha: lForm.fecha, trazabilidad: lForm.trazabilidad,
       tempConservacion: lForm.tempConservacion !== '' ? parseFloat(lForm.tempConservacion) : null,
-      desgrane: lForm.desgrane, bayasRotas: lForm.bayasRotas,
-      escobajoMarron: lForm.escobajoMarron, bayasDeshidratadas: lForm.bayasDeshidratadas,
-      suciedad: lForm.suciedad, plagaPicado: lForm.plagaPicado,
-      cuerposExtranos: lForm.cuerposExtranos, podridos: lForm.podridos,
+      ...defectFields,
       pesoFaltasLeves:  parseFloat(lForm.pesoFaltasLeves)  || 0,
       pesoFaltasGraves: parseFloat(lForm.pesoFaltasGraves) || 0,
       pesoFaltasElim:   parseFloat(lForm.pesoFaltasElim)   || 0,
@@ -382,6 +392,7 @@ export default function App() {
 
       <div className={`app${user ? ' user-logged' : ''}`}>
         {user && <UserIndicator user={user} onLogout={handleLogout} onAdmin={goAdmin} />}
+        {variety && !['variety','login','admin'].includes(view) && <VarietyIndicator variety={variety} />}
         {swUpdate && (
           <div className="update-banner">
             Nueva versión disponible
@@ -438,6 +449,8 @@ export default function App() {
           <NuevaTanda
             tandaForm={tandaForm}
             error={error}
+            variety={variety}
+            cfg={cfg}
             onCancel={goList}
             onSave={saveTanda}
             tSet={tSet}
@@ -447,6 +460,7 @@ export default function App() {
         {!loading && view === 'batch' && batch && (
           <BatchDetail
             batch={batch}
+            variety={variety}
             config={cfg}
             onBack={goList}
             onNuevaLectura={goNuevaLectura}
@@ -464,6 +478,8 @@ export default function App() {
             lCalc={lCalc}
             editingIdx={editingIdx}
             error={error}
+            variety={variety}
+            cfg={cfg}
             onBack={() => { setEditingIdx(null); setView('batch'); }}
             onSave={saveLectura}
             lSet={lSet}

@@ -1,13 +1,18 @@
-import { categorias } from '../lib/cvu';
-import { VARIEDADES_PCC } from '../lib/pcc';
+import { categorias, varieties } from '../lib/cvu';
 import Stepper from '../components/Stepper';
 
-export default function NuevaTanda({ tandaForm, error, onCancel, onSave, tSet }) {
+export default function NuevaTanda({ tandaForm, error, variety, cfg, onCancel, onSave, tSet }) {
+  const vInfo = varieties.find(v => v.id === variety) || { label: variety || 'Producto', icon: '📦' };
+  const VARS = cfg?.variedades?.[variety] ?? [];
+
   return (
     <>
       <header className="top-bar">
         <button className="icon-btn" onClick={onCancel}>←</button>
-        <div className="top-bar-title">Nueva tanda · Uva de Mesa</div>
+        <div style={{ flex: 1 }}>
+          <div className="top-bar-title">Nueva tanda</div>
+          <div className="top-bar-sub">{vInfo.icon} {vInfo.label}</div>
+        </div>
       </header>
       <main className="content">
         {error && <div className="form-error">{error}</div>}
@@ -20,12 +25,23 @@ export default function NuevaTanda({ tandaForm, error, onCancel, onSave, tSet })
           <div className="field"><label className="req">Peso exacto inicial (kg)</label><Stepper value={tandaForm.pesoInicial||''} onChange={v=>tSet('pesoInicial',v)} step={0.5} min={0} max={9999} decimals={1}/></div>
           <div className="field"><label>Nota</label><input type="text" value={tandaForm.nota||''} onChange={e=>tSet('nota',e.target.value)} placeholder="Opcional"/></div>
         </div>
+
         <p className="section-h">Variedad</p>
-        <div className="toggle-group" style={{ marginBottom: '1.25rem' }}>
-          {VARIEDADES_PCC.map(v => (
-            <button key={v} className={`toggle-btn${tandaForm.variedad===v?' toggle-btn--on':''}`} onClick={() => tSet('variedad', tandaForm.variedad===v?'':v)}>{v}</button>
-          ))}
-        </div>
+        {VARS.length > 0 ? (
+          <div className="toggle-group" style={{ marginBottom: '1.25rem' }}>
+            {VARS.map(v => (
+              <button key={v} className={`toggle-btn${tandaForm.variedad===v?' toggle-btn--on':''}`}
+                onClick={() => tSet('variedad', tandaForm.variedad===v ? '' : v)}>
+                {v}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="field" style={{ marginBottom: '1.25rem' }}>
+            <input type="text" value={tandaForm.variedad||''} onChange={e=>tSet('variedad',e.target.value)} placeholder="Variedad / tipo (opcional)"/>
+          </div>
+        )}
+
         <div className="action-bar">
           <button className="btn btn-ghost" onClick={onCancel}>Cancelar</button>
           <div className="spacer"/>

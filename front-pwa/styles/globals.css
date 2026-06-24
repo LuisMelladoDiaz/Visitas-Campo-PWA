@@ -971,6 +971,32 @@ img { max-width: 100%; display: block; }
   line-height: 1; transition: all .12s ease;
 }
 
+/* ─── Variety indicator (fixed, centered in top-bar) ─── */
+.variety-nav {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: var(--bar-h);
+  display: flex;
+  align-items: center;
+  z-index: 150;
+  pointer-events: none;
+}
+.variety-nav-pill {
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 999px;
+  padding: .22rem .65rem;
+  font-size: .78rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  white-space: nowrap;
+}
+
 /* ─── User indicator (fixed overlay sobre top-bar) ─── */
 /* Reserva espacio en el lado derecho del top-bar de todas las pantallas */
 .user-logged .top-bar { padding-right: 11.5rem; }

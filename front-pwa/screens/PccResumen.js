@@ -1,8 +1,10 @@
 import { fmtDate, fmtNum } from '../lib/utils';
 import { DEFECTOS_BAYAS, calcMuestraRes, calcMuestraResUnidades, calcPCCMedias, calcMediasUnidades, printPCC, FORMATOS_PCC } from '../lib/pcc';
+import { varieties } from '../lib/cvu';
 
 export default function PccResumen({ savedPcc, variety, cfg, onBack, onNuevoParte, onDeletePcc, onEditMuestra, onRefresh, refreshing }) {
   const isUva = (variety || savedPcc?.variety) === 'uva';
+  const vInfo = varieties.find(v => v.id === (variety || savedPcc?.variety)) || { icon: '📦' };
   const defectosConfig = cfg?.defectosPcc?.[variety || savedPcc?.variety] ?? [];
   const formatosList = cfg?.formatos?.[variety || savedPcc?.variety] ?? cfg?.pcc?.formatos ?? FORMATOS_PCC;
   const f = formatosList.find(fmt => fmt.id === savedPcc.formato);
@@ -20,7 +22,7 @@ export default function PccResumen({ savedPcc, variety, cfg, onBack, onNuevoPart
         <button className="icon-btn" onClick={onBack}>←</button>
         <div style={{ flex: 1 }}>
           <div className="top-bar-title">{savedPcc.id}</div>
-          <div className="top-bar-sub">{fmtDate(savedPcc.fecha)} {savedPcc.hora}{savedPcc.responsable?` · ${savedPcc.responsable}`:''}</div>
+          <div className="top-bar-sub">{vInfo.icon} {fmtDate(savedPcc.fecha)} {savedPcc.hora}{savedPcc.responsable?` · ${savedPcc.responsable}`:''}</div>
         </div>
         <button className="icon-btn" onClick={onRefresh} disabled={refreshing}
           title="Actualizar desde base de datos" style={{ opacity: refreshing ? .4 : 1 }}>
