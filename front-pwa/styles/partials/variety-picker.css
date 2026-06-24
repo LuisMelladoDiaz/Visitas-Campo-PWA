@@ -1,0 +1,60 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   VARIETY PICKER — pantalla de selección de producto
+───────────────────────────────────────────────────────────────────────────── */
+
+.picker-intro {
+  text-align: center;
+  padding: 1.5rem 0 1.25rem;
+  color: var(--muted);
+  font-size: 1.5rem;
+  font-weight: bolder;
+}
+
+.variety-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.variety-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .65rem;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+}
+.variety-card:hover:not([disabled]) { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(46,107,46,.15); border-color: var(--primary-2); }
+.variety-card:active:not([disabled]) { transform: scale(.97); }
+.variety-card[disabled] { opacity: .5; cursor: default; }
+
+/* Tarjeta con foto de fondo (--vbg se inyecta via style en VarietyPicker.js) */
+.variety-card--photo {
+  background-image:
+    linear-gradient(to bottom, rgba(255,255,255,.1) 0%, rgba(255,255,255,.72) 62%),
+    var(--vbg, none);
+  background-size: cover;
+  background-position: center;
+  border-color: rgba(0,0,0,.12);
+}
+.variety-card--photo .variety-icon {
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,.3));
+  font-size: 3rem;
+}
+.variety-card--photo .variety-name {
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(255,255,255,.95);
+}
+
+.variety-icon { font-size: 2.75rem; line-height: 1; }
+.variety-name { font-size: 1rem; font-weight: 700; }
+.variety-soon { font-size: .75rem; color: var(--muted); background: var(--surface-2); border-radius: 999px; padding: .2rem .65rem; }

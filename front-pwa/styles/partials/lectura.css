@@ -1,0 +1,119 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   LECTURA — formulario compacto de nueva/editar lectura CVU (3 columnas)
+───────────────────────────────────────────────────────────────────────────── */
+
+.lc-main {
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  width: 100% !important;
+  display: flex;
+  flex-direction: column;
+}
+.lectura-compact {
+  display: grid;
+  grid-template-columns: 240px 1fr 260px;
+  flex: 1;
+}
+.lc-col {
+  padding: .85rem 1.1rem;
+  border-right: 1px solid var(--border);
+}
+.lc-col:last-child { border-right: none; }
+.lc-col-result     { background: var(--surface); }
+
+.lc-section-title {
+  font-size: .67rem;
+  font-weight: 700;
+  letter-spacing: .09em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: .55rem;
+  padding-bottom: .3rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.lc-field                   { margin-bottom: .55rem; }
+.lc-field label             { display: block; font-size: .72rem; color: var(--muted); margin-bottom: .18rem; font-weight: 600; }
+.lc-field input             { width: 100%; padding: .42rem .65rem; font-size: .93rem; }
+.lc-field-inline            { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .4rem; }
+.lc-field-inline label      { white-space: nowrap; flex-shrink: 0; font-size: .85rem; margin-bottom: 0; color: var(--text); font-weight: 400; }
+.lc-field-inline input      { width: 5.5rem; text-align: right; padding: .35rem .5rem; font-size: .93rem; }
+
+.lc-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .82rem;
+  margin-top: .45rem;
+  padding-top: .45rem;
+  border-top: 2px solid var(--border);
+  color: var(--muted);
+}
+.lc-total-row strong { color: var(--text); font-size: 1rem; }
+
+/* ─── Defect toggle rows ─── */
+.lc-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .55rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.lc-toggle-row:last-of-type { border-bottom: none; }
+.lc-toggle-label  { font-size: .9rem; }
+.lc-toggle-group  { display: flex; gap: .35rem; }
+.lc-toggle {
+  padding: .35rem .9rem;
+  border: 1.5px solid var(--border);
+  border-radius: .45rem;
+  background: var(--surface);
+  font-size: .85rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all .12s ease;
+  color: var(--text);
+}
+.lc-toggle:hover      { border-color: var(--accent); }
+.lc-toggle.lc-ok      { background: var(--ok);    color: #fff; border-color: var(--ok); }
+.lc-toggle.lc-nok     { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+/* ─── Severity section headers ─── */
+.lc-severity-hdr {
+  font-size: .67rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .28rem .6rem;
+  border-radius: .35rem;
+  margin-bottom: .35rem;
+  margin-top: .1rem;
+}
+.lc-leve  { background: #fffbeb; color: #b45309; border: 1px solid #fcd34d; }
+.lc-grave { background: #fff3e0; color: #c05a00; border: 1px solid #fdba74; }
+.lc-elim  { background: #fde8e8; color: #c03030; border: 1px solid #fca5a5; }
+
+/* ─── Weight + % row inside severity group ─── */
+.lc-weight-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .4rem 0 .5rem;
+  border-top: 1px dashed var(--border);
+  margin-top: .1rem;
+}
+.lc-weight-row label  { font-size: .75rem; color: var(--muted); flex-shrink: 0; white-space: nowrap; }
+.lc-weight-row input  { width: 5rem; text-align: right; padding: .3rem .5rem; font-size: .9rem; }
+.lc-pct               { font-size: .88rem; font-weight: 700; min-width: 3.5rem; text-align: right; }
+.lc-pct.ok            { color: var(--ok); }
+.lc-pct.warn          { color: var(--warn); }
+.lc-pct.danger        { color: var(--danger); }
+
+/* ─── Result column ─── */
+.lc-class-badge { border-radius: .75rem; padding: .9rem 1rem; text-align: center; margin-bottom: .85rem; }
+.lc-metric      { margin-bottom: .65rem; padding-bottom: .65rem; border-bottom: 1px solid var(--border); }
+.lc-metric:last-child { border-bottom: none; }
+.lc-metric-row  { display: flex; justify-content: space-between; align-items: center; font-size: .88rem; }
+.lc-metric-row .lc-ok     { color: var(--ok);     font-weight: 700; }
+.lc-metric-row .lc-danger { color: var(--danger); font-weight: 700; }
+.lc-metric-row .lc-warn   { color: var(--warn);   font-weight: 700; }

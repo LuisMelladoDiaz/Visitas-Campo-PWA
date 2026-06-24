@@ -1,0 +1,34 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   MENU — pantalla de selección de módulo (CVU / PCC)
+───────────────────────────────────────────────────────────────────────────── */
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  padding: 2rem;
+}
+
+.menu-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 1.5rem;
+  padding: 1rem 1.5rem;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-card:hover:not([disabled]) { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(46,107,46,.18); border-color: var(--primary-2); }
+.menu-card:active:not([disabled]) { transform: scale(.97); }
+.menu-card[disabled] { opacity: .4; cursor: default; }
+.menu-card-icon { font-size: 3.5rem; line-height: 1; }
+.menu-card-name { font-size: 1.2rem; font-weight: 700; }
+.menu-card-desc { font-size: .88rem; color: var(--muted); line-height: 1.4; }

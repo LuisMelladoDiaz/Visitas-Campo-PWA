@@ -1,0 +1,80 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE — breakpoints para todos los módulos
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ─── Mobile (<640px) ─── */
+@media (max-width: 639px) {
+  :root { --bar-h: 52px; }
+  body { font-size: 15px; }
+  .top-bar         { padding: 0 .75rem; gap: .5rem; }
+  .top-bar-title   { font-size: .92rem; }
+  .top-bar-sub     { font-size: .72rem; }
+  .icon-btn        { width: 34px; height: 34px; font-size: 1rem; }
+  .content         { padding: .85rem; }
+  .section-h       { font-size: .72rem; }
+
+  .variety-grid  { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+  .variety-card  { padding: 1.1rem .75rem; }
+  .menu-grid     { grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+  .readings-table              { font-size: .78rem; }
+  .readings-table th,
+  .readings-table td           { padding: .45rem .5rem; }
+
+  .lc-main             { height: auto !important; overflow: visible !important; }
+  .lectura-compact     { grid-template-columns: 1fr !important; height: auto !important; overflow: visible !important; }
+  .lc-col              { height: auto !important; overflow-y: visible !important; }
+  .lc-col-result       { grid-column: 1; }
+
+  .mini-chart-scroll   { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  .btn-lg          { padding: .65rem 1.1rem; font-size: .95rem; }
+  .action-bar      { gap: .5rem; }
+  .detail-header-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ─── Tablet portrait (640–1023px): lectura en 2 columnas ─── */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .lc-main         { height: auto !important; overflow: visible !important; }
+  .lectura-compact { grid-template-columns: 1fr 1fr !important; height: auto !important; overflow: visible !important; }
+  .lc-col          { height: auto !important; overflow-y: visible !important; }
+  .lc-col-result   { grid-column: 1 / -1; border-top: 1px solid var(--border); }
+}
+
+/* ─── Tablet (768px+) ─── */
+@media (min-width: 768px) {
+  body             { font-size: 17px; }
+  .content         { padding: 1.5rem 2rem; }
+  .top-bar         { height: 64px; padding: 0 1.5rem; }
+  .top-bar-title   { font-size: 1.15rem; }
+
+  .variety-grid    { grid-template-columns: repeat(3, 1fr); max-width: 860px; }
+  .menu-grid       { width: 100%; }
+
+  .lectura-layout  { grid-template-columns: 1fr 320px; align-items: start; }
+  .result-card     { position: sticky; top: calc(64px + 1.25rem); }
+
+  .pcc-muestra-layout { grid-template-columns: 1fr 1fr; align-items: start; }
+  .formato-grid    { grid-template-columns: repeat(3, 1fr); }
+  .muestra-dots    { max-width: 220px; }
+}
+
+/* ─── Tablet landscape (1024px+): lectura compacta 3-col ─── */
+@media (min-width: 1024px) {
+  .lc-main         { height: calc(100vh - var(--bar-h)); overflow: hidden; }
+  .lectura-compact { height: 100%; overflow: hidden; }
+  .lc-col          { height: 100%; overflow-y: auto; }
+}
+
+/* ─── Wide (1100px+) ─── */
+@media (min-width: 1100px) {
+  .content         { max-width: 1200px; margin: 0 auto; padding: 2rem 2.5rem; }
+  .lectura-layout  { grid-template-columns: 1fr 360px; }
+}
+
+/* ─── Print ─── */
+@media print {
+  .top-bar, .action-bar, .btn { display: none !important; }
+  .content { padding: 0 !important; }
+  * { color: #000 !important; background: #fff !important; box-shadow: none !important; }
+}

@@ -1,0 +1,41 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   BASE — design tokens, CSS reset, elementos nativos
+───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --bg: #f2f5f2;
+  --surface: #ffffff;
+  --surface-2: #eef3ee;
+  --surface-3: #e2ece2;
+  --text: #1a2d1a;
+  --muted: #5a6a5a;
+  --primary: #2e6b2e;
+  --primary-2: #4c8d4c;
+  --accent: #7ca77c;
+  --ok: #1c7a40;
+  --ok-bg: #e6f5ec;
+  --warn: #c06800;
+  --warn-bg: #fff4e0;
+  --danger: #c03030;
+  --danger-bg: #fef0f0;
+  --border: rgba(46,107,46,.15);
+  --shadow: 0 2px 12px rgba(20,46,20,.08);
+  --radius: 1rem;
+  --bar-h: 60px;
+}
+
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg); }
+body {
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  font-family: inherit;
+  -webkit-font-smoothing: antialiased;
+  font-size: 16px;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+img { max-width: 100%; display: block; }

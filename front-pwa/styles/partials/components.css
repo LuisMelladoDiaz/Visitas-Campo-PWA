@@ -1,0 +1,173 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   COMPONENTS — átomos reutilizables: badges, botones, stepper, toggles, forms
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ─── Status badges ─── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: .25rem .75rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.badge-ok      { background: var(--ok-bg);      color: var(--ok); }
+.badge-warn    { background: var(--warn-bg);     color: var(--warn); }
+.badge-danger  { background: var(--danger-bg);   color: var(--danger); }
+.badge-neutral { background: var(--surface-2);   color: var(--muted); border: 1px solid var(--border); }
+
+/* ─── Buttons ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  border-radius: .85rem;
+  padding: .7rem 1.35rem;
+  min-height: 50px;
+  font-weight: 700;
+  font-size: .92rem;
+  transition: transform .15s, box-shadow .15s, background .15s;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+  line-height: 1;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(46,107,46,.3); }
+.btn-secondary { background: var(--surface-2); color: var(--text); border: 1.5px solid var(--border); }
+.btn-secondary:hover:not(:disabled) { background: var(--surface-3); }
+.btn-ghost  { background: var(--surface-2); color: var(--muted); border: 1.5px solid var(--border); }
+.btn-ghost:hover:not(:disabled) { background: var(--surface-3); }
+.btn-danger { background: transparent; color: var(--danger); border: 1.5px solid rgba(192,48,48,.3); }
+.btn-danger:hover:not(:disabled) { background: var(--danger-bg); }
+.btn-sm   { padding: .45rem .9rem;  min-height: 40px; font-size: .83rem; border-radius: .65rem; }
+.btn-lg   { padding: .9rem 2rem;    min-height: 56px; font-size: 1rem;   border-radius: 1rem; }
+.btn-full { width: 100%; }
+
+/* ─── Stepper ─── */
+.stepper {
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid var(--border);
+  border-radius: .75rem;
+  background: var(--surface-2);
+  overflow: hidden;
+  min-height: 50px;
+}
+.stepper-btn {
+  width: 54px;
+  font-size: 1.5rem;
+  font-weight: 300;
+  line-height: 1;
+  background: var(--surface-3);
+  color: var(--primary);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .1s;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.stepper-btn:active { background: var(--primary); color: #fff; }
+.stepper-val {
+  flex: 1;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  min-width: 0;
+  padding: 0 .25rem;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.stepper-val::-webkit-outer-spin-button,
+.stepper-val::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper-val:focus { outline: none; background: var(--surface); }
+.stepper--compact { min-height: 42px; border-radius: .55rem; }
+.stepper--compact .stepper-btn { width: 42px; font-size: 1.25rem; }
+.stepper--compact .stepper-val { font-size: .95rem; }
+
+/* ─── Toggle buttons ─── */
+.toggle-group { display: flex; gap: .45rem; flex-wrap: wrap; }
+.toggle-btn {
+  flex: 1;
+  min-width: 0;
+  padding: .65rem .75rem;
+  border-radius: .65rem;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 48px;
+  line-height: 1.2;
+}
+.toggle-btn:hover                        { border-color: var(--accent); background: var(--surface); color: var(--text); }
+.toggle-btn--on                          { background: var(--ok-bg);      border-color: var(--ok);     color: var(--ok); }
+.toggle-btn--on.toggle-btn--warn         { background: var(--warn-bg);   border-color: var(--warn);   color: var(--warn); }
+.toggle-btn--on.toggle-btn--danger       { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
+.toggle-btn--num { flex: none; width: 50px; padding: .65rem .4rem; }
+
+/* ─── Form grid ─── */
+.form-grid { display: grid; gap: 1rem; }
+.g2 { grid-template-columns: 1fr 1fr; }
+.g3 { grid-template-columns: 1fr 1fr 1fr; }
+.g4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+/* ─── Field ─── */
+.field { display: flex; flex-direction: column; gap: .32rem; }
+.field label {
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: .75rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: .75rem;
+  background: var(--surface-2);
+  color: var(--text);
+  min-height: 50px;
+  font-size: 1rem;
+}
+.field textarea { min-height: 5rem; resize: vertical; }
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(46,107,46,.13);
+  background: var(--surface);
+}
+.field input[readonly] { opacity: .65; cursor: default; background: var(--surface-3); }
+.req::after   { content: ' *'; color: var(--danger); }
+.field-hint   { font-size: .77rem; color: var(--muted); margin-top: .15rem; }
+
+/* ─── Inline edit button (table rows) ─── */
+.btn-edit-row {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: .4rem;
+  padding: .2rem .5rem;
+  font-size: .85rem;
+  cursor: pointer;
+  color: var(--muted);
+  line-height: 1;
+  transition: all .12s ease;
+}
+.btn-edit-row:hover { background: var(--surface-2); color: var(--text); border-color: var(--accent); }
