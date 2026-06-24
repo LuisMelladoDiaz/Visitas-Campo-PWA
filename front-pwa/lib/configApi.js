@@ -23,15 +23,16 @@ export async function loadConfigFromDB() {
     }
 
     // Group defectos CVU by producto_id, then by severidad (leves/graves/elim)
+    const SEV = { leve: 'leves', grave: 'graves', elim: 'elim' };
     const defectosCvuMap = {};
     for (const d of (defectosCvuRows.data || [])) {
       const pid = d.producto_id || 'uva';
       if (!defectosCvuMap[pid]) defectosCvuMap[pid] = { leves: [], graves: [], elim: [] };
-      const severidad = d.severidad || 'leves';
-      (defectosCvuMap[pid][severidad] = defectosCvuMap[pid][severidad] || []).push({
-        key:   d.codigo,
-        label: d.nombre,
-        okVal: d.ok_val || 'No',
+      const sevKey = SEV[d.severidad] || d.severidad || 'leves';
+      (defectosCvuMap[pid][sevKey] = defectosCvuMap[pid][sevKey] || []).push({
+        key:   d.clave,
+        label: d.etiqueta,
+        okVal: d.valor_ok || 'No',
       });
     }
 
@@ -40,8 +41,8 @@ export async function loadConfigFromDB() {
     for (const d of (defectosPccRows.data || [])) {
       const pid = d.producto_id || 'uva';
       (defectosPccMap[pid] = defectosPccMap[pid] || []).push({
-        key:             d.codigo,
-        label:           d.nombre,
+        key:             d.clave,
+        label:           d.etiqueta,
         toleranciaCero:  d.tolerancia_cero ?? false,
       });
     }
