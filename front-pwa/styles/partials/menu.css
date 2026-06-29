@@ -6,7 +6,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2.5rem;
-  padding: 2rem;
+  padding: 5rem;
 }
 
 .menu-card {

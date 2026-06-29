@@ -96,7 +96,7 @@
 }
 .baya-row {
   display: grid;
-  grid-template-columns: 1fr 86px;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: .5rem;
   padding: .5rem .9rem;

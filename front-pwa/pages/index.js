@@ -194,12 +194,20 @@ export default function App() {
 
   function goNuevaLectura() {
     const defects = getDefectosCvu(variety, cfg);
-    const siNoDefaults = Object.fromEntries(defects.all.map(d => [d.key, d.okVal]));
+    const prev = batch.readings.length > 0 ? batch.readings[batch.readings.length - 1] : null;
+    const defectVals = prev
+      ? Object.fromEntries(defects.all.map(d => [d.key, prev[d.key] ?? d.okVal]))
+      : Object.fromEntries(defects.all.map(d => [d.key, d.okVal]));
     setLForm({
-      fecha: today(), trazabilidad: batch.trazabilidad,
-      pesoDiario: '', tempConservacion: '', pctFueraCalibre: '',
-      ...siNoDefaults,
-      pesoFaltasLeves: '', pesoFaltasGraves: '', pesoFaltasElim: '',
+      fecha: today(),
+      trazabilidad: batch.trazabilidad,
+      pesoDiario: prev?.pd != null ? String(prev.pd) : '',
+      tempConservacion: prev?.tempConservacion != null ? String(prev.tempConservacion) : '',
+      pctFueraCalibre:  prev?.pctCalibre       != null ? String(prev.pctCalibre)       : '',
+      ...defectVals,
+      pesoFaltasLeves:  prev?.pesoFaltasLeves  != null ? String(prev.pesoFaltasLeves)  : '',
+      pesoFaltasGraves: prev?.pesoFaltasGraves != null ? String(prev.pesoFaltasGraves) : '',
+      pesoFaltasElim:   prev?.pesoFaltasElim   != null ? String(prev.pesoFaltasElim)   : '',
       photo: '',
     });
     setEditingIdx(null);
@@ -260,8 +268,8 @@ export default function App() {
       : calcResultadoUnidades(muestraForms, umbrales);
 
     if (editingPcc) {
-      // Edición de muestras de un parte existente
-      const updated = { ...editingPcc, muestras: muestraForms, resultado };
+      // Edición/ampliación de muestras de un parte existente
+      const updated = { ...editingPcc, nMuestras: muestraForms.length, muestras: muestraForms, resultado };
       const next = pccs.map(p => p.id === updated.id ? updated : p);
       setPccs(next); setSavedPcc(updated); setEditingPcc(null); setView('pcc-resumen');
       savePCC(updated).catch(e => console.error('Error sincronizando PCC:', e));
@@ -281,6 +289,20 @@ export default function App() {
   function goEditMuestra(pcc, idx) {
     setMuestraForms([...pcc.muestras]);
     setMuestraIdx(idx);
+    setEditingPcc(pcc);
+    setView('pcc-muestra');
+  }
+
+  function goAddMuestra(pcc) {
+    const pccVariety = pcc.variety || variety;
+    const t = nowTime();
+    const defectosPcc = cfg?.defectosPcc?.[pccVariety] ?? [];
+    const newIdx = pcc.muestras.length;
+    const newMuestra = pccVariety === 'uva'
+      ? emptyMuestra(newIdx + 1, t)
+      : emptyMuestraUnidades(newIdx + 1, t, defectosPcc);
+    setMuestraForms([...pcc.muestras, newMuestra]);
+    setMuestraIdx(newIdx);
     setEditingPcc(pcc);
     setView('pcc-muestra');
   }
@@ -525,6 +547,10 @@ export default function App() {
               else if (editingPcc) setView('pcc-resumen');
               else setView('nueva-pcc');
             }}
+            onBackToMenu={() => {
+              if (editingPcc) setView('pcc-resumen');
+              else setView('nueva-pcc');
+            }}
             onNext={() => setMuestraIdx(i => i + 1)}
             onFinalizar={guardarPCC}
             setMuestraIdx={setMuestraIdx}
@@ -539,7 +565,7 @@ export default function App() {
             variety={savedPcc?.variety || variety}
             cfg={cfg}
             onBack={goPCCList}
-            onNuevoParte={goNuevaPCC}
+            onAddMuestra={goAddMuestra}
             onDeletePcc={isAdmin(user) ? deletePCC : null}
             onEditMuestra={goEditMuestra}
             onRefresh={handleRefresh}

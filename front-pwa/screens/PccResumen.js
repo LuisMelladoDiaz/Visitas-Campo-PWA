@@ -2,7 +2,7 @@ import { fmtDate, fmtNum } from '../lib/utils';
 import { DEFECTOS_BAYAS, calcMuestraRes, calcMuestraResUnidades, calcPCCMedias, calcMediasUnidades, printPCC, FORMATOS_PCC } from '../lib/pcc';
 import { varieties } from '../lib/cvu';
 
-export default function PccResumen({ savedPcc, variety, cfg, onBack, onNuevoParte, onDeletePcc, onEditMuestra, onRefresh, refreshing }) {
+export default function PccResumen({ savedPcc, variety, cfg, onBack, onAddMuestra, onDeletePcc, onEditMuestra, onRefresh, refreshing }) {
   const isUva = (variety || savedPcc?.variety) === 'uva';
   const vInfo = varieties.find(v => v.id === (variety || savedPcc?.variety)) || { icon: '📦' };
   const defectosConfig = cfg?.defectosPcc?.[variety || savedPcc?.variety] ?? [];
@@ -240,7 +240,7 @@ export default function PccResumen({ savedPcc, variety, cfg, onBack, onNuevoPart
           </>
         )}
 
-        <button className="fab" onClick={onNuevoParte}>+</button>
+        <button className="fab" onClick={() => onAddMuestra(savedPcc)} title="Añadir muestra">+</button>
       </main>
     </>
   );

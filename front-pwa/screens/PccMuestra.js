@@ -6,7 +6,7 @@ import Stepper from '../components/Stepper';
 export default function PccMuestra({
   muestraForms, muestraIdx, mCalc, pccSetupForm, fmtActivo,
   variety, cfg,
-  onBack, onNext, onFinalizar, setMuestraIdx, mSet, mSetDefecto,
+  onBack, onBackToMenu, onNext, onFinalizar, setMuestraIdx, mSet, mSetDefecto,
 }) {
   const isUva = variety === 'uva';
   const vInfo = varieties.find(v => v.id === variety) || { icon: '📦' };
@@ -17,7 +17,7 @@ export default function PccMuestra({
   return (
     <>
       <header className="top-bar">
-        <button className="icon-btn" onClick={onBack}>←</button>
+        <button className="icon-btn" onClick={onBackToMenu}>←</button>
         <div style={{ flex: 1 }}>
           <div className="top-bar-title">Muestra {muestraIdx+1} de {muestraForms.length}</div>
           <div className="top-bar-sub">

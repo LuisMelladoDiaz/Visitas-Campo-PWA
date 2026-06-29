@@ -6,7 +6,7 @@
   text-align: center;
   padding: 1.5rem 0 1.25rem;
   color: var(--muted);
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: bolder;
 }
 
@@ -19,14 +19,15 @@
 }
 
 .variety-card {
+  margin-top: 1rem;
   background: var(--surface);
   border: 2px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.75rem 1.25rem;
+  padding: 2.25rem .25rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: .65rem;
+  gap: 1.25rem;
   cursor: pointer;
   box-shadow: var(--shadow);
   transition: transform .18s, box-shadow .18s, border-color .18s;
@@ -39,20 +40,33 @@
 
 /* Tarjeta con foto de fondo (--vbg se inyecta via style en VarietyPicker.js) */
 .variety-card--photo {
-  background-image:
-    linear-gradient(to bottom, rgba(255,255,255,.1) 0%, rgba(255,255,255,.72) 62%),
-    var(--vbg, none);
+  position: relative;
+  border-color: rgba(0,0,0,.12);
+  overflow: hidden;
+}
+/* La opacidad va solo al fondo, no al contenido */
+.variety-card--photo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--vbg, none);
   background-size: cover;
   background-position: center;
-  border-color: rgba(0,0,0,.12);
+  opacity: .15;
+  z-index: 0;
+}
+.variety-card--photo > * {
+  position: relative;
+  z-index: 1;
 }
 .variety-card--photo .variety-icon {
   filter: drop-shadow(0 2px 5px rgba(0,0,0,.3));
   font-size: 3rem;
 }
 .variety-card--photo .variety-name {
-  font-weight: 800;
-  text-shadow: 0 1px 0 rgba(255,255,255,.95);
+  font-weight: 1000;
+  font-size: 1.25rem;
+  text-shadow: 2px 2px 2px rgba(255, 255, 255, 0.95);
 }
 
 .variety-icon { font-size: 2.75rem; line-height: 1; }
