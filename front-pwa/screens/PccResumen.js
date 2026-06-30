@@ -3,7 +3,7 @@ import { DEFECTOS_BAYAS, calcMuestraRes, calcMuestraResUnidades, calcPCCMedias, 
 import { varieties } from '../lib/cvu';
 
 export default function PccResumen({ savedPcc, variety, cfg, onBack, onAddMuestra, onDeletePcc, onEditMuestra, onRefresh, refreshing }) {
-  const isUva = (variety || savedPcc?.variety) === 'uva';
+  const isUva = (variety || savedPcc?.variety) === 'UV';
   const vInfo = varieties.find(v => v.id === (variety || savedPcc?.variety)) || { icon: '📦' };
   const defectosConfig = cfg?.defectosPcc?.[variety || savedPcc?.variety] ?? [];
   const formatosList = cfg?.formatos?.[variety || savedPcc?.variety] ?? cfg?.pcc?.formatos ?? FORMATOS_PCC;

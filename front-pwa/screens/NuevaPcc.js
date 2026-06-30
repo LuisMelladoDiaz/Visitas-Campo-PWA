@@ -4,7 +4,7 @@ import { varieties } from '../lib/cvu';
 export default function NuevaPcc({ pccSetupForm, error, variety, cfg, onCancel, onIniciarMuestras, pSet }) {
   const VARS = cfg?.variedades?.[variety] ?? [];
   const FMTS = cfg?.formatos?.[variety] ?? cfg?.pcc?.formatos ?? FORMATOS_PCC;
-  const isUva = variety === 'uva';
+  const isUva = variety === 'UV';
   const vInfo = varieties.find(v => v.id === variety) || { label: variety, icon: '📋' };
 
   return (

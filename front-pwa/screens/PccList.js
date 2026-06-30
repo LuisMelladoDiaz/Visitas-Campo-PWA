@@ -6,7 +6,7 @@ export default function PccList({ pccs, variety, cfg, onBack, onNuevoParte, onOp
   const vInfo = varieties.find(v => v.id === variety) || { label: variety, icon: '📋' };
   const filtered = pccs.filter(p => p.variety === variety);
   const formatosList = cfg?.formatos?.[variety] ?? cfg?.pcc?.formatos ?? FORMATOS_PCC;
-  const isUva = variety === 'uva';
+  const isUva = variety === 'UV';
 
   return (
     <>

@@ -18,7 +18,7 @@ export async function loadConfigFromDB() {
     // Group variedades by cod_gru_conf
     const variadesMap = {};
     for (const v of (variedades.data || [])) {
-      const pid = v.cod_gru_conf || 'uva';
+      const pid = v.cod_gru_conf || 'UV';
       (variadesMap[pid] = variadesMap[pid] || []).push(v.d_varied);
     }
 
@@ -26,7 +26,7 @@ export async function loadConfigFromDB() {
     const SEV = { 0: 'leves', 1: 'graves', 2: 'elim' };
     const defectosCvuMap = {};
     for (const d of (defectosCvuRows.data || [])) {
-      const pid = d.cod_gru_conf || 'uva';
+      const pid = d.cod_gru_conf || 'UV';
       if (!defectosCvuMap[pid]) defectosCvuMap[pid] = { leves: [], graves: [], elim: [] };
       const sevKey = SEV[d.severidad] ?? 'leves';
       (defectosCvuMap[pid][sevKey] = defectosCvuMap[pid][sevKey] || []).push({
@@ -39,7 +39,7 @@ export async function loadConfigFromDB() {
     // Group defectos PCC by cod_gru_conf
     const defectosPccMap = {};
     for (const d of (defectosPccRows.data || [])) {
-      const pid = d.cod_gru_conf || 'uva';
+      const pid = d.cod_gru_conf || 'UV';
       (defectosPccMap[pid] = defectosPccMap[pid] || []).push({
         key:             d.clave,
         label:           d.etiqueta,
@@ -50,7 +50,7 @@ export async function loadConfigFromDB() {
     // Group formatos by cod_gru_conf (null = universal)
     const formatosMap = {};
     for (const f of (formatos.data || [])) {
-      const pid = f.cod_gru_conf || 'uva';
+      const pid = f.cod_gru_conf || 'UV';
       (formatosMap[pid] = formatosMap[pid] || []).push({
         id:        f.c_t_conf,
         label:     f.d_t_conf,
@@ -63,7 +63,7 @@ export async function loadConfigFromDB() {
     // Build umbrales keyed by cod_gru_conf
     const umbralesMap = {};
     for (const u of (umbrales.data || [])) {
-      const pid = u.cod_gru_conf || 'uva';
+      const pid = u.cod_gru_conf || 'UV';
       umbralesMap[pid] = {
         maxDefectosPct: u.max_defectos_pct != null ? parseFloat(u.max_defectos_pct) : null,
         minBrix:        u.min_brix         != null ? parseFloat(u.min_brix)         : null,
@@ -80,7 +80,7 @@ export async function loadConfigFromDB() {
       maxCalibre: c.max_pct_calibre != null ? parseFloat(c.max_pct_calibre) : null,
     })) ?? DEFAULT_CONFIG.cvu.clases;
 
-    const uvaUmbrales = umbralesMap['uva'] ?? DEFAULT_CONFIG.pcc.umbrales;
+    const uvaUmbrales = umbralesMap['UV'] ?? DEFAULT_CONFIG.pcc.umbrales;
 
     return {
       empresa: {
@@ -102,8 +102,8 @@ export async function loadConfigFromDB() {
       clases:       clasesMapped,
       // backwards compat for existing screens
       pcc: {
-        variedades: variadesMap['uva']  ?? DEFAULT_CONFIG.pcc.variedades,
-        formatos:   formatosMap['uva']  ?? DEFAULT_CONFIG.pcc.formatos,
+        variedades: variadesMap['UV']  ?? DEFAULT_CONFIG.pcc.variedades,
+        formatos:   formatosMap['UV']  ?? DEFAULT_CONFIG.pcc.formatos,
         umbrales:   uvaUmbrales,
       },
       cvu: {
@@ -146,13 +146,13 @@ export async function saveConfigToDB(config) {
     const { data: existing } = await supabase
       .from('gsi_g_varied')
       .select('id')
-      .eq('cod_gru_conf', 'uva');
+      .eq('cod_gru_conf', 'UV');
 
     const existingIds = (existing || []).map(v => v.id);
     await supabase.from('gsi_g_varied').delete().in('id', existingIds);
 
     const rows = config.pcc.variedades.map((nombre, i) => ({
-      cod_gru_conf: 'uva',
+      cod_gru_conf: 'UV',
       c_varied:     nombre.toLowerCase().replace(/\s+/g, '-'),
       d_varied:     nombre,
       activo:       true,

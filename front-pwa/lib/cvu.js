@@ -3,11 +3,11 @@ import { PR_CSS } from './print';
 
 // ─── Vida Útil constants ──────────────────────────────────────────────────────
 export const varieties = [
-  { id: 'uva',       label: 'Uva de Mesa', icon: '🍇' },
-  { id: 'remolacha', label: 'Remolacha',   icon: '🫚' },
-  { id: 'boniato',   label: 'Boniato',     icon: '🍠' },
-  { id: 'calabaza',  label: 'Calabaza',    icon: '🎃' },
-  { id: 'pimiento',  label: 'Pimiento',    icon: '🫑' },
+  { id: 'UV', label: 'Uva de Mesa', icon: '🍇' },
+  { id: 'RE', label: 'Remolacha',   icon: '🫚' },
+  { id: 'BO', label: 'Boniato',     icon: '🍠' },
+  { id: 'CA', label: 'Calabaza',    icon: '🎃' },
+  { id: 'PI', label: 'Pimiento',    icon: '🫑' },
 ];
 
 export const categorias = ['Extra', 'Clase I', 'Clase II', 'Ind.'];

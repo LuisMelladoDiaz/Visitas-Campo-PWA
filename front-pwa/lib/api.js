@@ -43,7 +43,7 @@ function resultadoFromInt(n) { return n === 1 ? 'C' : n === 2 ? 'NC' : null; }
 function tandaToRow(t) {
   return {
     no:                t.id,
-    gru_conf:          t.variety || 'uva',
+    gru_conf:          t.variety || 'UV',
     confeccion:        t.confeccion,
     variedad:          t.variedad          || null,
     categoria_inicial: t.categoriaInicial,
@@ -130,7 +130,7 @@ function tandaFromRows(row, lecturasRows) {
 function pccToRow(p) {
   return {
     no:          p.id,
-    gru_conf:    p.variety     || 'uva',
+    gru_conf:    p.variety     || 'UV',
     tipo_conf:   p.formato     || null,
     fecha:       p.fecha,
     hora:        p.hora        || null,

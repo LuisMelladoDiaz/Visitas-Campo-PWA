@@ -8,7 +8,7 @@ export default function PccMuestra({
   variety, cfg,
   onBack, onBackToMenu, onNext, onFinalizar, setMuestraIdx, mSet, mSetDefecto,
 }) {
-  const isUva = variety === 'uva';
+  const isUva = variety === 'UV';
   const vInfo = varieties.find(v => v.id === variety) || { icon: '📦' };
   const defectosConfig = cfg?.defectosPcc?.[variety] ?? [];
   const m = muestraForms[muestraIdx];

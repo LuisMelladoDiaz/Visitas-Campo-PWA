@@ -5,21 +5,21 @@ export const DEFAULT_CONFIG = {
     nombre: 'Torremesa',
   },
   productos: [
-    { id: 'uva',       nombre: 'Uva de Mesa', icono: '🍇', tiene_cvu: true,  tiene_pcc: true,  activo: true },
-    { id: 'remolacha', nombre: 'Remolacha',   icono: '🔴', tiene_cvu: true,  tiene_pcc: false, activo: true },
-    { id: 'boniato',   nombre: 'Boniato',     icono: '🍠', tiene_cvu: true,  tiene_pcc: false, activo: true },
-    { id: 'calabaza',  nombre: 'Calabaza',    icono: '🎃', tiene_cvu: true,  tiene_pcc: true,  activo: true },
-    { id: 'pimiento',  nombre: 'Pimiento',    icono: '🫑', tiene_cvu: false, tiene_pcc: true,  activo: true },
+    { id: 'UV', nombre: 'Uva de Mesa', icono: '🍇', tiene_cvu: true,  tiene_pcc: true,  activo: true },
+    { id: 'RE', nombre: 'Remolacha',   icono: '🔴', tiene_cvu: true,  tiene_pcc: false, activo: true },
+    { id: 'BO', nombre: 'Boniato',     icono: '🍠', tiene_cvu: true,  tiene_pcc: false, activo: true },
+    { id: 'CA', nombre: 'Calabaza',    icono: '🎃', tiene_cvu: true,  tiene_pcc: true,  activo: true },
+    { id: 'PI', nombre: 'Pimiento',    icono: '🫑', tiene_cvu: false, tiene_pcc: true,  activo: true },
   ],
   variedades: {
-    uva:       ['Sweet Globe', 'Sweet Celebration', 'Candy Snap'],
-    remolacha: ['Mónaco', 'Boto', 'Roja Redonda'],
-    boniato:   ['Beauregard', 'Covington', 'Jewel'],
-    calabaza:  ['Butternut', 'Cacahuete', 'Moscata'],
-    pimiento:  ['California Rojo', 'California Verde', 'Lamuyo', 'Italiano'],
+    UV: ['Sweet Globe', 'Sweet Celebration', 'Candy Snap'],
+    RE: ['Mónaco', 'Boto', 'Roja Redonda'],
+    BO: ['Beauregard', 'Covington', 'Jewel'],
+    CA: ['Butternut', 'Cacahuete', 'Moscata'],
+    PI: ['California Rojo', 'California Verde', 'Lamuyo', 'Italiano'],
   },
   defectosCvu: {
-    uva: {
+    UV: {
       leves: [
         { key: 'desgrane',           label: 'Desgrane',            okVal: 'No' },
         { key: 'bayasRotas',         label: 'Bayas rotas',         okVal: 'No' },
@@ -33,7 +33,7 @@ export const DEFAULT_CONFIG = {
         { key: 'podridos',        label: 'Podridos',          okVal: 'No' },
       ],
     },
-    remolacha: {
+    RE: {
       leves: [
         { key: 'golpesHeridasManchas', label: 'Golpes, heridas y manchas',               okVal: 'No' },
         { key: 'puntasRotas',          label: 'Puntas rotas',                              okVal: 'No' },
@@ -50,7 +50,7 @@ export const DEFAULT_CONFIG = {
         { key: 'rotosRajados',    label: 'Rotos o rajados',    okVal: 'No' },
       ],
     },
-    boniato: {
+    BO: {
       leves: [
         { key: 'despellejados',         label: 'Despellejados',                          okVal: 'No' },
         { key: 'puntasRotas',           label: 'Puntas rotas',                            okVal: 'No' },
@@ -67,7 +67,7 @@ export const DEFAULT_CONFIG = {
         { key: 'rotosRajados',    label: 'Rotos o rajados',   okVal: 'No' },
       ],
     },
-    calabaza: {
+    CA: {
       leves: [
         { key: 'defectosApariencia',    label: 'Defectos globales de apariencia',         okVal: 'No' },
         { key: 'puntasDeshidratadas30', label: 'Puntas deshidratadas > 30mm',            okVal: 'No' },
@@ -83,7 +83,7 @@ export const DEFAULT_CONFIG = {
     },
   },
   defectosPcc: {
-    uva: [
+    UV: [
       { key: 'materiaExtrana',   label: 'Materia extraña',         toleranciaCero: false },
       { key: 'suciaPolvo',       label: 'Sucia / con polvo',        toleranciaCero: false },
       { key: 'deshidratadas',    label: 'Deshidratadas',            toleranciaCero: false },
@@ -93,7 +93,7 @@ export const DEFAULT_CONFIG = {
       { key: 'podridas',         label: 'Podridas',                 toleranciaCero: true  },
       { key: 'otros',            label: 'Otros',                    toleranciaCero: false },
     ],
-    pimiento: [
+    PI: [
       { key: 'materiasExtranas',    label: 'Materias extrañas',          toleranciaCero: true  },
       { key: 'sucio',               label: 'Sucio',                       toleranciaCero: false },
       { key: 'picadoMordisqueado',  label: 'Picado / mordisqueado',       toleranciaCero: false },
@@ -109,7 +109,7 @@ export const DEFAULT_CONFIG = {
       { key: 'pudriciones',         label: 'Pudriciones',                 toleranciaCero: true  },
       { key: 'manchasSolPeseta',    label: 'Manchas del sol o peseta',    toleranciaCero: false },
     ],
-    calabaza: [
+    CA: [
       { key: 'materiasExtranas',    label: 'Materias extrañas',           toleranciaCero: true  },
       { key: 'sucio',               label: 'Sucio',                       toleranciaCero: false },
       { key: 'picadoMordisqueado',  label: 'Picado / mordisqueado',       toleranciaCero: false },

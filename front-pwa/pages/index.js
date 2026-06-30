@@ -252,7 +252,7 @@ export default function App() {
     const n = fmt?.nMuestras ?? 10;
     const t = nowTime();
     const defectosPcc = cfg?.defectosPcc?.[variety] ?? [];
-    const factory = variety === 'uva'
+    const factory = variety === 'UV'
       ? (i) => emptyMuestra(i + 1, t)
       : (i) => emptyMuestraUnidades(i + 1, t, defectosPcc);
     setMuestraForms(Array.from({ length: n }, (_, i) => factory(i)));
@@ -263,7 +263,7 @@ export default function App() {
 
   function guardarPCC() {
     const umbrales = cfg?.umbrales?.[variety] ?? cfg?.pcc?.umbrales;
-    const resultado = variety === 'uva'
+    const resultado = variety === 'UV'
       ? calcPCCResultado(muestraForms, umbrales)
       : calcResultadoUnidades(muestraForms, umbrales);
 
@@ -298,7 +298,7 @@ export default function App() {
     const t = nowTime();
     const defectosPcc = cfg?.defectosPcc?.[pccVariety] ?? [];
     const newIdx = pcc.muestras.length;
-    const newMuestra = pccVariety === 'uva'
+    const newMuestra = pccVariety === 'UV'
       ? emptyMuestra(newIdx + 1, t)
       : emptyMuestraUnidades(newIdx + 1, t, defectosPcc);
     setMuestraForms([...pcc.muestras, newMuestra]);
@@ -390,7 +390,7 @@ export default function App() {
   const lCalc = batch ? calcLectura(lForm, batch.pesoInicial, cfg?.cvu?.clases) : null;
   const umbralesVariety = cfg?.umbrales?.[variety] ?? cfg?.pcc?.umbrales;
   const mCalc = muestraForms[muestraIdx]
-    ? (variety === 'uva'
+    ? (variety === 'UV'
         ? calcMuestraRes(muestraForms[muestraIdx], umbralesVariety)
         : calcMuestraResUnidades(muestraForms[muestraIdx], umbralesVariety))
     : null;
