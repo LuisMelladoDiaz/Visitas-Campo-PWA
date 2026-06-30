@@ -6,29 +6,29 @@ export async function loadConfigFromDB() {
   try {
     const [empresa, clases, productos, variedades, defectosCvuRows, defectosPccRows, formatos, umbrales] = await Promise.all([
       supabase.from('config_empresa').select('*').limit(1).single(),
-      supabase.from('config_clases_cvu').select('*').order('orden'),
-      supabase.from('config_productos').select('*').eq('activo', true).order('orden'),
-      supabase.from('config_variedades').select('*').eq('activo', true).order('orden'),
-      supabase.from('config_defectos_cvu').select('*').eq('activo', true).order('orden'),
-      supabase.from('config_defectos_pcc').select('*').eq('activo', true).order('orden'),
-      supabase.from('config_formatos_pcc').select('*').eq('activo', true),
-      supabase.from('config_umbrales_pcc').select('*'),
+      supabase.from('lmd_clases_calidad_cvu').select('*').order('orden'),
+      supabase.from('gsi_vgr_conf').select('*').eq('activo', true).order('orden'),
+      supabase.from('gsi_g_varied').select('*').eq('activo', true).order('orden'),
+      supabase.from('lmd_defectos_cvu').select('*').eq('activo', true).order('orden'),
+      supabase.from('lmd_defectos_pcc').select('*').eq('activo', true).order('orden'),
+      supabase.from('gsi_vti_conf').select('*').eq('activo', true),
+      supabase.from('lmd_umbrales_pcc').select('*'),
     ]);
 
-    // Group variedades by producto_id
+    // Group variedades by cod_gru_conf
     const variadesMap = {};
     for (const v of (variedades.data || [])) {
-      const pid = v.producto_id || 'uva';
-      (variadesMap[pid] = variadesMap[pid] || []).push(v.nombre);
+      const pid = v.cod_gru_conf || 'uva';
+      (variadesMap[pid] = variadesMap[pid] || []).push(v.d_varied);
     }
 
-    // Group defectos CVU by producto_id, then by severidad (leves/graves/elim)
-    const SEV = { leve: 'leves', grave: 'graves', elim: 'elim' };
+    // Group defectos CVU by cod_gru_conf, then by severidad (SMALLINT: 0=leve, 1=grave, 2=elim)
+    const SEV = { 0: 'leves', 1: 'graves', 2: 'elim' };
     const defectosCvuMap = {};
     for (const d of (defectosCvuRows.data || [])) {
-      const pid = d.producto_id || 'uva';
+      const pid = d.cod_gru_conf || 'uva';
       if (!defectosCvuMap[pid]) defectosCvuMap[pid] = { leves: [], graves: [], elim: [] };
-      const sevKey = SEV[d.severidad] || d.severidad || 'leves';
+      const sevKey = SEV[d.severidad] ?? 'leves';
       (defectosCvuMap[pid][sevKey] = defectosCvuMap[pid][sevKey] || []).push({
         key:   d.clave,
         label: d.etiqueta,
@@ -36,10 +36,10 @@ export async function loadConfigFromDB() {
       });
     }
 
-    // Group defectos PCC by producto_id
+    // Group defectos PCC by cod_gru_conf
     const defectosPccMap = {};
     for (const d of (defectosPccRows.data || [])) {
-      const pid = d.producto_id || 'uva';
+      const pid = d.cod_gru_conf || 'uva';
       (defectosPccMap[pid] = defectosPccMap[pid] || []).push({
         key:             d.clave,
         label:           d.etiqueta,
@@ -47,23 +47,23 @@ export async function loadConfigFromDB() {
       });
     }
 
-    // Group formatos by producto_id (null = universal)
+    // Group formatos by cod_gru_conf (null = universal)
     const formatosMap = {};
     for (const f of (formatos.data || [])) {
-      const pid = f.producto_id || 'uva';
+      const pid = f.cod_gru_conf || 'uva';
       (formatosMap[pid] = formatosMap[pid] || []).push({
-        id:        f.codigo,
-        label:     f.nombre,
+        id:        f.c_t_conf,
+        label:     f.d_t_conf,
         sub:       f.descripcion || '',
         nMuestras: f.n_muestras,
         pesoRef:   f.peso_ref_g,
       });
     }
 
-    // Build umbrales keyed by producto_id
+    // Build umbrales keyed by cod_gru_conf
     const umbralesMap = {};
     for (const u of (umbrales.data || [])) {
-      const pid = u.producto_id || 'uva';
+      const pid = u.cod_gru_conf || 'uva';
       umbralesMap[pid] = {
         maxDefectosPct: u.max_defectos_pct != null ? parseFloat(u.max_defectos_pct) : null,
         minBrix:        u.min_brix         != null ? parseFloat(u.min_brix)         : null,
@@ -87,23 +87,23 @@ export async function loadConfigFromDB() {
         nombre: empresa.data?.nombre ?? DEFAULT_CONFIG.empresa.nombre,
       },
       productos: productos.data?.map(p => ({
-        id:         p.id,
-        nombre:     p.nombre,
+        id:         p.cod_gru_conf,
+        nombre:     p.des_gru_conf,
         icono:      p.icono,
         tiene_cvu:  p.tiene_cvu  ?? false,
         tiene_pcc:  p.tiene_pcc  ?? false,
         activo:     p.activo     ?? true,
       })) ?? DEFAULT_CONFIG.productos,
-      variedades:   Object.keys(variadesMap).length   ? variadesMap   : DEFAULT_CONFIG.variedades,
+      variedades:   Object.keys(variadesMap).length    ? variadesMap    : DEFAULT_CONFIG.variedades,
       defectosCvu:  Object.keys(defectosCvuMap).length ? defectosCvuMap : DEFAULT_CONFIG.defectosCvu,
       defectosPcc:  Object.keys(defectosPccMap).length ? defectosPccMap : DEFAULT_CONFIG.defectosPcc,
-      formatos:     Object.keys(formatosMap).length   ? formatosMap   : (DEFAULT_CONFIG.formatos ?? { uva: DEFAULT_CONFIG.pcc.formatos }),
-      umbrales:     Object.keys(umbralesMap).length   ? umbralesMap   : (DEFAULT_CONFIG.umbrales ?? { uva: DEFAULT_CONFIG.pcc.umbrales }),
+      formatos:     Object.keys(formatosMap).length    ? formatosMap    : (DEFAULT_CONFIG.formatos ?? { uva: DEFAULT_CONFIG.pcc.formatos }),
+      umbrales:     Object.keys(umbralesMap).length    ? umbralesMap    : (DEFAULT_CONFIG.umbrales ?? { uva: DEFAULT_CONFIG.pcc.umbrales }),
       clases:       clasesMapped,
       // backwards compat for existing screens
       pcc: {
-        variedades: variadesMap['uva']        ?? DEFAULT_CONFIG.pcc.variedades,
-        formatos:   formatosMap['uva']        ?? DEFAULT_CONFIG.pcc.formatos,
+        variedades: variadesMap['uva']  ?? DEFAULT_CONFIG.pcc.variedades,
+        formatos:   formatosMap['uva']  ?? DEFAULT_CONFIG.pcc.formatos,
         umbrales:   uvaUmbrales,
       },
       cvu: {
@@ -123,7 +123,7 @@ export async function saveConfigToDB(config) {
     ops.push(
       supabase.from('config_empresa')
         .update({ nombre: config.empresa.nombre })
-        .neq('id', '00000000-0000-0000-0000-000000000000') // update all rows
+        .neq('id', '00000000-0000-0000-0000-000000000000')
     );
   }
 
@@ -131,7 +131,7 @@ export async function saveConfigToDB(config) {
   if (config.pcc?.umbrales) {
     const u = config.pcc.umbrales;
     ops.push(
-      supabase.from('config_umbrales_pcc')
+      supabase.from('lmd_umbrales_pcc')
         .update({
           max_defectos_pct: u.maxDefectosPct,
           min_brix:         u.minBrix,
@@ -141,31 +141,31 @@ export async function saveConfigToDB(config) {
     );
   }
 
-  // Variedades uva (reemplazar lista completa para producto_id='uva')
+  // Variedades uva (reemplazar lista completa para cod_gru_conf='uva')
   if (config.pcc?.variedades) {
     const { data: existing } = await supabase
-      .from('config_variedades')
-      .select('id, nombre')
-      .eq('producto_id', 'uva');
+      .from('gsi_g_varied')
+      .select('id')
+      .eq('cod_gru_conf', 'uva');
 
     const existingIds = (existing || []).map(v => v.id);
-    await supabase.from('config_variedades').delete().in('id', existingIds);
+    await supabase.from('gsi_g_varied').delete().in('id', existingIds);
 
     const rows = config.pcc.variedades.map((nombre, i) => ({
-      producto_id: 'uva',
-      codigo: nombre.toLowerCase().replace(/\s+/g, '-'),
-      nombre,
-      activo: true,
-      orden:  i + 1,
+      cod_gru_conf: 'uva',
+      c_varied:     nombre.toLowerCase().replace(/\s+/g, '-'),
+      d_varied:     nombre,
+      activo:       true,
+      orden:        i + 1,
     }));
-    ops.push(supabase.from('config_variedades').insert(rows));
+    ops.push(supabase.from('gsi_g_varied').insert(rows));
   }
 
   // Clases CVU (actualizar por nombre)
   if (config.cvu?.clases) {
     for (const [i, c] of config.cvu.clases.entries()) {
       ops.push(
-        supabase.from('config_clases_cvu')
+        supabase.from('lmd_clases_calidad_cvu')
           .update({
             max_pct_elim:    c.maxElim,
             max_pct_graves:  c.maxGraves,

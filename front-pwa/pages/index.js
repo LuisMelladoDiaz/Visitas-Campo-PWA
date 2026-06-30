@@ -278,7 +278,7 @@ export default function App() {
       const formatos = cfg?.formatos?.[variety] ?? cfg?.pcc?.formatos ?? [];
       const fmt = formatos.find(f => f.id === pccSetupForm.formato);
       const year = new Date().getFullYear();
-      const id = `PC-${year}-${String(pccs.length + 1).padStart(4, '0')}`;
+      const id = `PCC-${year}-${String(pccs.length + 1).padStart(4, '0')}`;
       const np = { id, ...pccSetupForm, nMuestras: fmt?.nMuestras || 10, muestras: muestraForms, resultado };
       const next = [...pccs, np];
       setPccs(next); setSavedPcc(np); setView('pcc-resumen');
@@ -344,7 +344,7 @@ export default function App() {
     const { confeccion, trazabilidad, pesoInicial, fecha } = tandaForm;
     if (!confeccion || !trazabilidad || !pesoInicial || !fecha) { setError('Completa los campos obligatorios (*).'); return; }
     const year = new Date().getFullYear();
-    const id = `TA-${year}-${String(batches.length + 1).padStart(4, '0')}`;
+    const id = `CVU-${year}-${String(batches.length + 1).padStart(4, '0')}`;
     const nb = { id, variety, confeccion: tandaForm.confeccion, variedad: tandaForm.variedad, categoriaInicial: tandaForm.categoriaInicial, trazabilidad: tandaForm.trazabilidad, pesoInicial: parseFloat(tandaForm.pesoInicial), fecha: tandaForm.fecha, nota: tandaForm.nota, readings: [] };
     const next = [...batches, nb];
     setBatches(next); setBatch(nb); setError(''); setView('batch');

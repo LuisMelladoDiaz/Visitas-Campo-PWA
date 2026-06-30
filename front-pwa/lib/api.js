@@ -31,19 +31,26 @@ function cacheUpsertItem(key, item) {
   cacheWrite(key, cached);
 }
 
+// ─── Resultado helpers (string ↔ SMALLINT) ────────────────────────────────────
+// DB: 0=Pendiente, 1=Conforme, 2=NoConforme
+// JS: null / 'C' / 'NC'
+
+function resultadoToInt(r)  { return r === 'C' ? 1 : r === 'NC' ? 2 : 0; }
+function resultadoFromInt(n) { return n === 1 ? 'C' : n === 2 ? 'NC' : null; }
+
 // ─── Mappers Tanda ────────────────────────────────────────────────────────────
 
 function tandaToRow(t) {
   return {
-    id:                t.id,
-    producto_id:       t.variety || 'uva',
+    no:                t.id,
+    gru_conf:          t.variety || 'uva',
     confeccion:        t.confeccion,
-    variedad:          t.variedad   || null,
+    variedad:          t.variedad          || null,
     categoria_inicial: t.categoriaInicial,
     trazabilidad:      t.trazabilidad,
     peso_inicial:      t.pesoInicial,
     fecha:             t.fecha,
-    nota:              t.nota       || null,
+    nota:              t.nota              || null,
   };
 }
 
@@ -60,7 +67,7 @@ function lecturaToRow(tanda_id, r) {
     if (!LECTURA_NON_DEFECT_KEYS.has(key)) defectos[key] = r[key];
   }
   return {
-    tanda_id,
+    cod_cabecera_cvu:   tanda_id,
     dia:               r.dia,
     fecha:             r.fecha,
     trazabilidad:      r.trazabilidad      || null,
@@ -105,8 +112,8 @@ function lecturaFromRow(row) {
 
 function tandaFromRows(row, lecturasRows) {
   return {
-    id:               row.id,
-    variety:          row.producto_id,
+    id:               row.no,
+    variety:          row.gru_conf,
     confeccion:       row.confeccion,
     variedad:         row.variedad,
     categoriaInicial: row.categoria_inicial,
@@ -122,7 +129,9 @@ function tandaFromRows(row, lecturasRows) {
 
 function pccToRow(p) {
   return {
-    id:          p.id,
+    no:          p.id,
+    gru_conf:    p.variety     || 'uva',
+    tipo_conf:   p.formato     || null,
     fecha:       p.fecha,
     hora:        p.hora        || null,
     responsable: p.responsable || null,
@@ -130,55 +139,53 @@ function pccToRow(p) {
     trazabilidad:p.trazabilidad|| null,
     cinta_num:   p.cinaNum     || null,
     mesa_num:    p.mesaNum     || null,
-    formato_id:  p.formato     || null,
-    producto_id: p.variety     || 'uva',
     datos_extra: p.datosExtra  || { para_so2: p.paraSO2 ?? false },
     n_muestras:  p.nMuestras   ?? 10,
-    resultado:   p.resultado   || null,
+    resultado:   resultadoToInt(p.resultado),
   };
 }
 
 const MUESTRA_META_KEYS = new Set(['num', 'hora', 'resultado']);
 
-function muestraToRow(parte_id, m) {
+function muestraToRow(cod_cabecera_pcc, m) {
   const mediciones = {};
   for (const key of Object.keys(m)) {
     if (!MUESTRA_META_KEYS.has(key)) mediciones[key] = m[key];
   }
   return {
-    parte_id,
-    num:       m.num,
+    cod_cabecera_pcc,
+    no_linea:  m.num,
     hora:      m.hora      || null,
     mediciones,
-    resultado: m.resultado || null,
+    resultado: resultadoToInt(m.resultado),
   };
 }
 
 function muestraFromRow(row) {
   return {
-    num:       row.num,
+    num:       row.no_linea,
     hora:      row.hora,
     ...(row.mediciones || {}),
-    resultado: row.resultado,
+    resultado: resultadoFromInt(row.resultado),
   };
 }
 
 function pccFromRows(row, muestrasRows) {
   return {
-    id:           row.id,
+    id:           row.no,
     fecha:        row.fecha,
     hora:         row.hora,
     responsable:  row.responsable,
-    variety:      row.producto_id,
+    variety:      row.gru_conf,
     variedad:     row.variedad,
     trazabilidad: row.trazabilidad,
     cinaNum:      row.cinta_num,
     mesaNum:      row.mesa_num,
-    formato:      row.formato_id,
+    formato:      row.tipo_conf,
     datosExtra:   row.datos_extra || {},
     paraSO2:      row.datos_extra?.para_so2 ?? false,
     nMuestras:    row.n_muestras,
-    resultado:    row.resultado,
+    resultado:    resultadoFromInt(row.resultado),
     muestras:     (muestrasRows || []).map(muestraFromRow).sort((a, b) => a.num - b.num),
   };
 }
@@ -192,10 +199,10 @@ async function uploadPhoto(tanda_id, dia, dataUrl) {
     const bytes  = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
     const path   = `${tanda_id}/dia-${dia}.jpg`;
     const { error } = await supabase.storage
-      .from('lectura-photos')
+      .from('calidad-fotos')
       .upload(path, bytes.buffer, { contentType: 'image/jpeg', upsert: true });
     if (error) { console.error('uploadPhoto error:', error.message); return null; }
-    const { data } = supabase.storage.from('lectura-photos').getPublicUrl(path);
+    const { data } = supabase.storage.from('calidad-fotos').getPublicUrl(path);
     return data.publicUrl;
   } catch (e) {
     console.error('uploadPhoto exception:', e);
@@ -207,7 +214,7 @@ async function uploadPhoto(tanda_id, dia, dataUrl) {
 
 export async function loadBatches() {
   const { data: tandas, error: e1 } = await supabase
-    .from('tandas')
+    .from('lmd_cabecera_cvu')
     .select('*')
     .order('fecha', { ascending: false });
 
@@ -216,27 +223,25 @@ export async function loadBatches() {
   }
 
   const { data: lecturas } = await supabase
-    .from('lecturas')
+    .from('lmd_linea_cvu')
     .select('*')
     .order('dia');
 
   const lecMap = {};
   (lecturas || []).forEach(l => {
-    (lecMap[l.tanda_id] = lecMap[l.tanda_id] || []).push(l);
+    (lecMap[l.cod_cabecera_cvu] = lecMap[l.cod_cabecera_cvu] || []).push(l);
   });
 
-  const result = tandas.map(t => tandaFromRows(t, lecMap[t.id]));
+  const result = tandas.map(t => tandaFromRows(t, lecMap[t.no]));
   cacheWrite(STORAGE_KEY, result);
   return result;
 }
 
 export async function saveBatch(tanda) {
-  // Upsert tanda
-  const { error: e1 } = await supabase.from('tandas').upsert(tandaToRow(tanda));
+  const { error: e1 } = await supabase.from('lmd_cabecera_cvu').upsert(tandaToRow(tanda));
   if (e1) throw new Error(`Error guardando tanda: ${e1.message}`);
 
-  // Reemplazar lecturas (delete + insert, más simple que upsert con UNIQUE constraint)
-  await supabase.from('lecturas').delete().eq('tanda_id', tanda.id);
+  await supabase.from('lmd_linea_cvu').delete().eq('cod_cabecera_cvu', tanda.id);
 
   const rows = await Promise.all(tanda.readings.map(async r => {
     const photo_url = r.photo?.startsWith('data:')
@@ -246,7 +251,7 @@ export async function saveBatch(tanda) {
   }));
 
   if (rows.length > 0) {
-    const { error: e2 } = await supabase.from('lecturas').insert(rows);
+    const { error: e2 } = await supabase.from('lmd_linea_cvu').insert(rows);
     if (e2) throw new Error(`Error guardando lecturas: ${e2.message}`);
   }
 
@@ -259,7 +264,7 @@ export async function saveBatch(tanda) {
 }
 
 export async function deleteBatch(id) {
-  const { error } = await supabase.from('tandas').delete().eq('id', id);
+  const { error } = await supabase.from('lmd_cabecera_cvu').delete().eq('no', id);
   if (error) throw new Error(`Error eliminando tanda: ${error.message}`);
   cacheRemoveItem(STORAGE_KEY, id);
 }
@@ -268,7 +273,7 @@ export async function deleteBatch(id) {
 
 export async function loadPCCs() {
   const { data: partes, error: e1 } = await supabase
-    .from('partes_pcc')
+    .from('lmd_cabecera_pcc')
     .select('*')
     .order('fecha', { ascending: false });
 
@@ -277,29 +282,29 @@ export async function loadPCCs() {
   }
 
   const { data: muestras } = await supabase
-    .from('muestras_pcc')
+    .from('lmd_linea_pcc')
     .select('*')
-    .order('num');
+    .order('no_linea');
 
   const muestrasMap = {};
   (muestras || []).forEach(m => {
-    (muestrasMap[m.parte_id] = muestrasMap[m.parte_id] || []).push(m);
+    (muestrasMap[m.cod_cabecera_pcc] = muestrasMap[m.cod_cabecera_pcc] || []).push(m);
   });
 
-  const result = partes.map(p => pccFromRows(p, muestrasMap[p.id]));
+  const result = partes.map(p => pccFromRows(p, muestrasMap[p.no]));
   cacheWrite(PCC_KEY, result);
   return result;
 }
 
 export async function savePCC(pcc) {
-  const { error: e1 } = await supabase.from('partes_pcc').upsert(pccToRow(pcc));
+  const { error: e1 } = await supabase.from('lmd_cabecera_pcc').upsert(pccToRow(pcc));
   if (e1) throw new Error(`Error guardando PCC: ${e1.message}`);
 
-  await supabase.from('muestras_pcc').delete().eq('parte_id', pcc.id);
+  await supabase.from('lmd_linea_pcc').delete().eq('cod_cabecera_pcc', pcc.id);
 
   const rows = pcc.muestras.map(m => muestraToRow(pcc.id, m));
   if (rows.length > 0) {
-    const { error: e2 } = await supabase.from('muestras_pcc').insert(rows);
+    const { error: e2 } = await supabase.from('lmd_linea_pcc').insert(rows);
     if (e2) throw new Error(`Error guardando muestras: ${e2.message}`);
   }
 
@@ -308,7 +313,7 @@ export async function savePCC(pcc) {
 }
 
 export async function deletePCC(id) {
-  const { error } = await supabase.from('partes_pcc').delete().eq('id', id);
+  const { error } = await supabase.from('lmd_cabecera_pcc').delete().eq('no', id);
   if (error) throw new Error(`Error eliminando PCC: ${error.message}`);
   cacheRemoveItem(PCC_KEY, id);
 }
