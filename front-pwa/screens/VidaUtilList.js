@@ -35,7 +35,7 @@ export default function VidaUtilList({ batches, variety, onBack, onNuevaTanda, o
                 <div key={b.id} className="batch-card" onClick={() => onOpenBatch(b.id)}>
                   <div className="batch-card-body">
                     <div className="bc-row">
-                      <span className="bc-id">{b.id}</span>
+                      <span className="bc-id">{b.id} - {b.bcNo}</span>
                       <span className="bc-date">{fmtDate(b.fecha)}</span>
                     </div>
                     <div className="bc-conf">{b.confeccion}</div>
