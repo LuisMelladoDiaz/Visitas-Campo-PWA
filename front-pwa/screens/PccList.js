@@ -40,10 +40,10 @@ export default function PccList({ pccs, variety, cfg, onBack, onNuevoParte, onOp
                 <div key={p.id} className="batch-card" onClick={() => onOpenPcc(p)}>
                   <div className="batch-card-body">
                     <div className="bc-row">
-                      <span className="bc-id">{p.id}</span>
+                      <span className="bc-id"> Nº {p.id} - {p.bcNo}</span>
                       <span className="bc-date">{fmtDate(p.fecha)} {p.hora}</span>
                     </div>
-                    <div className="bc-conf">{fmt?.label} {fmt?.sub}{p.trazabilidad ? ` · ${p.trazabilidad}` : ''}</div>
+                    <div className="bc-conf">{fmt?.label} {fmt?.sub}{p.trazabilidad ? ` · ${p.trazabilidad}` : ''} </div>
                     <div className="bc-meta">
                       {p.variedad ? p.variedad : ''}
                       {isUva && p.cinaNum ? ` · Cinta ${p.cinaNum}` : ''}

@@ -85,7 +85,7 @@ export default function PccResumen({ savedPcc, variety, cfg, onBack, onAddMuestr
             onClick={handlePushToBc}
             disabled={pushing}
           >
-            {pushing ? '⟳ Enviando…' : savedPcc.bcNo ? '↺ Re-enviar' : '⬆ Enviar a BC'}
+            {pushing ? '⟳ Enviando…' : savedPcc.bcNo ? '↺ Actualizar BC' : '⬆ Enviar a BC'}
           </button>
         </div>
 
