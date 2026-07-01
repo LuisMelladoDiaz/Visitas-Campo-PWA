@@ -1,0 +1,203 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   ADMIN — pantalla de configuración / visor datos BC
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ─── Tab bar ─── */
+.admin-tabs {
+  display: flex;
+  overflow-x: auto;
+  background: var(--surface);
+  border-bottom: 1.5px solid var(--border);
+  padding: 0 .75rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  position: sticky;
+  top: var(--bar-h);
+  z-index: 10;
+}
+.admin-tabs::-webkit-scrollbar { display: none; }
+
+.admin-tab {
+  flex-shrink: 0;
+  padding: .7rem 1rem;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+}
+.admin-tab:hover          { color: var(--primary); }
+.admin-tab--active        { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* ─── Header badge ─── */
+.admin-bc-badge {
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: .2rem .65rem;
+  white-space: nowrap;
+}
+
+/* ─── Table meta row (table name + row count) ─── */
+.admin-table-meta {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  margin-bottom: .65rem;
+}
+.admin-table-name {
+  font-size: .75rem;
+  font-weight: 700;
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: .4rem;
+  padding: .15rem .55rem;
+}
+.admin-row-count {
+  font-size: .72rem;
+  color: var(--muted);
+}
+
+/* ─── Content wrapper ─── */
+.admin-content {
+  padding-top: .75rem;
+  padding-bottom: 2rem;
+}
+
+/* ─── BC table ─── */
+.admin-table-wrap {
+  overflow-x: auto;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .83rem;
+}
+
+.admin-table thead tr {
+  background: var(--surface-2);
+}
+
+.admin-table th {
+  text-align: left;
+  padding: .55rem .85rem;
+  font-size: .71rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+  border-bottom: 1.5px solid var(--border);
+}
+
+.admin-table td {
+  padding: .5rem .85rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.admin-table tbody tr:last-child td { border-bottom: none; }
+.admin-table tbody tr:hover         { background: var(--surface-2); }
+
+/* ─── States ─── */
+.admin-loading,
+.admin-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--muted);
+  font-size: .88rem;
+}
+
+/* ─── General tab ─── */
+.admin-general {
+  max-width: 480px;
+}
+
+/* ─── Sync error banner (below header, above tabs) ─── */
+.admin-sync-err {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .78rem;
+  color: var(--danger);
+  background: var(--danger-bg, #fff0f0);
+  border-bottom: 1px solid rgba(192,48,48,.25);
+  padding: .45rem 1rem;
+}
+.admin-sync-err span { flex: 1; }
+.admin-sync-err button {
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  padding: 0 .2rem;
+  font-size: .95rem;
+  line-height: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BC SYNC BAR — barra de estado/acción para envío de partes a BC
+   Usada en BatchDetail y PccResumen
+───────────────────────────────────────────────────────────────────────────── */
+.bc-sync-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .6rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: .65rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.bc-sync-status {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.bc-sync-docno {
+  font-size: .8rem;
+  font-weight: 700;
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--primary);
+}
+
+.bc-sync-time {
+  font-size: .75rem;
+  color: var(--muted);
+}
+
+.bc-sync-err {
+  width: 100%;
+  font-size: .78rem;
+  color: var(--danger);
+  background: var(--danger-bg);
+  border: 1px solid rgba(192,48,48,.2);
+  border-radius: .5rem;
+  padding: .3rem .65rem;
+}
+
+.bc-sync-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}

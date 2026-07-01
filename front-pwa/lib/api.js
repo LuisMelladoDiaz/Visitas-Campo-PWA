@@ -121,6 +121,8 @@ function tandaFromRows(row, lecturasRows) {
     pesoInicial:      parseFloat(row.peso_inicial),
     fecha:            row.fecha,
     nota:             row.nota,
+    bcNo:             row.bc_no      || null,
+    bcSyncAt:         row.bc_sync_at || null,
     readings:         (lecturasRows || []).map(lecturaFromRow).sort((a, b) => a.dia - b.dia),
   };
 }
@@ -186,6 +188,8 @@ function pccFromRows(row, muestrasRows) {
     paraSO2:      row.datos_extra?.para_so2 ?? false,
     nMuestras:    row.n_muestras,
     resultado:    resultadoFromInt(row.resultado),
+    bcNo:         row.bc_no      || null,
+    bcSyncAt:     row.bc_sync_at || null,
     muestras:     (muestrasRows || []).map(muestraFromRow).sort((a, b) => a.num - b.num),
   };
 }

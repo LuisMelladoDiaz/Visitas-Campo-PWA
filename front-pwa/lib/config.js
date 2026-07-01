@@ -12,11 +12,32 @@ export const DEFAULT_CONFIG = {
     { id: 'PI', nombre: 'Pimiento',    icono: '🫑', tiene_cvu: false, tiene_pcc: true,  activo: true },
   ],
   variedades: {
-    UV: ['Sweet Globe', 'Sweet Celebration', 'Candy Snap'],
-    RE: ['Mónaco', 'Boto', 'Roja Redonda'],
-    BO: ['Beauregard', 'Covington', 'Jewel'],
-    CA: ['Butternut', 'Cacahuete', 'Moscata'],
-    PI: ['California Rojo', 'California Verde', 'Lamuyo', 'Italiano'],
+    UV: [
+      { code: 'Sweet Globe',       label: 'Sweet Globe'       },
+      { code: 'Sweet Celebration', label: 'Sweet Celebration' },
+      { code: 'Candy Snap',        label: 'Candy Snap'        },
+    ],
+    RE: [
+      { code: 'Mónaco',        label: 'Mónaco'        },
+      { code: 'Boto',          label: 'Boto'          },
+      { code: 'Roja Redonda',  label: 'Roja Redonda'  },
+    ],
+    BO: [
+      { code: 'Beauregard', label: 'Beauregard' },
+      { code: 'Covington',  label: 'Covington'  },
+      { code: 'Jewel',      label: 'Jewel'      },
+    ],
+    CA: [
+      { code: 'Butternut', label: 'Butternut' },
+      { code: 'Cacahuete', label: 'Cacahuete' },
+      { code: 'Moscata',   label: 'Moscata'   },
+    ],
+    PI: [
+      { code: 'California Rojo',   label: 'California Rojo'   },
+      { code: 'California Verde',  label: 'California Verde'  },
+      { code: 'Lamuyo',            label: 'Lamuyo'            },
+      { code: 'Italiano',          label: 'Italiano'          },
+    ],
   },
   defectosCvu: {
     UV: {

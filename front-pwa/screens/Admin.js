@@ -1,274 +1,318 @@
-import { useState } from 'react';
-import { loadConfig, saveConfig } from '../lib/config';
-import Stepper from '../components/Stepper';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+
+const SUPABASE_URL      = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+const SEV_LABEL = { 0: 'Leve', 1: 'Grave', 2: 'Elim.' };
+const SEV_CSS   = { 0: 'badge-neutral', 1: 'badge-warn', 2: 'badge-danger' };
+
+const TABS = [
+  { id: 'grupos',     label: 'Grupos conf.' },
+  { id: 'variedades', label: 'Variedades'   },
+  { id: 'tipos',      label: 'Tipos conf.'  },
+  { id: 'clases',     label: 'Clases CVU'   },
+  { id: 'def-cvu',    label: 'Defectos CVU' },
+  { id: 'umbrales',   label: 'Umbrales PCC' },
+  { id: 'def-pcc',    label: 'Defectos PCC' },
+  { id: 'general',    label: 'General'      },
+];
+
+// ─── Reusable table ──────────────────────────────────────────────────────────
+
+function BcTable({ columns, rows }) {
+  if (!rows?.length) return <p className="admin-empty">Sin datos — pulsa "Descargar datos BC" para sincronizar.</p>;
+  return (
+    <div className="admin-table-wrap">
+      <table className="admin-table">
+        <thead>
+          <tr>{columns.map(c => <th key={c.key}>{c.label}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i}>
+              {columns.map(c => (
+                <td key={c.key}>
+                  {c.render ? c.render(r[c.key], r) : (r[c.key] ?? '—')}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function BoolBadge({ v, trueClass = 'badge-ok' }) {
+  return v
+    ? <span className={`badge ${trueClass}`}>Sí</span>
+    : <span className="badge badge-neutral">No</span>;
+}
+
+function PctCell({ v }) {
+  return v != null ? <>{v} %</> : '—';
+}
+
+// ─── Tab views ───────────────────────────────────────────────────────────────
+
+function TabGrupos({ rows }) {
+  return (
+    <BcTable rows={rows} columns={[
+      { key: 'cod_gru_conf', label: 'Código' },
+      { key: 'des_gru_conf', label: 'Descripción' },
+      { key: 'tiene_cvu',    label: 'CVU', render: v => <BoolBadge v={v} /> },
+      { key: 'tiene_pcc',    label: 'PCC', render: v => <BoolBadge v={v} /> },
+    ]} />
+  );
+}
+
+function TabVariedades({ rows }) {
+  return (
+    <BcTable rows={rows} columns={[
+      { key: 'c_varied',     label: 'Código'      },
+      { key: 'd_varied',     label: 'Descripción' },
+      { key: 'cod_gru_conf', label: 'Grupo'       },
+    ]} />
+  );
+}
+
+function TabTipos({ rows }) {
+  return (
+    <BcTable rows={rows} columns={[
+      { key: 'c_t_conf',     label: 'Código' },
+      { key: 'd_t_conf',     label: 'Descripción' },
+      { key: 'cod_gru_conf', label: 'Grupo' },
+      { key: 'peso_ref_g',   label: 'Peso ref. (g)', render: v => v != null ? v.toLocaleString('es-ES') : '—' },
+      { key: 'n_muestras',   label: 'Nº muestras' },
+    ]} />
+  );
+}
+
+function TabClases({ rows }) {
+  return (
+    <BcTable rows={rows} columns={[
+      { key: 'cod_gru_conf',   label: 'Grupo' },
+      { key: 'nombre',         label: 'Clase' },
+      { key: 'max_pct_elim',   label: 'Elim. %',   render: v => <PctCell v={v} /> },
+      { key: 'max_pct_graves', label: 'Graves %',   render: v => <PctCell v={v} /> },
+      { key: 'max_pct_total',  label: 'Total %',    render: v => <PctCell v={v} /> },
+      { key: 'max_pct_calibre',label: 'Calibre %',  render: v => <PctCell v={v} /> },
+    ]} />
+  );
+}
+
+function TabDefCvu({ rows }) {
+  return (
+    <BcTable rows={rows} columns={[
+      { key: 'cod_gru_conf', label: 'Grupo' },
+      { key: 'severidad',    label: 'Severidad', render: v => <span className={`badge ${SEV_CSS[v] ?? 'badge-neutral'}`}>{SEV_LABEL[v] ?? v}</span> },
+      { key: 'clave',        label: 'Clave'      },
+      { key: 'etiqueta',     label: 'Etiqueta'   },
+      { key: 'valor_ok',     label: 'Valor OK'   },
+      { key: 'activo',       label: 'Activo', render: v => <BoolBadge v={v} /> },
+    ]} />
+  );
+}
+
+function TabUmbrales({ rows }) {
+  return (
+    <BcTable rows={rows} columns={[
+      { key: 'cod_gru_conf',    label: 'Grupo' },
+      { key: 'max_defectos_pct',label: 'Máx. defectos %', render: v => <PctCell v={v} /> },
+      { key: 'min_brix',        label: 'Mín. Brix',       render: v => v != null ? v : '—' },
+      { key: 'max_calibre_pct', label: 'Máx. calibre %',  render: v => <PctCell v={v} /> },
+    ]} />
+  );
+}
+
+function TabDefPcc({ rows }) {
+  return (
+    <BcTable rows={rows} columns={[
+      { key: 'cod_gru_conf',    label: 'Grupo' },
+      { key: 'clave',           label: 'Clave'     },
+      { key: 'etiqueta',        label: 'Etiqueta'  },
+      { key: 'tolerancia_cero', label: 'Tol. cero', render: v => <BoolBadge v={v} trueClass="badge-danger" /> },
+      { key: 'activo',          label: 'Activo',    render: v => <BoolBadge v={v} /> },
+    ]} />
+  );
+}
+
+function TabGeneral({ nombre, onChange, onSave, saving }) {
+  return (
+    <div className="admin-general">
+      <p className="section-h">Empresa</p>
+      <div className="form-group">
+        <label className="form-label">Nombre / Razón social</label>
+        <input
+          className="form-input"
+          type="text"
+          value={nombre}
+          onChange={e => onChange(e.target.value)}
+        />
+      </div>
+      <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end' }}>
+        <button className="btn btn-primary" onClick={onSave} disabled={saving}>
+          {saving ? 'Guardando…' : 'Guardar'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Admin({ onBack }) {
-  const [cfg, setCfg] = useState(() => loadConfig());
+  const [tab, setTab]     = useState('grupos');
+  const [rows, setRows]   = useState({});
+  const [loading, setLoading] = useState(true);
+  const [nombre, setNombre]   = useState('');
+  const [saving, setSaving]   = useState(false);
+  const [syncing, setSyncing]     = useState(false);
+  const [syncState, setSyncState] = useState(null);
+  const [syncError, setSyncError] = useState(null);
 
-  // ── Empresa ────────────────────────────────────────────────────────────────
-  function setEmpresaNombre(val) {
-    setCfg(c => ({ ...c, empresa: { ...c.empresa, nombre: val } }));
-  }
-
-  // ── Variedades ─────────────────────────────────────────────────────────────
-  const [newVariety, setNewVariety] = useState('');
-
-  function removeVariety(idx) {
-    setCfg(c => ({
-      ...c,
-      pcc: { ...c.pcc, variedades: c.pcc.variedades.filter((_, i) => i !== idx) },
-    }));
-  }
-
-  function addVariety() {
-    const v = newVariety.trim();
-    if (!v) return;
-    setCfg(c => ({
-      ...c,
-      pcc: { ...c.pcc, variedades: [...c.pcc.variedades, v] },
-    }));
-    setNewVariety('');
-  }
-
-  // ── Formatos ───────────────────────────────────────────────────────────────
-  const emptyFmt = { label: '', sub: '', pesoRef: '', nMuestras: '' };
-  const [newFmt, setNewFmt] = useState(emptyFmt);
-
-  function removeFormato(idx) {
-    setCfg(c => ({
-      ...c,
-      pcc: { ...c.pcc, formatos: c.pcc.formatos.filter((_, i) => i !== idx) },
-    }));
-  }
-
-  function addFormato() {
-    const { label, sub, pesoRef, nMuestras } = newFmt;
-    if (!label.trim()) return;
-    const id = label.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    setCfg(c => ({
-      ...c,
-      pcc: {
-        ...c.pcc,
-        formatos: [
-          ...c.pcc.formatos,
-          {
-            id,
-            label: label.trim(),
-            sub: sub.trim(),
-            pesoRef: pesoRef === '' ? null : Number(pesoRef),
-            nMuestras: nMuestras === '' ? 10 : Number(nMuestras),
-          },
-        ],
-      },
-    }));
-    setNewFmt(emptyFmt);
-  }
-
-  // ── Umbrales PCC ───────────────────────────────────────────────────────────
-  function setUmbral(key, val) {
-    setCfg(c => ({
-      ...c,
-      pcc: {
-        ...c.pcc,
-        umbrales: { ...c.pcc.umbrales, [key]: parseFloat(val) || 0 },
-      },
-    }));
-  }
-
-  // ── Umbrales CVU ───────────────────────────────────────────────────────────
-  function setClaseField(idx, key, val) {
-    setCfg(c => {
-      const clases = c.cvu.clases.map((cls, i) =>
-        i === idx ? { ...cls, [key]: val === '' ? null : Number(val) } : cls
-      );
-      return { ...c, cvu: { ...c.cvu, clases } };
+  async function loadData() {
+    setLoading(true);
+    const [grupos, variedades, tipos, defCvu, defPcc, clases, umbrales, empresa] = await Promise.all([
+      supabase.from('gsi_vgr_conf').select('*').order('cod_gru_conf'),
+      supabase.from('gsi_g_varied').select('*').order('cod_gru_conf').order('d_varied'),
+      supabase.from('gsi_vti_conf').select('*').order('c_t_conf'),
+      supabase.from('lmd_defectos_cvu').select('*').order('cod_gru_conf').order('severidad').order('orden'),
+      supabase.from('lmd_defectos_pcc').select('*').order('cod_gru_conf').order('orden'),
+      supabase.from('lmd_clases_calidad_cvu').select('*').order('cod_gru_conf').order('orden'),
+      supabase.from('lmd_umbrales_pcc').select('*').order('cod_gru_conf'),
+      supabase.from('config_empresa').select('nombre').limit(1).single(),
+    ]);
+    setRows({
+      grupos:     grupos.data     ?? [],
+      variedades: variedades.data ?? [],
+      tipos:      tipos.data      ?? [],
+      defCvu:     defCvu.data     ?? [],
+      defPcc:     defPcc.data     ?? [],
+      clases:     clases.data     ?? [],
+      umbrales:   umbrales.data   ?? [],
     });
+    setNombre(empresa.data?.nombre ?? '');
+    setLoading(false);
   }
 
-  // ── Save ───────────────────────────────────────────────────────────────────
-  function handleSave() {
-    saveConfig(cfg);
-    onBack();
+  useEffect(() => { loadData(); }, []);
+
+  async function handleSync() {
+    setSyncing(true);
+    setSyncState(null);
+    setSyncError(null);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/sync-bc`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.ok) {
+        const firstErr = Object.entries(data?.results ?? {}).find(([, v]) => v.error);
+        throw new Error(firstErr ? `${firstErr[0]}: ${firstErr[1].error}` : (data?.error ?? `HTTP ${res.status}`));
+      }
+      setSyncState('ok');
+      loadData();
+    } catch (e) {
+      setSyncState('error');
+      setSyncError(e.message);
+    } finally {
+      setSyncing(false);
+    }
   }
+
+  async function handleSave() {
+    setSaving(true);
+    await supabase
+      .from('config_empresa')
+      .update({ nombre })
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    setSaving(false);
+  }
+
+  const isBC = tab !== 'general';
+  const count = isBC && rows[tabKey(tab)] ? rows[tabKey(tab)].length : null;
 
   return (
     <>
       <header className="top-bar">
-        <div className="top-bar-title">Administración</div>
+        <button className="icon-btn" onClick={onBack} title="Volver">←</button>
+        <div className="top-bar-title" style={{ flex: 1 }}>Configuración</div>
+        <button
+          className="btn btn-sm btn-secondary"
+          onClick={handleSync}
+          disabled={syncing}
+          title="Descargar configuración desde Business Central"
+          style={syncState === 'ok' ? { color: 'var(--ok)', borderColor: 'var(--ok)' } : syncState === 'error' ? { color: 'var(--danger)', borderColor: 'var(--danger)' } : {}}
+        >
+          {syncing ? '⟳' : syncState === 'ok' ? '✓' : syncState === 'error' ? '✕' : '⬇'} BC
+        </button>
       </header>
 
-      <main className="content" style={{ paddingBottom: '5rem' }}>
-
-        {/* ── Empresa ── */}
-        <p className="section-h">Empresa</p>
-        <div className="form-group">
-          <label className="form-label">Nombre empresa / Razón social</label>
-          <input
-            className="form-input"
-            type="text"
-            value={cfg.empresa.nombre}
-            onChange={e => setEmpresaNombre(e.target.value)}
-          />
+      {syncError && (
+        <div className="admin-sync-err">
+          <span>{syncError}</span>
+          <button onClick={() => { setSyncState(null); setSyncError(null); }}>✕</button>
         </div>
+      )}
 
-        {/* ── Variedades ── */}
-        <p className="section-h">Variedades de uva (PCC)</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem', marginBottom: '1rem' }}>
-          {cfg.pcc.variedades.map((v, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '.75rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '.75rem', padding: '.5rem 1rem' }}>
-              <span style={{ flex: 1 }}>{v}</span>
-              <button
-                className="icon-btn"
-                style={{ color: 'var(--danger)', fontSize: '1rem', lineHeight: 1 }}
-                onClick={() => removeVariety(i)}
-                title="Eliminar"
-              >✕</button>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: '.5rem' }}>
-          <input
-            className="form-input"
-            type="text"
-            placeholder="Nueva variedad…"
-            value={newVariety}
-            onChange={e => setNewVariety(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addVariety()}
-            style={{ flex: 1 }}
-          />
-          <button className="btn btn-primary" onClick={addVariety}>Añadir variedad</button>
-        </div>
+      <nav className="admin-tabs">
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            className={`admin-tab${tab === t.id ? ' admin-tab--active' : ''}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
 
-        {/* ── Formatos ── */}
-        <p className="section-h">Formatos de envase (PCC)</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem', marginBottom: '1rem' }}>
-          {cfg.pcc.formatos.map((f, i) => (
-            <div key={f.id ?? i} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '.75rem', padding: '.75rem 1rem', display: 'flex', alignItems: 'flex-start', gap: '.75rem' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600 }}>{f.label}</div>
-                {f.sub && <div style={{ fontSize: '.85rem', color: 'var(--muted)' }}>{f.sub}</div>}
-                <div style={{ fontSize: '.8rem', color: 'var(--muted)', marginTop: '.25rem' }}>
-                  {f.pesoRef != null ? `Peso ref: ${f.pesoRef} g` : 'Sin peso ref'} · {f.nMuestras} muestras
-                </div>
+      <main className="content admin-content">
+        {loading && isBC ? (
+          <div className="admin-loading">Cargando…</div>
+        ) : (
+          <>
+            {isBC && (
+              <div className="admin-table-meta">
+                <span className="admin-table-name">{currentTableName(tab)}</span>
+                {count != null && <span className="admin-row-count">{count} filas</span>}
               </div>
-              <button
-                className="icon-btn"
-                style={{ color: 'var(--danger)', fontSize: '1rem', lineHeight: 1 }}
-                onClick={() => removeFormato(i)}
-                title="Eliminar"
-              >✕</button>
-            </div>
-          ))}
-        </div>
-        {/* Add formato form */}
-        <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '.75rem', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
-          <div style={{ fontWeight: 600, fontSize: '.9rem', color: 'var(--muted)', marginBottom: '.25rem' }}>Añadir formato</div>
-          <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap' }}>
-            <input
-              className="form-input"
-              type="text"
-              placeholder="Etiqueta *"
-              value={newFmt.label}
-              onChange={e => setNewFmt(f => ({ ...f, label: e.target.value }))}
-              style={{ flex: '2 1 140px' }}
-            />
-            <input
-              className="form-input"
-              type="text"
-              placeholder="Sub-etiqueta"
-              value={newFmt.sub}
-              onChange={e => setNewFmt(f => ({ ...f, sub: e.target.value }))}
-              style={{ flex: '2 1 120px' }}
-            />
-            <input
-              className="form-input"
-              type="number"
-              placeholder="Peso ref (g)"
-              value={newFmt.pesoRef}
-              onChange={e => setNewFmt(f => ({ ...f, pesoRef: e.target.value }))}
-              style={{ flex: '1 1 100px' }}
-            />
-            <input
-              className="form-input"
-              type="number"
-              placeholder="Nº muestras"
-              value={newFmt.nMuestras}
-              onChange={e => setNewFmt(f => ({ ...f, nMuestras: e.target.value }))}
-              style={{ flex: '1 1 100px' }}
-            />
-          </div>
-          <button className="btn btn-primary" onClick={addFormato} style={{ alignSelf: 'flex-end' }}>Añadir formato</button>
-        </div>
-
-        {/* ── Umbrales PCC ── */}
-        <p className="section-h">Umbrales PCC</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-            <label style={{ flex: 1 }}>Máx. defectos (%)</label>
-            <Stepper
-              value={String(cfg.pcc.umbrales.maxDefectosPct)}
-              onChange={val => setUmbral('maxDefectosPct', val)}
-              step={0.5} min={0} max={100} decimals={1}
-            />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-            <label style={{ flex: 1 }}>Mínimo °Brix</label>
-            <Stepper
-              value={String(cfg.pcc.umbrales.minBrix)}
-              onChange={val => setUmbral('minBrix', val)}
-              step={0.1} min={0} max={30} decimals={1}
-            />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-            <label style={{ flex: 1 }}>Máx. fuera calibre (%)</label>
-            <Stepper
-              value={String(cfg.pcc.umbrales.maxCalibrePct)}
-              onChange={val => setUmbral('maxCalibrePct', val)}
-              step={0.5} min={0} max={100} decimals={1}
-            />
-          </div>
-        </div>
-
-        {/* ── Umbrales CVU ── */}
-        <p className="section-h">Umbrales CVU — Clasificación de calidad</p>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.9rem' }}>
-            <thead>
-              <tr style={{ background: 'var(--surface-2)' }}>
-                <th style={{ textAlign: 'left', padding: '.5rem .75rem', fontWeight: 600, borderBottom: '1px solid var(--border)' }}>Clase</th>
-                <th style={{ textAlign: 'center', padding: '.5rem .5rem', fontWeight: 600, borderBottom: '1px solid var(--border)' }}>Elim</th>
-                <th style={{ textAlign: 'center', padding: '.5rem .5rem', fontWeight: 600, borderBottom: '1px solid var(--border)' }}>Graves</th>
-                <th style={{ textAlign: 'center', padding: '.5rem .5rem', fontWeight: 600, borderBottom: '1px solid var(--border)' }}>Total</th>
-                <th style={{ textAlign: 'center', padding: '.5rem .5rem', fontWeight: 600, borderBottom: '1px solid var(--border)' }}>Calibre</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cfg.cvu.clases.map((cls, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '.5rem .75rem', fontWeight: 600 }}>{cls.label}</td>
-                  {['maxElim', 'maxGraves', 'maxTotal', 'maxCalibre'].map(key => (
-                    <td key={key} style={{ padding: '.35rem .25rem', textAlign: 'center' }}>
-                      <Stepper
-                        value={cls[key] == null ? '' : String(cls[key])}
-                        onChange={val => setClaseField(i, key, val)}
-                        step={1} min={0} max={100} decimals={0}
-                        compact
-                      />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
+            )}
+            {tab === 'grupos'     && <TabGrupos     rows={rows.grupos}     />}
+            {tab === 'variedades' && <TabVariedades rows={rows.variedades} />}
+            {tab === 'tipos'      && <TabTipos      rows={rows.tipos}      />}
+            {tab === 'clases'     && <TabClases     rows={rows.clases}     />}
+            {tab === 'def-cvu'    && <TabDefCvu     rows={rows.defCvu}     />}
+            {tab === 'umbrales'   && <TabUmbrales   rows={rows.umbrales}   />}
+            {tab === 'def-pcc'    && <TabDefPcc     rows={rows.defPcc}     />}
+            {tab === 'general'    && (
+              <TabGeneral nombre={nombre} onChange={setNombre} onSave={handleSave} saving={saving} />
+            )}
+          </>
+        )}
       </main>
-
-      {/* ── Action bar ── */}
-      <div className="action-bar">
-        <button className="btn btn-ghost" onClick={onBack}>← Volver</button>
-        <button className="btn btn-primary btn-lg" onClick={handleSave}>Guardar cambios ✓</button>
-      </div>
     </>
   );
+}
+
+function tabKey(tab) {
+  return { grupos: 'grupos', variedades: 'variedades', tipos: 'tipos', 'def-cvu': 'defCvu', 'def-pcc': 'defPcc', clases: 'clases', umbrales: 'umbrales' }[tab];
+}
+
+function currentTableName(tab) {
+  return {
+    grupos:     'gsi_vgr_conf',
+    variedades: 'gsi_g_varied',
+    tipos:      'gsi_vti_conf',
+    clases:     'lmd_clases_calidad_cvu',
+    'def-cvu':  'lmd_defectos_cvu',
+    umbrales:   'lmd_umbrales_pcc',
+    'def-pcc':  'lmd_defectos_pcc',
+  }[tab] ?? '';
 }

@@ -19,7 +19,7 @@ export async function loadConfigFromDB() {
     const variadesMap = {};
     for (const v of (variedades.data || [])) {
       const pid = v.cod_gru_conf || 'UV';
-      (variadesMap[pid] = variadesMap[pid] || []).push(v.d_varied);
+      (variadesMap[pid] = variadesMap[pid] || []).push({ code: v.c_varied, label: v.d_varied });
     }
 
     // Group defectos CVU by cod_gru_conf, then by severidad (SMALLINT: 0=leve, 1=grave, 2=elim)

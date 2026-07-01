@@ -1,11 +1,39 @@
-import { fmtDate, fmtNum } from '../lib/utils';
+import { useState } from 'react';
+import { fmtDate, fmtNum, fmtDateTime } from '../lib/utils';
 import { CVU_CALIDAD, calcBatchSummary, MiniLineChart, varieties } from '../lib/cvu';
 import { printBatch } from '../lib/cvu';
+import { pushToBc } from '../lib/bcPush';
 
 export default function BatchDetail({ batch, variety, config, onBack, onNuevaLectura, onEditLectura, onDeleteBatch, onRefresh, refreshing }) {
+  const [pushing, setPushing]   = useState(false);
+  const [pushErr, setPushErr]   = useState(null);
+
+  async function handlePushToBc() {
+    setPushing(true);
+    setPushErr(null);
+    try {
+      await pushToBc('CVU', batch.id);
+      onRefresh?.();
+    } catch (e) {
+      setPushErr(e.message);
+    } finally {
+      setPushing(false);
+    }
+  }
   const vInfo = varieties.find(v => v.id === variety) || { icon: '📦' };
   return (
     <>
+      {pushErr && (
+        <div className="error-modal-overlay" onClick={() => setPushErr(null)}>
+          <div className="error-modal" onClick={e => e.stopPropagation()}>
+            <div className="error-modal-title">⚠ Error al enviar a BC</div>
+            <div className="error-modal-body">{pushErr}</div>
+            <div className="error-modal-actions">
+              <button className="btn btn-sm btn-secondary" onClick={() => setPushErr(null)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
       <header className="top-bar">
         <button className="icon-btn" onClick={onBack}>←</button>
         <div style={{ flex: 1 }}>
@@ -20,6 +48,29 @@ export default function BatchDetail({ batch, variety, config, onBack, onNuevaLec
         {onDeleteBatch && <button className="icon-btn" style={{ background: 'rgba(192,48,48,.25)' }} onClick={() => onDeleteBatch(batch.id)} title="Eliminar tanda">🗑</button>}
       </header>
       <main className="content">
+
+        {/* ── BC Sync ── */}
+        <div className="bc-sync-bar">
+          <div className="bc-sync-status">
+            {batch.bcNo ? (
+              <>
+                <span className="badge badge-ok">BC ✓</span>
+                <span className="bc-sync-docno">{batch.bcNo}</span>
+                <span className="bc-sync-time">{fmtDateTime(batch.bcSyncAt)}</span>
+              </>
+            ) : (
+              <span className="badge badge-neutral">No enviado a BC</span>
+            )}
+          </div>
+          <button
+            className="btn btn-sm btn-secondary bc-sync-btn"
+            onClick={handlePushToBc}
+            disabled={pushing}
+          >
+            {pushing ? '⟳ Enviando…' : batch.bcNo ? '↺ Re-enviar' : '⬆ Enviar a BC'}
+          </button>
+        </div>
+
         <div className="detail-header">
           <div className="detail-header-grid">
             <div className="dh-item"><span className="dh-label">Fecha entrada</span><span className="dh-value">{fmtDate(batch.fecha)}</span></div>

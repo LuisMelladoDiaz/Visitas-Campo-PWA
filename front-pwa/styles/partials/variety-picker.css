@@ -72,3 +72,83 @@
 .variety-icon { font-size: 2.75rem; line-height: 1; }
 .variety-name { font-size: 1rem; font-weight: 700; }
 .variety-soon { font-size: .75rem; color: var(--muted); background: var(--surface-2); border-radius: 999px; padding: .2rem .65rem; }
+
+/* ─── Botón sync BC ────────────────────────────────────────────────────────── */
+.sync-bc-btn {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .55rem 1rem .55rem .8rem;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.12);
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+  z-index: 50;
+  white-space: nowrap;
+}
+.sync-bc-btn:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: var(--primary-2);
+  color: var(--primary);
+  box-shadow: 0 4px 16px rgba(46,107,46,.18);
+}
+.sync-bc-btn:active:not(:disabled) { transform: scale(.97); }
+.sync-bc-btn:disabled { opacity: .65; cursor: default; }
+.sync-bc-btn--ok    { border-color: var(--ok);     color: var(--ok);     }
+.sync-bc-btn--error { border-color: var(--danger);  color: var(--danger); }
+
+.sync-bc-icon {
+  font-size: 1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.sync-bc-wrap {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .5rem;
+  z-index: 50;
+}
+.sync-bc-wrap .sync-bc-btn {
+  position: static;
+}
+
+.sync-bc-error {
+  display: flex;
+  align-items: flex-start;
+  gap: .5rem;
+  max-width: min(340px, calc(100vw - 2.5rem));
+  background: var(--surface);
+  border: 1.5px solid var(--danger);
+  border-radius: .75rem;
+  padding: .6rem .75rem;
+  font-size: .78rem;
+  color: var(--danger);
+  box-shadow: 0 4px 16px rgba(0,0,0,.14);
+  word-break: break-word;
+}
+.sync-bc-error-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--danger);
+  font-size: .85rem;
+  padding: 0 .1rem;
+  line-height: 1.4;
+  opacity: .7;
+}
+.sync-bc-error-close:hover { opacity: 1; }

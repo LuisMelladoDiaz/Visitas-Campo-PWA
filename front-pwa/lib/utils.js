@@ -4,6 +4,10 @@ export function fmtDate(d) {
   return new Date(d).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 export function fmtNum(n, dec = 2) { return n == null ? '—' : Number(n).toFixed(dec); }
+export function fmtDateTime(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
 export function today() { return new Date().toISOString().slice(0, 10); }
 export function nowTime() {
   const d = new Date();

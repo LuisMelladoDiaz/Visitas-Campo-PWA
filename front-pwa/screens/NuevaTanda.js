@@ -3,7 +3,7 @@ import Stepper from '../components/Stepper';
 
 export default function NuevaTanda({ tandaForm, error, variety, cfg, onCancel, onSave, tSet }) {
   const vInfo = varieties.find(v => v.id === variety) || { label: variety || 'Producto', icon: '📦' };
-  const VARS = cfg?.variedades?.[variety] ?? [];
+  const VARS = (cfg?.variedades?.[variety] ?? []).map(v => typeof v === 'string' ? { code: v, label: v } : v);
 
   return (
     <>
@@ -30,9 +30,9 @@ export default function NuevaTanda({ tandaForm, error, variety, cfg, onCancel, o
         {VARS.length > 0 ? (
           <div className="toggle-group" style={{ marginBottom: '1.25rem' }}>
             {VARS.map(v => (
-              <button key={v} className={`toggle-btn${tandaForm.variedad===v?' toggle-btn--on':''}`}
-                onClick={() => tSet('variedad', tandaForm.variedad===v ? '' : v)}>
-                {v}
+              <button key={v.code} className={`toggle-btn${tandaForm.variedad===v.code?' toggle-btn--on':''}`}
+                onClick={() => tSet('variedad', tandaForm.variedad===v.code ? '' : v.code)}>
+                {v.label}
               </button>
             ))}
           </div>

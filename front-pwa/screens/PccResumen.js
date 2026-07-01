@@ -1,8 +1,25 @@
-import { fmtDate, fmtNum } from '../lib/utils';
+import { useState } from 'react';
+import { fmtDate, fmtNum, fmtDateTime } from '../lib/utils';
 import { DEFECTOS_BAYAS, calcMuestraRes, calcMuestraResUnidades, calcPCCMedias, calcMediasUnidades, printPCC, FORMATOS_PCC } from '../lib/pcc';
 import { varieties } from '../lib/cvu';
+import { pushToBc } from '../lib/bcPush';
 
 export default function PccResumen({ savedPcc, variety, cfg, onBack, onAddMuestra, onDeletePcc, onEditMuestra, onRefresh, refreshing }) {
+  const [pushing, setPushing]   = useState(false);
+  const [pushErr, setPushErr]   = useState(null);
+
+  async function handlePushToBc() {
+    setPushing(true);
+    setPushErr(null);
+    try {
+      await pushToBc('PCC', savedPcc.id);
+      onRefresh?.();
+    } catch (e) {
+      setPushErr(e.message);
+    } finally {
+      setPushing(false);
+    }
+  }
   const isUva = (variety || savedPcc?.variety) === 'UV';
   const vInfo = varieties.find(v => v.id === (variety || savedPcc?.variety)) || { icon: '📦' };
   const defectosConfig = cfg?.defectosPcc?.[variety || savedPcc?.variety] ?? [];
@@ -18,6 +35,17 @@ export default function PccResumen({ savedPcc, variety, cfg, onBack, onAddMuestr
 
   return (
     <>
+      {pushErr && (
+        <div className="error-modal-overlay" onClick={() => setPushErr(null)}>
+          <div className="error-modal" onClick={e => e.stopPropagation()}>
+            <div className="error-modal-title">⚠ Error al enviar a BC</div>
+            <div className="error-modal-body">{pushErr}</div>
+            <div className="error-modal-actions">
+              <button className="btn btn-sm btn-secondary" onClick={() => setPushErr(null)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
       <header className="top-bar">
         <button className="icon-btn" onClick={onBack}>←</button>
         <div style={{ flex: 1 }}>
@@ -38,6 +66,29 @@ export default function PccResumen({ savedPcc, variety, cfg, onBack, onAddMuestr
       </header>
 
       <main className="content">
+
+        {/* ── BC Sync ── */}
+        <div className="bc-sync-bar">
+          <div className="bc-sync-status">
+            {savedPcc.bcNo ? (
+              <>
+                <span className="badge badge-ok">BC ✓</span>
+                <span className="bc-sync-docno">{savedPcc.bcNo}</span>
+                <span className="bc-sync-time">{fmtDateTime(savedPcc.bcSyncAt)}</span>
+              </>
+            ) : (
+              <span className="badge badge-neutral">No enviado a BC</span>
+            )}
+          </div>
+          <button
+            className="btn btn-sm btn-secondary bc-sync-btn"
+            onClick={handlePushToBc}
+            disabled={pushing}
+          >
+            {pushing ? '⟳ Enviando…' : savedPcc.bcNo ? '↺ Re-enviar' : '⬆ Enviar a BC'}
+          </button>
+        </div>
+
         <div className={`pcc-resultado pcc-resultado--${savedPcc.resultado==='C'?'c':savedPcc.resultado==='NC'?'nc':'pending'}`}>
           <div className="pcc-res-label">Resultado global</div>
           <div className="pcc-res-value">

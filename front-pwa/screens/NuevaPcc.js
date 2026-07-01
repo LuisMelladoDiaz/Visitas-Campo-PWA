@@ -2,7 +2,7 @@ import { FORMATOS_PCC } from '../lib/pcc';
 import { varieties } from '../lib/cvu';
 
 export default function NuevaPcc({ pccSetupForm, error, variety, cfg, onCancel, onIniciarMuestras, pSet }) {
-  const VARS = cfg?.variedades?.[variety] ?? [];
+  const VARS = (cfg?.variedades?.[variety] ?? []).map(v => typeof v === 'string' ? { code: v, label: v } : v);
   const FMTS = cfg?.formatos?.[variety] ?? cfg?.pcc?.formatos ?? FORMATOS_PCC;
   const isUva = variety === 'UV';
   const vInfo = varieties.find(v => v.id === variety) || { label: variety, icon: '📋' };
@@ -37,10 +37,10 @@ export default function NuevaPcc({ pccSetupForm, error, variety, cfg, onCancel, 
             <p className="section-h" style={{ marginTop: '1.5rem' }}>Variedad</p>
             <div className="toggle-group" style={{ marginBottom: '1.25rem' }}>
               {VARS.map(v => (
-                <button key={v}
-                  className={`toggle-btn${pccSetupForm.variedad===v?' toggle-btn--on':''}`}
-                  onClick={() => pSet('variedad', pccSetupForm.variedad===v?'':v)}>
-                  {v}
+                <button key={v.code}
+                  className={`toggle-btn${pccSetupForm.variedad===v.code?' toggle-btn--on':''}`}
+                  onClick={() => pSet('variedad', pccSetupForm.variedad===v.code?'':v.code)}>
+                  {v.label}
                 </button>
               ))}
             </div>

@@ -1,0 +1,444 @@
+{
+  "info": {
+    "name": "BC Calidad Tablet — Seed Data",
+    "description": "Datos iniciales mapeados desde seed.sql de VISITAS-CAMPO-PWA.\n\nAntes de ejecutar: configura las variables de entorno (token, gruConf_*).\nOrden recomendado: Config primero, luego Partes PCC, luego CVU.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base", "value": "https://api.businesscentral.dynamics.com/v2.0/edf9b398-0246-4793-bf2f-720b304f417f/Backup_Mayo_2026/api/lmd/calidad/v1.0/companies(e4b574e7-b5e9-ed11-8848-0022488aeffb)" },
+    { "key": "token", "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImFGa21LVkZjLTRXVjZzWENCdk5aa1hJNTA1WSIsImtpZCI6ImFGa21LVkZjLTRXVjZzWENCdk5aa1hJNTA1WSJ9.eyJhdWQiOiJodHRwczovL2FwaS5idXNpbmVzc2NlbnRyYWwuZHluYW1pY3MuY29tIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvZWRmOWIzOTgtMDI0Ni00NzkzLWJmMmYtNzIwYjMwNGY0MTdmLyIsImlhdCI6MTc4MjczNTUxMSwibmJmIjoxNzgyNzM1NTExLCJleHAiOjE3ODI3Mzk0MTEsImFpbyI6ImsyRmdZS2pjTGhnb3QralM2ZVRUQXYrMSt5SitMLzlsS3F3cVh0Y2ZVVDNQMVhudTZaY0EiLCJhcHBpZCI6ImVlYzhjN2VkLTUzZTktNDBhMS1hNzRkLTQyOWQ5YmJjODE4ZiIsImFwcGlkYWNyIjoiMSIsImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0L2VkZjliMzk4LTAyNDYtNDc5My1iZjJmLTcyMGIzMDRmNDE3Zi8iLCJpZHR5cCI6ImFwcCIsIm9pZCI6IjNmN2RmMGUyLTdiMTgtNDNmNC05NDg5LTUwOWNjZjA0ODZjYyIsInJoIjoiMS5BUkFBbUxQNTdVWUNrMGVfTDNJTE1FOUJmejN2Ylpsc3MxTkJoZ2VtX1R3QnVKOEFBQUFRQUEuIiwicm9sZXMiOlsiQXV0b21hdGlvbi5SZWFkV3JpdGUuQWxsIiwiYXBwX2FjY2VzcyIsIkFQSS5SZWFkV3JpdGUuQWxsIl0sInN1YiI6IjNmN2RmMGUyLTdiMTgtNDNmNC05NDg5LTUwOWNjZjA0ODZjYyIsInRpZCI6ImVkZjliMzk4LTAyNDYtNDc5My1iZjJmLTcyMGIzMDRmNDE3ZiIsInV0aSI6Ijg2MDJHdURkUmtHTmMxb2tBOWN2QUEiLCJ2ZXIiOiIxLjAiLCJ4bXNfYWN0X2ZjdCI6IjMgOSIsInhtc19mdGQiOiJZaHdGb2lTQ3dNNUo5VDh2ekZqS1MzejBmREx4NTRYZEhMcjVidEp6TzlzQlpYVnliM0JsYm05eWRHZ3RaSE50Y3ciLCJ4bXNfaWRyZWwiOiI3IDE4IiwieG1zX3JkIjoiMC5BVjhBb1A4S0JRZ0NFZ0VRRWhRSUJ4SVFwTXFPeWRkbEZVV3ZRNm1sVmtuQXdoSVVDQWtTRVBJZmp5dnFZREJHczloQnJ0RHZPYUFTRkFnSUVoQTk3MjJaYkxOVFFZWUhwdjA4QWJpZkVoUUlDeElRN1lxZ1lXOE5EWGdJdXpfSmVBbF9NdyIsInhtc19zdWJfZmN0IjoiOSAzIn0.i9VQB_wQedWBwqZJbKlRos1i2Xv5Nxhqj44EkK7jnV6GiPH597vWhZwMeziN4uyOl-RSUpr7Nvf3MgKlOwvHpIRHtPPJEewrrEssNxpJ67kPdLMFBatoyPdCruE3rkSFd-CvGFgYG4UPGc5-YN56bYQ6lgaWJdK85vXB-rz5nfJ7Kj7QKF9mzdOgvL9roqYJt1q-efBq2x22cizAOnvR_G_p_FufIqgh9ILbcnoNQTJH7w3wb7teQwVfuqa2HyEDxGSVdouLzx1_EBVe7v_BVChAF8mWu2ivx1izaFfo3QBo-XZ3MRKHreql9nZhc6vcSzjdIVNTB_UojW2gqpmA5w", "description": "Bearer token de Azure AD" },
+    { "key": "gruConf_uva",      "value": "UV", "description": "Código GsiGVarConf para Uva en BC" },
+    { "key": "gruConf_pimiento", "value": "PI", "description": "Código GsiGVarConf para Pimiento en BC" },
+    { "key": "gruConf_calabaza", "value": "CA", "description": "Código GsiGVarConf para Calabaza en BC" },
+    { "key": "gruConf_remolacha","value": "RE", "description": "Código GsiGVarConf para Remolacha en BC" },
+    { "key": "gruConf_boniato",  "value": "BO", "description": "Código GsiGVarConf para Boniato en BC" },
+    { "key": "cabeceraPcc_no",   "value": "", "description": "Se rellena automáticamente tras POST cabecera" },
+    { "key": "cabeceraCvu_no",   "value": "", "description": "Se rellena automáticamente tras POST tanda" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "1 · Config",
+      "item": [
+        {
+          "name": "DefectosPcc",
+          "item": [
+            {
+              "name": "uva · materiaExtrana", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"clave\": \"materiaExtrana\",\n  \"etiqueta\": \"Materia extraña\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 1\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "uva · suciaPolvo", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"clave\": \"suciaPolvo\",\n  \"etiqueta\": \"Sucia con polvo\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 2\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "uva · deshidratadas", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"clave\": \"deshidratadas\",\n  \"etiqueta\": \"Deshidratadas\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 3\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "uva · picadas", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"clave\": \"picadas\",\n  \"etiqueta\": \"Picada o mordisqueada\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 4\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "uva · rotas", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"clave\": \"rotas\",\n  \"etiqueta\": \"Rotas desgrane\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 5\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "uva · manchasSol ⚠ tolerancia cero", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"clave\": \"manchasSol\",\n  \"etiqueta\": \"Manchas de sol\",\n  \"toleranciaCero\": true,\n  \"activo\": true,\n  \"orden\": 6\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "uva · podridas ⚠ tolerancia cero", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"clave\": \"podridas\",\n  \"etiqueta\": \"Podridas\",\n  \"toleranciaCero\": true,\n  \"activo\": true,\n  \"orden\": 7\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "uva · otros", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"clave\": \"otros\",\n  \"etiqueta\": \"Otros\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 8\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · materiasExtranas ⚠", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"materiasExtranas\",\n  \"etiqueta\": \"Materias extrañas\",\n  \"toleranciaCero\": true,\n  \"activo\": true,\n  \"orden\": 1\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · sucio", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"sucio\",\n  \"etiqueta\": \"Sucio\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 2\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · picadoMordisqueado", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"picadoMordisqueado\",\n  \"etiqueta\": \"Picado o mordisqueado\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 3\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · rajado", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"rajado\",\n  \"etiqueta\": \"Rajado\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 4\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · herida", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"herida\",\n  \"etiqueta\": \"Herida grieta\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 5\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · deformado", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"deformado\",\n  \"etiqueta\": \"Deformado\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 6\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · danoMecanico", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"danoMecanico\",\n  \"etiqueta\": \"Daño mecánico\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 7\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · manchado", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"manchado\",\n  \"etiqueta\": \"Manchado\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 8\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · cortado", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"cortado\",\n  \"etiqueta\": \"Cortado\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 9\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · sinPedunculo", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"sinPedunculo\",\n  \"etiqueta\": \"Sin pedúnculo\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 10\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · sinMadurez", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"sinMadurez\",\n  \"etiqueta\": \"Sin madurez\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 11\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · pesoFueraCalibre", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"pesoFueraCalibre\",\n  \"etiqueta\": \"Peso fuera de calibre\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 12\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · pudriciones ⚠", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"pudriciones\",\n  \"etiqueta\": \"Pudriciones\",\n  \"toleranciaCero\": true,\n  \"activo\": true,\n  \"orden\": 13\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "pimiento · manchasSolPeseta", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"clave\": \"manchasSolPeseta\",\n  \"etiqueta\": \"Manchas del sol o peseta\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 14\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "calabaza · materiasExtranas ⚠", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"clave\": \"materiasExtranas\",\n  \"etiqueta\": \"Materias extrañas\",\n  \"toleranciaCero\": true,\n  \"activo\": true,\n  \"orden\": 1\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "calabaza · sucio", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"clave\": \"sucio\",\n  \"etiqueta\": \"Sucio\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 2\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "calabaza · picadoMordisqueado", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"clave\": \"picadoMordisqueado\",\n  \"etiqueta\": \"Picado o mordisqueado\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 3\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "calabaza · rajado", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"clave\": \"rajado\",\n  \"etiqueta\": \"Rajado\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 4\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "calabaza · herida", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"clave\": \"herida\",\n  \"etiqueta\": \"Herida grieta\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 5\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "calabaza · deformado", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"clave\": \"deformado\",\n  \"etiqueta\": \"Deformado\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 6\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "calabaza · danoMecanico", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"clave\": \"danoMecanico\",\n  \"etiqueta\": \"Daño mecánico\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 7\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "calabaza · manchado", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"clave\": \"manchado\",\n  \"etiqueta\": \"Manchado\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 8\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "calabaza · cortado", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"clave\": \"cortado\",\n  \"etiqueta\": \"Cortado\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 9\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "calabaza · sinPedunculo", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"clave\": \"sinPedunculo\",\n  \"etiqueta\": \"Sin pedúnculo\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 10\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "calabaza · verdesSinMadurez", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"clave\": \"verdesSinMadurez\",\n  \"etiqueta\": \"Verdes o sin madurez\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 11\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            },
+            {
+              "name": "calabaza · pesoFueraCalibre", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"clave\": \"pesoFueraCalibre\",\n  \"etiqueta\": \"Peso fuera de calibre\",\n  \"toleranciaCero\": false,\n  \"activo\": true,\n  \"orden\": 12\n}" },
+                "url": {"raw":"{{base}}/defectosPcc","host":["{{base}}"],"path":["defectosPcc"]} }
+            }
+          ]
+        },
+        {
+          "name": "UmbralesPcc",
+          "item": [
+            {
+              "name": "uva", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"maxDefectosPct\": 5.00,\n  \"minBrix\": 11.0,\n  \"maxCalibrePct\": 5.00\n}" },
+                "url": {"raw":"{{base}}/umbralesPcc","host":["{{base}}"],"path":["umbralesPcc"]} }
+            },
+            {
+              "name": "pimiento", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"maxDefectosPct\": 15.00,\n  \"minBrix\": 0,\n  \"maxCalibrePct\": 0\n}" },
+                "url": {"raw":"{{base}}/umbralesPcc","host":["{{base}}"],"path":["umbralesPcc"]} }
+            },
+            {
+              "name": "calabaza", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"maxDefectosPct\": 15.00,\n  \"minBrix\": 0,\n  \"maxCalibrePct\": 0\n}" },
+                "url": {"raw":"{{base}}/umbralesPcc","host":["{{base}}"],"path":["umbralesPcc"]} }
+            }
+          ]
+        },
+        {
+          "name": "ClasesCalidadCvu",
+          "description": "producto_id=NULL en seed → gruConf vacío (clases universales)",
+          "item": [
+            {
+              "name": "Extra", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"\",\n  \"nombre\": \"Extra\",\n  \"cssKey\": \"class-extra\",\n  \"orden\": 1,\n  \"maxPctLeves\": 2.00,\n  \"maxPctGraves\": 0.00,\n  \"maxPctElim\": 0.00,\n  \"maxPctTotal\": 2.00,\n  \"maxPctCalibre\": 0\n}" },
+                "url": {"raw":"{{base}}/clasesCalidadCvu","host":["{{base}}"],"path":["clasesCalidadCvu"]} }
+            },
+            {
+              "name": "Clase 1", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"\",\n  \"nombre\": \"Clase 1\",\n  \"cssKey\": \"class-1\",\n  \"orden\": 2,\n  \"maxPctLeves\": 0,\n  \"maxPctGraves\": 5.00,\n  \"maxPctElim\": 0.00,\n  \"maxPctTotal\": 10.00,\n  \"maxPctCalibre\": 5.00\n}" },
+                "url": {"raw":"{{base}}/clasesCalidadCvu","host":["{{base}}"],"path":["clasesCalidadCvu"]} }
+            },
+            {
+              "name": "Clase 2", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"\",\n  \"nombre\": \"Clase 2\",\n  \"cssKey\": \"class-2\",\n  \"orden\": 3,\n  \"maxPctLeves\": 0,\n  \"maxPctGraves\": 5.00,\n  \"maxPctElim\": 1.00,\n  \"maxPctTotal\": 15.00,\n  \"maxPctCalibre\": 5.00\n}" },
+                "url": {"raw":"{{base}}/clasesCalidadCvu","host":["{{base}}"],"path":["clasesCalidadCvu"]} }
+            },
+            {
+              "name": "Industria", "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"\",\n  \"nombre\": \"Industria\",\n  \"cssKey\": \"class-ind\",\n  \"orden\": 4,\n  \"maxPctLeves\": 0,\n  \"maxPctGraves\": 5.00,\n  \"maxPctElim\": 1.00,\n  \"maxPctTotal\": 20.00,\n  \"maxPctCalibre\": 10.00\n}" },
+                "url": {"raw":"{{base}}/clasesCalidadCvu","host":["{{base}}"],"path":["clasesCalidadCvu"]} }
+            }
+          ]
+        },
+        {
+          "name": "DefectosCvu",
+          "description": "severidad: 0=Leve, 1=Grave, 2=Eliminatorio",
+          "item": [
+            { "name": "uva · leve · desgrane", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"severidad\": 0,\n  \"clave\": \"desgrane\",\n  \"etiqueta\": \"Desgrane\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 1\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "uva · leve · bayasRotas", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"severidad\": 0,\n  \"clave\": \"bayasRotas\",\n  \"etiqueta\": \"Bayas rotas\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 2\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "uva · leve · escobajoMarron", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"severidad\": 0,\n  \"clave\": \"escobajoMarron\",\n  \"etiqueta\": \"Escobajo marrón\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 3\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "uva · leve · bayasDeshidratadas", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"severidad\": 0,\n  \"clave\": \"bayasDeshidratadas\",\n  \"etiqueta\": \"Bayas deshidratadas\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 4\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "uva · leve · suciedad", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"severidad\": 0,\n  \"clave\": \"suciedad\",\n  \"etiqueta\": \"Presencia suciedad\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 5\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "uva · grave · plagaPicado", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"severidad\": 1,\n  \"clave\": \"plagaPicado\",\n  \"etiqueta\": \"Plaga / picado\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 1\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "uva · elim · cuerposExtranos", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"severidad\": 2,\n  \"clave\": \"cuerposExtranos\",\n  \"etiqueta\": \"Cuerpos extraños\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 1\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "uva · elim · podridos", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"severidad\": 2,\n  \"clave\": \"podridos\",\n  \"etiqueta\": \"Podridos\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 2\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "calabaza · leve · defectosApariencia", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"severidad\": 0,\n  \"clave\": \"defectosApariencia\",\n  \"etiqueta\": \"Defectos globales de apariencia\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 1\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "calabaza · leve · puntasDeshidratadas30mm", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"severidad\": 0,\n  \"clave\": \"puntasDeshidratadas30mm\",\n  \"etiqueta\": \"Puntas deshidratadas > 30mm\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 2\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "calabaza · leve · densidadRaices", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"severidad\": 0,\n  \"clave\": \"densidadRaices\",\n  \"etiqueta\": \"Densidad de raíces\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 3\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "calabaza · leve · danosMecanicos", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"severidad\": 0,\n  \"clave\": \"daNosMecanicos\",\n  \"etiqueta\": \"Daños mecánicos (cicatrizadas > 10mm²)\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 4\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "calabaza · grave · plagaPicado", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"severidad\": 1,\n  \"clave\": \"plagaPicado\",\n  \"etiqueta\": \"Plagas / picados\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 1\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "calabaza · elim · cuerposExtranos", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"severidad\": 2,\n  \"clave\": \"cuerposExtranos\",\n  \"etiqueta\": \"Cuerpos extraños\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 1\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "calabaza · elim · podridos", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"severidad\": 2,\n  \"clave\": \"podridos\",\n  \"etiqueta\": \"Podridos\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 2\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } },
+            { "name": "calabaza · elim · rotosRajados", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"severidad\": 2,\n  \"clave\": \"rotosRajados\",\n  \"etiqueta\": \"Rotos o rajados\",\n  \"valorOk\": \"No\",\n  \"activo\": true,\n  \"orden\": 3\n}" }, "url": {"raw":"{{base}}/defectosCvu","host":["{{base}}"],"path":["defectosCvu"]} } }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 · Partes PCC",
+      "item": [
+        {
+          "name": "CabecerasPcc",
+          "description": "No incluir campo 'no' — se auto-genera (PCC-YYYY-NNNN).\nEl script Tests captura el no generado en {{cabeceraPcc_no}}.",
+          "item": [
+            {
+              "name": "uva · PC-2026-0001",
+              "event": [{"listen":"test","script":{"exec":["var j = pm.response.json();","if(j.no) pm.environment.set('cabeceraPcc_no', j.no);"],"type":"text/javascript"}}],
+              "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"tipoConf\": \"caja-carton\",\n  \"fecha\": \"2026-06-15\",\n  \"hora\": \"09:30:00\",\n  \"responsable\": \"María García\",\n  \"variedad\": \"sweet-globe\",\n  \"trazabilidad\": \"TRZ-SG-001-26\",\n  \"cintaNum\": 3,\n  \"mesaNum\": 2,\n  \"nMuestras\": 10,\n  \"resultado\": 1,\n  \"datosExtra\": \"{\\\"para_so2\\\": false}\"\n}" },
+                "url": {"raw":"{{base}}/cabecerasPcc","host":["{{base}}"],"path":["cabecerasPcc"]} }
+            },
+            {
+              "name": "pimiento · PC-2026-0010",
+              "event": [{"listen":"test","script":{"exec":["var j = pm.response.json();","if(j.no) pm.environment.set('cabeceraPcc_no', j.no);"],"type":"text/javascript"}}],
+              "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_pimiento}}\",\n  \"tipoConf\": \"pim-carton-5kg\",\n  \"fecha\": \"2026-06-02\",\n  \"hora\": \"08:00:00\",\n  \"responsable\": \"María García\",\n  \"variedad\": \"california-rojo\",\n  \"trazabilidad\": \"TRZ-PIM-010-26\",\n  \"cintaNum\": 1,\n  \"mesaNum\": 1,\n  \"nMuestras\": 1,\n  \"resultado\": 1,\n  \"fotoUrl\": \"https://icxnndtanwtdnumapskx.supabase.co/storage/v1/object/public/lectura-photos/pcc/PC-2026-0010/foto.png\",\n  \"datosExtra\": \"{\\\"calibre\\\":\\\"+10CM\\\",\\\"coloracion\\\":\\\"ALTA_ROJO\\\",\\\"longitud_media\\\":15.2,\\\"globalgap\\\":true,\\\"pedido\\\":\\\"PED-2026-050\\\"}\"\n}" },
+                "url": {"raw":"{{base}}/cabecerasPcc","host":["{{base}}"],"path":["cabecerasPcc"]} }
+            },
+            {
+              "name": "calabaza · PC-2026-0020",
+              "event": [{"listen":"test","script":{"exec":["var j = pm.response.json();","if(j.no) pm.environment.set('cabeceraPcc_no', j.no);"],"type":"text/javascript"}}],
+              "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"tipoConf\": \"cal-caja-carton\",\n  \"fecha\": \"2026-06-14\",\n  \"hora\": \"08:30:00\",\n  \"responsable\": \"María García\",\n  \"variedad\": \"butternut\",\n  \"trazabilidad\": \"TRZ-CAL-012-26\",\n  \"cintaNum\": 1,\n  \"mesaNum\": 1,\n  \"nMuestras\": 1,\n  \"resultado\": 1,\n  \"datosExtra\": \"{\\\"calibre_range\\\":\\\"901-1200\\\",\\\"coloracion\\\":\\\"ALTA\\\",\\\"globalgap\\\":true,\\\"pedido\\\":\\\"PED-2026-060\\\"}\"\n}" },
+                "url": {"raw":"{{base}}/cabecerasPcc","host":["{{base}}"],"path":["cabecerasPcc"]} }
+            }
+          ]
+        },
+        {
+          "name": "LineasPcc",
+          "description": "Ajusta codCabeceraPcc con el valor auto-generado de la cabecera ({{cabeceraPcc_no}})",
+          "item": [
+            { "name": "uva · muestra 1", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"codCabeceraPcc\": \"{{cabeceraPcc_no}}\",\n  \"noLinea\": 1,\n  \"hora\": \"09:32:00\",\n  \"pctDefectos\": 2.500,\n  \"resultado\": 1,\n  \"mediciones\": \"{\\\"peso\\\":\\\"4450\\\",\\\"calibre\\\":\\\"17.5\\\",\\\"brix\\\":\\\"13.5\\\",\\\"totalBayas\\\":120,\\\"suciaPolvo\\\":1,\\\"rotas\\\":2}\"\n}" }, "url": {"raw":"{{base}}/lineasPcc","host":["{{base}}"],"path":["lineasPcc"]} } },
+            { "name": "uva · muestra 2", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"codCabeceraPcc\": \"{{cabeceraPcc_no}}\",\n  \"noLinea\": 2,\n  \"hora\": \"09:38:00\",\n  \"pctDefectos\": 0.741,\n  \"resultado\": 1,\n  \"mediciones\": \"{\\\"peso\\\":\\\"4520\\\",\\\"calibre\\\":\\\"18.0\\\",\\\"brix\\\":\\\"14.0\\\",\\\"totalBayas\\\":135,\\\"rotas\\\":1}\"\n}" }, "url": {"raw":"{{base}}/lineasPcc","host":["{{base}}"],"path":["lineasPcc"]} } },
+            { "name": "uva · muestra 3", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"codCabeceraPcc\": \"{{cabeceraPcc_no}}\",\n  \"noLinea\": 3,\n  \"hora\": \"09:45:00\",\n  \"pctDefectos\": 3.125,\n  \"resultado\": 1,\n  \"mediciones\": \"{\\\"peso\\\":\\\"4490\\\",\\\"calibre\\\":\\\"17.0\\\",\\\"brix\\\":\\\"13.0\\\",\\\"totalBayas\\\":128,\\\"suciaPolvo\\\":2,\\\"deshidratadas\\\":1,\\\"rotas\\\":1}\"\n}" }, "url": {"raw":"{{base}}/lineasPcc","host":["{{base}}"],"path":["lineasPcc"]} } },
+            { "name": "pimiento · muestra 1 (1%)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"codCabeceraPcc\": \"{{cabeceraPcc_no}}\",\n  \"noLinea\": 1,\n  \"hora\": \"08:05:00\",\n  \"pctDefectos\": 1.0,\n  \"resultado\": 1,\n  \"mediciones\": \"{\\\"n_unidades\\\":200,\\\"peso\\\":5010,\\\"temperatura\\\":12.0,\\\"total_pct\\\":1.0,\\\"sucio\\\":{\\\"unidades\\\":2,\\\"pct\\\":1.0}}\"\n}" }, "url": {"raw":"{{base}}/lineasPcc","host":["{{base}}"],"path":["lineasPcc"]} } },
+            { "name": "pimiento · muestra 1 NC (17.5%)", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"codCabeceraPcc\": \"{{cabeceraPcc_no}}\",\n  \"noLinea\": 1,\n  \"hora\": \"08:35:00\",\n  \"pctDefectos\": 17.5,\n  \"resultado\": 2,\n  \"mediciones\": \"{\\\"n_unidades\\\":200,\\\"peso\\\":4870,\\\"temperatura\\\":14.0,\\\"total_pct\\\":17.5,\\\"observaciones\\\":\\\"RECHAZADO — supera umbral 15%\\\"}\"\n}" }, "url": {"raw":"{{base}}/lineasPcc","host":["{{base}}"],"path":["lineasPcc"]} } }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3 · CVU Tandas",
+      "item": [
+        {
+          "name": "CabecerasCvu",
+          "description": "No incluir campo 'no' — se auto-genera (CVU-YYYY-NNNN).\nEl script Tests captura el no generado en {{cabeceraCvu_no}}.",
+          "item": [
+            {
+              "name": "uva · TA-2026-0001 Sweet Globe",
+              "event": [{"listen":"test","script":{"exec":["var j = pm.response.json();","if(j.no) pm.environment.set('cabeceraCvu_no', j.no);"],"type":"text/javascript"}}],
+              "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_uva}}\",\n  \"variedad\": \"sweet-globe\",\n  \"confeccion\": \"CONF-2026-001\",\n  \"categoriaInicial\": \"Extra\",\n  \"trazabilidad\": \"TRZ-SG-001-26\",\n  \"pesoInicial\": 52.500,\n  \"fecha\": \"2026-06-01\",\n  \"nota\": \"Primer lote de temporada\"\n}" },
+                "url": {"raw":"{{base}}/cabecerasCvu","host":["{{base}}"],"path":["cabecerasCvu"]} }
+            },
+            {
+              "name": "calabaza · TA-2026-0012 Butternut",
+              "event": [{"listen":"test","script":{"exec":["var j = pm.response.json();","if(j.no) pm.environment.set('cabeceraCvu_no', j.no);"],"type":"text/javascript"}}],
+              "request": { "method": "POST",
+                "header": [{"key":"Content-Type","value":"application/json"}],
+                "body": { "mode": "raw", "options": {"raw":{"language":"json"}},
+                  "raw": "{\n  \"gruConf\": \"{{gruConf_calabaza}}\",\n  \"variedad\": \"butternut\",\n  \"confeccion\": \"CONF-2026-012\",\n  \"categoriaInicial\": \"Extra\",\n  \"trazabilidad\": \"TRZ-CAL-012-26\",\n  \"pesoInicial\": 200.000,\n  \"fecha\": \"2026-06-10\",\n  \"nota\": \"Seguimiento fotográfico completo\"\n}" },
+                "url": {"raw":"{{base}}/cabecerasCvu","host":["{{base}}"],"path":["cabecerasCvu"]} }
+            }
+          ]
+        },
+        {
+          "name": "LineasCvu",
+          "description": "Ajusta codCabeceraCvu con {{cabeceraCvu_no}}",
+          "item": [
+            { "name": "uva · día 1 · Extra", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"codCabeceraCvu\": \"{{cabeceraCvu_no}}\",\n  \"dia\": 1,\n  \"fecha\": \"2026-06-02\",\n  \"trazabilidad\": \"TRZ-SG-001-26\",\n  \"pesoDiario\": 52.100,\n  \"tempConservacion\": 1.5,\n  \"defectos\": \"{\\\"desgrane\\\":\\\"No\\\",\\\"bayasRotas\\\":\\\"No\\\",\\\"podridos\\\":\\\"No\\\"}\",\n  \"pesoFaltasLeves\": 0.000,\n  \"pesoFaltasGraves\": 0.000,\n  \"pesoFaltasElim\": 0.000,\n  \"pctPerdida\": 0.762,\n  \"pctLeves\": 0.000,\n  \"pctGraves\": 0.000,\n  \"pctElim\": 0.000,\n  \"pctTotal\": 0.000,\n  \"pctCalibre\": 1.5,\n  \"clasificacion\": \"Extra\"\n}" }, "url": {"raw":"{{base}}/lineasCvu","host":["{{base}}"],"path":["lineasCvu"]} } },
+            { "name": "uva · día 4 · Clase 1", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"codCabeceraCvu\": \"{{cabeceraCvu_no}}\",\n  \"dia\": 4,\n  \"fecha\": \"2026-06-05\",\n  \"trazabilidad\": \"TRZ-SG-001-26\",\n  \"pesoDiario\": 50.500,\n  \"tempConservacion\": 2.0,\n  \"defectos\": \"{\\\"desgrane\\\":\\\"Si\\\",\\\"bayasDeshidratadas\\\":\\\"Si\\\"}\",\n  \"pesoFaltasLeves\": 1.200,\n  \"pesoFaltasGraves\": 0.200,\n  \"pesoFaltasElim\": 0.000,\n  \"pctPerdida\": 3.810,\n  \"pctLeves\": 2.376,\n  \"pctGraves\": 0.396,\n  \"pctElim\": 0.000,\n  \"pctTotal\": 2.772,\n  \"pctCalibre\": 2.5,\n  \"clasificacion\": \"Clase 1\"\n}" }, "url": {"raw":"{{base}}/lineasCvu","host":["{{base}}"],"path":["lineasCvu"]} } },
+            { "name": "uva · día 7 · Clase 2", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"codCabeceraCvu\": \"{{cabeceraCvu_no}}\",\n  \"dia\": 7,\n  \"fecha\": \"2026-06-08\",\n  \"trazabilidad\": \"TRZ-SG-001-26\",\n  \"pesoDiario\": 48.500,\n  \"tempConservacion\": 3.0,\n  \"defectos\": \"{\\\"desgrane\\\":\\\"Si\\\",\\\"bayasRotas\\\":\\\"Si\\\",\\\"escobajoMarron\\\":\\\"Si\\\",\\\"bayasDeshidratadas\\\":\\\"Si\\\",\\\"suciedad\\\":\\\"Si\\\"}\",\n  \"pesoFaltasLeves\": 3.200,\n  \"pesoFaltasGraves\": 0.700,\n  \"pesoFaltasElim\": 0.000,\n  \"pctPerdida\": 7.619,\n  \"pctLeves\": 6.598,\n  \"pctGraves\": 1.443,\n  \"pctElim\": 0.000,\n  \"pctTotal\": 8.041,\n  \"pctCalibre\": 4.0,\n  \"clasificacion\": \"Clase 2\"\n}" }, "url": {"raw":"{{base}}/lineasCvu","host":["{{base}}"],"path":["lineasCvu"]} } },
+            { "name": "calabaza · día 1 · Extra", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"codCabeceraCvu\": \"{{cabeceraCvu_no}}\",\n  \"dia\": 1,\n  \"fecha\": \"2026-06-11\",\n  \"trazabilidad\": \"TRZ-CAL-012-26\",\n  \"pesoDiario\": 199.500,\n  \"tempConservacion\": 8.0,\n  \"defectos\": \"{\\\"defectosApariencia\\\":\\\"No\\\",\\\"podridos\\\":\\\"No\\\",\\\"rotosRajados\\\":\\\"No\\\"}\",\n  \"pesoFaltasLeves\": 0.500,\n  \"pesoFaltasGraves\": 0.000,\n  \"pesoFaltasElim\": 0.000,\n  \"pctPerdida\": 0.250,\n  \"pctLeves\": 0.251,\n  \"pctGraves\": 0.000,\n  \"pctElim\": 0.000,\n  \"pctTotal\": 0.251,\n  \"pctCalibre\": 0,\n  \"clasificacion\": \"Extra\",\n  \"photoUrl\": \"https://icxnndtanwtdnumapskx.supabase.co/storage/v1/object/public/lectura-photos/TA-2026-0012/dia-1.png\"\n}" }, "url": {"raw":"{{base}}/lineasCvu","host":["{{base}}"],"path":["lineasCvu"]} } },
+            { "name": "calabaza · día 4 · Clase 2", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"codCabeceraCvu\": \"{{cabeceraCvu_no}}\",\n  \"dia\": 4,\n  \"fecha\": \"2026-06-14\",\n  \"trazabilidad\": \"TRZ-CAL-012-26\",\n  \"pesoDiario\": 190.000,\n  \"tempConservacion\": 9.0,\n  \"defectos\": \"{\\\"defectosApariencia\\\":\\\"Si\\\",\\\"puntasDeshidratadas30mm\\\":\\\"Si\\\",\\\"densidadRaices\\\":\\\"Si\\\",\\\"daNosMecanicos\\\":\\\"Si\\\"}\",\n  \"pesoFaltasLeves\": 15.000,\n  \"pesoFaltasGraves\": 7.000,\n  \"pesoFaltasElim\": 0.500,\n  \"pctPerdida\": 5.000,\n  \"pctLeves\": 7.895,\n  \"pctGraves\": 3.684,\n  \"pctElim\": 0.263,\n  \"pctTotal\": 11.842,\n  \"pctCalibre\": 0,\n  \"clasificacion\": \"Clase 2\",\n  \"photoUrl\": \"https://icxnndtanwtdnumapskx.supabase.co/storage/v1/object/public/lectura-photos/TA-2026-0012/dia-4.png\"\n}" }, "url": {"raw":"{{base}}/lineasCvu","host":["{{base}}"],"path":["lineasCvu"]} } },
+            { "name": "calabaza · día 6 · No conforme", "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": { "mode": "raw", "options": {"raw":{"language":"json"}}, "raw": "{\n  \"codCabeceraCvu\": \"{{cabeceraCvu_no}}\",\n  \"dia\": 6,\n  \"fecha\": \"2026-06-16\",\n  \"trazabilidad\": \"TRZ-CAL-012-26\",\n  \"pesoDiario\": 178.000,\n  \"tempConservacion\": 10.0,\n  \"defectos\": \"{\\\"defectosApariencia\\\":\\\"Si\\\",\\\"podridos\\\":\\\"Si\\\",\\\"rotosRajados\\\":\\\"Si\\\"}\",\n  \"pesoFaltasLeves\": 28.000,\n  \"pesoFaltasGraves\": 11.000,\n  \"pesoFaltasElim\": 6.000,\n  \"pctPerdida\": 11.000,\n  \"pctLeves\": 15.730,\n  \"pctGraves\": 6.180,\n  \"pctElim\": 3.371,\n  \"pctTotal\": 25.281,\n  \"pctCalibre\": 0,\n  \"clasificacion\": \"No conforme\",\n  \"photoUrl\": \"https://icxnndtanwtdnumapskx.supabase.co/storage/v1/object/public/lectura-photos/TA-2026-0012/dia-6.png\"\n}" }, "url": {"raw":"{{base}}/lineasCvu","host":["{{base}}"],"path":["lineasCvu"]} } }
+          ]
+        }
+      ]
+    }
+  ]
+}
