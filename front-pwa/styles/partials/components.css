@@ -173,8 +173,10 @@
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: 1rem;
-  max-width: 480px;
+  max-width: min(92vw, 600px);
   width: 100%;
+  max-height: 85dvh;
+  overflow: hidden;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -185,6 +187,7 @@
   font-size: 1rem;
   font-weight: 700;
   color: var(--danger);
+  flex-shrink: 0;
 }
 .error-modal-body {
   font-size: .82rem;
@@ -194,10 +197,11 @@
   border: 1px solid rgba(192,48,48,.2);
   border-radius: .65rem;
   padding: .75rem 1rem;
-  word-break: break-word;
+  word-break: break-all;
   white-space: pre-wrap;
-  max-height: 220px;
   overflow-y: auto;
+  flex: 1;
+  min-height: 4rem;
 }
 .error-modal-actions {
   display: flex;

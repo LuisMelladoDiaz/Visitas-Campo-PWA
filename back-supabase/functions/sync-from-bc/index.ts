@@ -1,23 +1,3 @@
-/**
- * sync-from-bc/index.ts — Supabase Edge Function
- *
- * Syncs reference/config data from Business Central to Supabase.
- * Runs on demand (POST /functions/v1/sync-from-bc) or via a cron trigger.
- *
- * Required environment variables:
- *   BC_BASE_URL    — e.g. https://api.businesscentral.dynamics.com/v2.0
- *   BC_TENANT_ID   — Azure AD tenant ID for the BC environment
- *   BC_COMPANY_ID  — BC company GUID (visible in BC URL or via /companies endpoint)
- *   BC_CLIENT_ID   — App registration client ID (OAuth2 client-credentials flow)
- *   BC_CLIENT_SECRET — App registration client secret
- *   SUPABASE_URL   — injected automatically by Supabase runtime
- *   SUPABASE_SERVICE_ROLE_KEY — injected automatically by Supabase runtime
- *
- * BC API publisher/group/version: lmd / calidad / v1.0
- * Entity sets:  gruposConf · variedades · tiposConf · defectosPcc · umbralesPcc
- *               clasesCalidadCvu · defectosCvu
- */
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // ---------------------------------------------------------------------------
@@ -87,7 +67,18 @@ async function bcFetchAll(entitySet: string, token: string): Promise<unknown[]> 
 // ---------------------------------------------------------------------------
 // Main handler
 // ---------------------------------------------------------------------------
-Deno.serve(async (_req) => {
+
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -323,7 +314,7 @@ Deno.serve(async (_req) => {
       JSON.stringify({ ok: !hasErrors, results }),
       {
         status: hasErrors ? 207 : 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       },
     );
   } catch (err: any) {
@@ -331,7 +322,7 @@ Deno.serve(async (_req) => {
       JSON.stringify({ ok: false, error: err.message }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       },
     );
   }

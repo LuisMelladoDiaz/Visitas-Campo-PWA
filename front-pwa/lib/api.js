@@ -1,8 +1,6 @@
 // ─── API layer — Supabase + localStorage fallback ─────────────────────────────
-// Todas las funciones son async. Patrón:
-//   1. Actualiza localStorage inmediatamente (offline-first)
-//   2. Sincroniza con Supabase en background
-//   3. En loadXxx, si Supabase responde OK → actualiza cache local
+// Todas las funciones son async.
+// IDs internos: seq (BIGSERIAL generado por la DB). bc_no = número asignado por BC.
 
 import { supabase } from './supabase';
 import { STORAGE_KEY, PCC_KEY } from './storage';
@@ -42,7 +40,6 @@ function resultadoFromInt(n) { return n === 1 ? 'C' : n === 2 ? 'NC' : null; }
 
 function tandaToRow(t) {
   return {
-    no:                t.id,
     gru_conf:          t.variety || 'UV',
     confeccion:        t.confeccion,
     variedad:          t.variedad          || null,
@@ -61,13 +58,13 @@ const LECTURA_NON_DEFECT_KEYS = new Set([
   'pctTotal', 'pctCalibre', 'clasificacion', 'photo',
 ]);
 
-function lecturaToRow(tanda_id, r) {
+function lecturaToRow(cabecera_seq, r) {
   const defectos = {};
   for (const key of Object.keys(r)) {
     if (!LECTURA_NON_DEFECT_KEYS.has(key)) defectos[key] = r[key];
   }
   return {
-    cod_cabecera_cvu:   tanda_id,
+    cabecera_seq,
     dia:               r.dia,
     fecha:             r.fecha,
     trazabilidad:      r.trazabilidad      || null,
@@ -112,7 +109,7 @@ function lecturaFromRow(row) {
 
 function tandaFromRows(row, lecturasRows) {
   return {
-    id:               row.no,
+    id:               row.seq,
     variety:          row.gru_conf,
     confeccion:       row.confeccion,
     variedad:         row.variedad,
@@ -131,7 +128,6 @@ function tandaFromRows(row, lecturasRows) {
 
 function pccToRow(p) {
   return {
-    no:          p.id,
     gru_conf:    p.variety     || 'UV',
     tipo_conf:   p.formato     || null,
     fecha:       p.fecha,
@@ -149,13 +145,13 @@ function pccToRow(p) {
 
 const MUESTRA_META_KEYS = new Set(['num', 'hora', 'resultado']);
 
-function muestraToRow(cod_cabecera_pcc, m) {
+function muestraToRow(cabecera_seq, m) {
   const mediciones = {};
   for (const key of Object.keys(m)) {
     if (!MUESTRA_META_KEYS.has(key)) mediciones[key] = m[key];
   }
   return {
-    cod_cabecera_pcc,
+    cabecera_seq,
     no_linea:  m.num,
     hora:      m.hora      || null,
     mediciones,
@@ -174,7 +170,7 @@ function muestraFromRow(row) {
 
 function pccFromRows(row, muestrasRows) {
   return {
-    id:           row.no,
+    id:           row.seq,
     fecha:        row.fecha,
     hora:         row.hora,
     responsable:  row.responsable,
@@ -196,12 +192,12 @@ function pccFromRows(row, muestrasRows) {
 
 // ─── Fotos: base64 → Supabase Storage ─────────────────────────────────────────
 
-async function uploadPhoto(tanda_id, dia, dataUrl) {
+async function uploadPhoto(cabecera_seq, dia, dataUrl) {
   if (!dataUrl || !dataUrl.startsWith('data:')) return dataUrl || null;
   try {
     const base64 = dataUrl.split(',')[1];
     const bytes  = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-    const path   = `${tanda_id}/dia-${dia}.jpg`;
+    const path   = `${cabecera_seq}/dia-${dia}.jpg`;
     const { error } = await supabase.storage
       .from('calidad-fotos')
       .upload(path, bytes.buffer, { contentType: 'image/jpeg', upsert: true });
@@ -233,25 +229,41 @@ export async function loadBatches() {
 
   const lecMap = {};
   (lecturas || []).forEach(l => {
-    (lecMap[l.cod_cabecera_cvu] = lecMap[l.cod_cabecera_cvu] || []).push(l);
+    const key = l.cabecera_seq;
+    (lecMap[key] = lecMap[key] || []).push(l);
   });
 
-  const result = tandas.map(t => tandaFromRows(t, lecMap[t.no]));
-  cacheWrite(STORAGE_KEY, result);
-  return result;
+  const result = tandas.map(t => tandaFromRows(t, lecMap[t.seq]));
+  const supabaseIds = new Set(result.map(t => t.id));
+  const localOnly   = (cacheRead(STORAGE_KEY) || []).filter(t => !supabaseIds.has(t.id));
+  const merged = [...localOnly, ...result];
+  cacheWrite(STORAGE_KEY, merged);
+  return merged;
 }
 
 export async function saveBatch(tanda) {
-  const { error: e1 } = await supabase.from('lmd_cabecera_cvu').upsert(tandaToRow(tanda));
-  if (e1) throw new Error(`Error guardando tanda: ${e1.message}`);
+  let cabSeq;
 
-  await supabase.from('lmd_linea_cvu').delete().eq('cod_cabecera_cvu', tanda.id);
+  if (tanda.id) {
+    const { error } = await supabase.from('lmd_cabecera_cvu')
+      .update(tandaToRow(tanda)).eq('seq', tanda.id);
+    if (error) throw new Error(`Error guardando tanda: ${error.message}`);
+    cabSeq = tanda.id;
+  } else {
+    const { data, error } = await supabase.from('lmd_cabecera_cvu')
+      .insert(tandaToRow(tanda)).select('seq').single();
+    if (error) throw new Error(`Error creando tanda: ${error.message}`);
+    cabSeq = data.seq;
+  }
+
+  const { error: eDel } = await supabase.from('lmd_linea_cvu').delete().eq('cabecera_seq', cabSeq);
+  if (eDel) throw new Error(`Error borrando lecturas previas: ${eDel.message}`);
 
   const rows = await Promise.all(tanda.readings.map(async r => {
     const photo_url = r.photo?.startsWith('data:')
-      ? await uploadPhoto(tanda.id, r.dia, r.photo)
+      ? await uploadPhoto(cabSeq, r.dia, r.photo)
       : (r.photo || null);
-    return { ...lecturaToRow(tanda.id, r), photo_url };
+    return { ...lecturaToRow(cabSeq, r), photo_url };
   }));
 
   if (rows.length > 0) {
@@ -261,6 +273,7 @@ export async function saveBatch(tanda) {
 
   const saved = {
     ...tanda,
+    id: cabSeq,
     readings: tanda.readings.map((r, i) => ({ ...r, photo: rows[i]?.photo_url ?? r.photo })),
   };
   cacheUpsertItem(STORAGE_KEY, saved);
@@ -268,7 +281,7 @@ export async function saveBatch(tanda) {
 }
 
 export async function deleteBatch(id) {
-  const { error } = await supabase.from('lmd_cabecera_cvu').delete().eq('no', id);
+  const { error } = await supabase.from('lmd_cabecera_cvu').delete().eq('seq', id);
   if (error) throw new Error(`Error eliminando tanda: ${error.message}`);
   cacheRemoveItem(STORAGE_KEY, id);
 }
@@ -292,32 +305,49 @@ export async function loadPCCs() {
 
   const muestrasMap = {};
   (muestras || []).forEach(m => {
-    (muestrasMap[m.cod_cabecera_pcc] = muestrasMap[m.cod_cabecera_pcc] || []).push(m);
+    const key = m.cabecera_seq;
+    (muestrasMap[key] = muestrasMap[key] || []).push(m);
   });
 
-  const result = partes.map(p => pccFromRows(p, muestrasMap[p.no]));
-  cacheWrite(PCC_KEY, result);
-  return result;
+  const result = partes.map(p => pccFromRows(p, muestrasMap[p.seq]));
+  const supabaseIds = new Set(result.map(p => p.id));
+  const localOnly   = (cacheRead(PCC_KEY) || []).filter(p => !supabaseIds.has(p.id));
+  const merged = [...localOnly, ...result];
+  cacheWrite(PCC_KEY, merged);
+  return merged;
 }
 
 export async function savePCC(pcc) {
-  const { error: e1 } = await supabase.from('lmd_cabecera_pcc').upsert(pccToRow(pcc));
-  if (e1) throw new Error(`Error guardando PCC: ${e1.message}`);
+  let cabSeq;
 
-  await supabase.from('lmd_linea_pcc').delete().eq('cod_cabecera_pcc', pcc.id);
+  if (pcc.id) {
+    const { error } = await supabase.from('lmd_cabecera_pcc')
+      .update(pccToRow(pcc)).eq('seq', pcc.id);
+    if (error) throw new Error(`Error guardando PCC: ${error.message}`);
+    cabSeq = pcc.id;
+  } else {
+    const { data, error } = await supabase.from('lmd_cabecera_pcc')
+      .insert(pccToRow(pcc)).select('seq').single();
+    if (error) throw new Error(`Error creando PCC: ${error.message}`);
+    cabSeq = data.seq;
+  }
 
-  const rows = pcc.muestras.map(m => muestraToRow(pcc.id, m));
+  const { error: eDel } = await supabase.from('lmd_linea_pcc').delete().eq('cabecera_seq', cabSeq);
+  if (eDel) throw new Error(`Error borrando muestras previas: ${eDel.message}`);
+
+  const rows = pcc.muestras.map(m => muestraToRow(cabSeq, m));
   if (rows.length > 0) {
     const { error: e2 } = await supabase.from('lmd_linea_pcc').insert(rows);
     if (e2) throw new Error(`Error guardando muestras: ${e2.message}`);
   }
 
-  cacheUpsertItem(PCC_KEY, pcc);
-  return pcc;
+  const saved = { ...pcc, id: cabSeq };
+  cacheUpsertItem(PCC_KEY, saved);
+  return saved;
 }
 
 export async function deletePCC(id) {
-  const { error } = await supabase.from('lmd_cabecera_pcc').delete().eq('no', id);
+  const { error } = await supabase.from('lmd_cabecera_pcc').delete().eq('seq', id);
   if (error) throw new Error(`Error eliminando PCC: ${error.message}`);
   cacheRemoveItem(PCC_KEY, id);
 }

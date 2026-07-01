@@ -27,6 +27,20 @@
   white-space: nowrap;
 }
 
+/* ─── Sync error banner ─── */
+.sync-err-banner {
+  display: flex;
+  align-items: center;
+  padding: .65rem 1.25rem;
+  background: #c0392b;
+  color: #fff;
+  font-size: .875rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  cursor: pointer;
+  gap: .5rem;
+}
+
 /* ─── Top Bar ─── */
 .top-bar {
   position: sticky;

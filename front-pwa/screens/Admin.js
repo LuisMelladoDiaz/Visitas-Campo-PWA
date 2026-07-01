@@ -171,6 +171,9 @@ export default function Admin({ onBack }) {
   const [syncing, setSyncing]     = useState(false);
   const [syncState, setSyncState] = useState(null);
   const [syncError, setSyncError] = useState(null);
+  const [syncingPartes, setSyncingPartes]     = useState(false);
+  const [syncPartesState, setSyncPartesState] = useState(null);
+  const [syncPartesError, setSyncPartesError] = useState(null);
 
   async function loadData() {
     setLoading(true);
@@ -226,6 +229,32 @@ export default function Admin({ onBack }) {
     }
   }
 
+  async function handleSyncPartes() {
+    setSyncingPartes(true);
+    setSyncPartesState(null);
+    setSyncPartesError(null);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/sync-partes-from-bc`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.ok) {
+        const firstErr = Object.entries(data?.results ?? {}).find(([, v]) => v.error);
+        throw new Error(firstErr ? `${firstErr[0]}: ${firstErr[1].error}` : (data?.error ?? `HTTP ${res.status}`));
+      }
+      setSyncPartesState('ok');
+    } catch (e) {
+      setSyncPartesState('error');
+      setSyncPartesError(e.message);
+    } finally {
+      setSyncingPartes(false);
+    }
+  }
+
   async function handleSave() {
     setSaving(true);
     await supabase
@@ -252,12 +281,27 @@ export default function Admin({ onBack }) {
         >
           {syncing ? '⟳' : syncState === 'ok' ? '✓' : syncState === 'error' ? '✕' : '⬇'} BC
         </button>
+        <button
+          className="btn btn-sm btn-secondary"
+          onClick={handleSyncPartes}
+          disabled={syncingPartes}
+          title="Descargar todos los partes desde Business Central"
+          style={syncPartesState === 'ok' ? { color: 'var(--ok)', borderColor: 'var(--ok)' } : syncPartesState === 'error' ? { color: 'var(--danger)', borderColor: 'var(--danger)' } : {}}
+        >
+          {syncingPartes ? '⟳' : syncPartesState === 'ok' ? '✓' : syncPartesState === 'error' ? '✕' : '⬇'} Partes
+        </button>
       </header>
 
       {syncError && (
         <div className="admin-sync-err">
           <span>{syncError}</span>
           <button onClick={() => { setSyncState(null); setSyncError(null); }}>✕</button>
+        </div>
+      )}
+      {syncPartesError && (
+        <div className="admin-sync-err">
+          <span>Partes: {syncPartesError}</span>
+          <button onClick={() => { setSyncPartesState(null); setSyncPartesError(null); }}>✕</button>
         </div>
       )}
 

@@ -106,6 +106,7 @@ export default function App() {
   // ── Loading ──────────────────────────────────────────────────────────────
   const [loading,    setLoading]    = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [syncErr,    setSyncErr]    = useState(null);
 
   // ── Bootstrap ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -261,28 +262,31 @@ export default function App() {
     setView('pcc-muestra');
   }
 
-  function guardarPCC() {
+  async function guardarPCC() {
     const umbrales = cfg?.umbrales?.[variety] ?? cfg?.pcc?.umbrales;
     const resultado = variety === 'UV'
       ? calcPCCResultado(muestraForms, umbrales)
       : calcResultadoUnidades(muestraForms, umbrales);
 
     if (editingPcc) {
-      // Edición/ampliación de muestras de un parte existente
       const updated = { ...editingPcc, nMuestras: muestraForms.length, muestras: muestraForms, resultado };
       const next = pccs.map(p => p.id === updated.id ? updated : p);
       setPccs(next); setSavedPcc(updated); setEditingPcc(null); setView('pcc-resumen');
-      savePCC(updated).catch(e => console.error('Error sincronizando PCC:', e));
+      try { await savePCC(updated); setSyncErr(null); }
+      catch (e) { setSyncErr(`Error guardando PCC: ${e.message}`); }
     } else {
-      // Nuevo parte
       const formatos = cfg?.formatos?.[variety] ?? cfg?.pcc?.formatos ?? [];
       const fmt = formatos.find(f => f.id === pccSetupForm.formato);
-      const year = new Date().getFullYear();
-      const id = `PCC-${year}-${String(pccs.length + 1).padStart(4, '0')}`;
-      const np = { id, ...pccSetupForm, nMuestras: fmt?.nMuestras || 10, muestras: muestraForms, resultado };
-      const next = [...pccs, np];
-      setPccs(next); setSavedPcc(np); setView('pcc-resumen');
-      savePCC(np).catch(e => console.error('Error sincronizando PCC:', e));
+      const pccData = { ...pccSetupForm, nMuestras: fmt?.nMuestras || 10, muestras: muestraForms, resultado };
+      try {
+        const saved = await savePCC(pccData);
+        setSyncErr(null);
+        setPccs(prev => [...prev, saved]);
+        setSavedPcc(saved);
+        setView('pcc-resumen');
+      } catch (e) {
+        setSyncErr(`Error guardando PCC: ${e.message}`);
+      }
     }
   }
 
@@ -307,11 +311,12 @@ export default function App() {
     setView('pcc-muestra');
   }
 
-  function deletePCC(id) {
+  async function deletePCC(id) {
     if (!confirm('¿Eliminar este parte de control?')) return;
     const next = pccs.filter(p => p.id !== id);
     setPccs(next); setView('pcc-list');
-    apiDeletePCC(id).catch(e => console.error('Error eliminando PCC:', e));
+    try { await apiDeletePCC(id); setSyncErr(null); }
+    catch (e) { setSyncErr(`Error eliminando PCC: ${e.message}`); setPccs(pccs); }
   }
 
   function mSet(key, val) {
@@ -340,15 +345,20 @@ export default function App() {
   }
 
   // ── Vida Útil actions ─────────────────────────────────────────────────────
-  function saveTanda() {
+  async function saveTanda() {
     const { confeccion, trazabilidad, pesoInicial, fecha } = tandaForm;
     if (!confeccion || !trazabilidad || !pesoInicial || !fecha) { setError('Completa los campos obligatorios (*).'); return; }
-    const year = new Date().getFullYear();
-    const id = `CVU-${year}-${String(batches.length + 1).padStart(4, '0')}`;
-    const nb = { id, variety, confeccion: tandaForm.confeccion, variedad: tandaForm.variedad, categoriaInicial: tandaForm.categoriaInicial, trazabilidad: tandaForm.trazabilidad, pesoInicial: parseFloat(tandaForm.pesoInicial), fecha: tandaForm.fecha, nota: tandaForm.nota, readings: [] };
-    const next = [...batches, nb];
-    setBatches(next); setBatch(nb); setError(''); setView('batch');
-    saveBatch(nb).catch(e => console.error('Error sincronizando tanda:', e));
+    const nb = { variety, confeccion: tandaForm.confeccion, variedad: tandaForm.variedad, categoriaInicial: tandaForm.categoriaInicial, trazabilidad: tandaForm.trazabilidad, pesoInicial: parseFloat(tandaForm.pesoInicial), fecha: tandaForm.fecha, nota: tandaForm.nota, readings: [] };
+    try {
+      const saved = await saveBatch(nb);
+      setBatches(prev => [...prev, saved]);
+      setBatch(saved);
+      setError('');
+      setSyncErr(null);
+      setView('batch');
+    } catch (e) {
+      setError(`Error creando tanda: ${e.message}`);
+    }
   }
 
   function saveLectura() {
@@ -374,16 +384,18 @@ export default function App() {
     const next = batches.map(b => b.id === batch.id ? updated : b);
     setBatches(next); setBatch(updated); setEditingIdx(null); setError(''); setView('batch');
     saveBatch(updated).then(saved => {
+      setSyncErr(null);
       setBatch(saved);
       setBatches(prev => prev.map(b => b.id === saved.id ? saved : b));
-    }).catch(e => console.error('Error sincronizando lectura:', e));
+    }).catch(e => setSyncErr(`Error guardando lectura: ${e.message}`));
   }
 
-  function deleteBatch(id) {
+  async function deleteBatch(id) {
     if (!confirm('¿Eliminar esta tanda y todas sus lecturas?')) return;
     const next = batches.filter(b => b.id !== id);
     setBatches(next); setView('vida-util-list');
-    apiDeleteBatch(id).catch(e => console.error('Error eliminando tanda:', e));
+    try { await apiDeleteBatch(id); setSyncErr(null); }
+    catch (e) { setSyncErr(`Error eliminando tanda: ${e.message}`); setBatches(batches); }
   }
 
   // ── Live calcs ────────────────────────────────────────────────────────────
@@ -419,6 +431,11 @@ export default function App() {
           <div className="update-banner">
             Nueva versión disponible
             <button className="update-banner-btn" onClick={applyUpdate}>Actualizar</button>
+          </div>
+        )}
+        {syncErr && (
+          <div className="sync-err-banner" onClick={() => setSyncErr(null)}>
+            ⚠ {syncErr} — Toca para cerrar
           </div>
         )}
 
