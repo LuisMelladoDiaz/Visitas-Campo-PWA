@@ -64,6 +64,17 @@ function parseJson(s: any): object {
   try { return JSON.parse(s); } catch { return {}; }
 }
 
+// BC serializa el enum resultado como nombre ("Pendiente", "Conforme", "No Conforme").
+// Supabase lo almacena como SMALLINT (0=Pendiente, 1=Conforme, 2=NoConforme).
+const RESULTADO_TO_INT: Record<string, number> = {
+  'Pendiente':   0, 'pendiente':   0, '0': 0,
+  'Conforme':    1, 'conforme':    1, '1': 1,
+  'No Conforme': 2, 'NoConforme':  2, 'noConforme': 2, '2': 2,
+};
+function resultadoToInt(val: any): number {
+  return RESULTADO_TO_INT[String(val ?? '')] ?? 0;
+}
+
 // ---------------------------------------------------------------------------
 // CORS
 // ---------------------------------------------------------------------------
@@ -111,7 +122,7 @@ Deno.serve(async (req) => {
           cinta_num:   bc.cintaNum    ?? null,
           mesa_num:    bc.mesaNum     ?? null,
           n_muestras:  bc.nMuestras   ?? 10,
-          resultado:   parseInt(bc.resultado ?? '0'),
+          resultado:   resultadoToInt(bc.resultado),
           datos_extra: parseJson(bc.datosExtra),
           bc_no:       bcNo,
           bc_sync_at:  new Date().toISOString(),
@@ -145,7 +156,7 @@ Deno.serve(async (req) => {
             no_linea:     l.noLinea,
             hora:         l.hora      ?? null,
             mediciones:   parseJson(l.mediciones),
-            resultado:    parseInt(l.resultado ?? '0'),
+            resultado:    resultadoToInt(l.resultado),
           }));
           const { error } = await supabase.from('lmd_linea_pcc').insert(lineRows);
           if (error) throw new Error(`Insert lineas PCC ${bcNo}: ${error.message}`);

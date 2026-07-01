@@ -1,5 +1,11 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+// BC serializa el enum resultado como nombre; Supabase lo guarda como SMALLINT.
+const INT_TO_RESULTADO = ['Pendiente', 'Conforme', 'No Conforme'];
+function resultadoToEnum(n: number | null): string {
+  return INT_TO_RESULTADO[n ?? 0] ?? 'Pendiente';
+}
+
 // ---------------------------------------------------------------------------
 // BC helpers
 // ---------------------------------------------------------------------------
@@ -224,7 +230,7 @@ async function pushPcc(supabaseSeq: number, supabase: any, token: string) {
     cintaNum:     cab.cinta_num    != null ? String(cab.cinta_num) : null,
     mesaNum:      cab.mesa_num     != null ? String(cab.mesa_num)  : null,
     nMuestras:    cab.n_muestras   ?? 10,
-    resultado:    String(cab.resultado ?? 0),
+    resultado:    resultadoToEnum(cab.resultado),
     datosExtra:   JSON.stringify(cab.datos_extra ?? {}),
   };
 
@@ -239,7 +245,7 @@ async function pushPcc(supabaseSeq: number, supabase: any, token: string) {
         noLinea:        l.no_linea,
         hora:           l.hora ?? null,
         pctDefectos:    med?.total_pct != null ? parseFloat(med.total_pct) : null,
-        resultado:      String(l.resultado ?? 0),
+        resultado:      resultadoToEnum(l.resultado),
         mediciones:     JSON.stringify(med),
       };
       await bcUpsertLine('lineasPcc', `codCabeceraPcc='${bcNo}',noLinea=${l.no_linea}`, lineBody, token);
