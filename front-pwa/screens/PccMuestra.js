@@ -174,10 +174,73 @@ export default function PccMuestra({
                   <Stepper value={m.temperatura||''} onChange={v=>mSet('temperatura',v)} step={0.5} min={-10} max={50} decimals={1}/>
                 </div>
               </div>
+              <div className="field" style={{ marginBottom: '1rem' }}>
+                <label>Intensidad color</label>
+                <div className="toggle-group">
+                  {[
+                    { v: 'Alta', cls: 'tb-int4' },
+                    { v: 'Elevada', cls: 'tb-int3' },
+                    { v: 'Media', cls: 'tb-int2' },
+                    { v: 'Baja', cls: 'tb-int1' },
+                  ].map(({ v, cls }) => (
+                    <button key={v}
+                      className={`toggle-btn tb-scale ${cls}${m.coloracion===v?' toggle-btn--on':''}`}
+                      onClick={()=>mSet('coloracion',m.coloracion===v?'':v)}>
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="field" style={{ marginBottom: '1rem' }}>
+                <label>Color</label>
+                <div className="toggle-group">
+                  {[
+                    { v: 'Rojo', cls: 'tb-red' },
+                    { v: 'Verde', cls: 'tb-green' },
+                    { v: 'Mezcla', cls: 'tb-mix' },
+                    { v: 'Amarillo', cls: 'tb-yellow' },
+                  ].map(({ v, cls }) => (
+                    <button key={v}
+                      className={`toggle-btn tb-color ${cls}${m.color===v?' toggle-btn--on':''}`}
+                      onClick={()=>mSet('color',m.color===v?'':v)}>
+                      <span className={`tb-color-dot ${cls}-dot`}/>
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="field" style={{ marginBottom: '1rem' }}>
+                <label>Longitud</label>
+                <div className="toggle-group">
+                  {["Media","Máxima", "Mínima"].map(n=>(
+                    <button key={n}
+                      className={`toggle-btn${m.longitud===String(n)?' toggle-btn--on':''}`}
+                      onClick={()=>mSet('longitud',m.longitud===String(n)?'':String(n))}>
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="field">
                 <label>Observaciones</label>
                 <textarea value={m.observaciones||''} onChange={e=>mSet('observaciones',e.target.value)}
                   rows={3} style={{width:'100%',padding:'.5rem',borderRadius:'6px',border:'1px solid var(--border)',fontSize:'.9rem'}}/>
+              </div>
+
+              <div className="field" style={{ marginBottom: '1rem' }}>
+                <label>Certificado GlobalGap</label>
+                <div className="toggle-group">
+                  {["Si","No"].map(n=>(
+                    <button key={n}
+                      className={`toggle-btn${m.certificado===String(n)?' toggle-btn--on':''}`}
+                      onClick={()=>mSet('certificado',m.certificado===String(n)?'':String(n))}>
+                      {n}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 

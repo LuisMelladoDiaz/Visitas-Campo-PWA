@@ -118,6 +118,28 @@
 .toggle-btn--on.toggle-btn--danger       { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
 .toggle-btn--num { flex: none; width: 50px; padding: .65rem .4rem; }
 
+/* ─── Toggle buttons: color scale (pimiento/calabaza) ─── */
+.toggle-btn.tb-scale { border-bottom-width: 3px; }
+.toggle-btn.tb-int1 { border-bottom-color: #c7c7b4; }
+.toggle-btn.tb-int2 { border-bottom-color: #e3b64f; }
+.toggle-btn.tb-int3 { border-bottom-color: #c9791f; }
+.toggle-btn.tb-int4 { border-bottom-color: #c0392b; }
+.toggle-btn--on.tb-int1 { background: #f4f4ec; border-color: #a8a890; color: #6b6b58; }
+.toggle-btn--on.tb-int2 { background: #fff6df; border-color: #d4a017; color: #8a6508; }
+.toggle-btn--on.tb-int3 { background: #ffead0; border-color: #c07000; color: #8a4d00; }
+.toggle-btn--on.tb-int4 { background: #fce2de; border-color: #c0392b; color: #a1301f; }
+
+.toggle-btn.tb-color { display: flex; align-items: center; justify-content: center; gap: .4rem; }
+.tb-color-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.tb-red-dot    { background: #c0392b; }
+.tb-green-dot  { background: #1c7a40; }
+.tb-yellow-dot { background: #d4a017; }
+.tb-mix-dot    { background: conic-gradient(#c0392b 0 33%, #d4a017 33% 66%, #1c7a40 66% 100%); }
+.toggle-btn--on.tb-red    { background: #fdecea; border-color: #c0392b; color: #a1301f; }
+.toggle-btn--on.tb-green  { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+.toggle-btn--on.tb-yellow { background: #fff8e1; border-color: #b8860b; color: #8a6508; }
+.toggle-btn--on.tb-mix    { background: linear-gradient(90deg, #fdecea, #fff8e1, #e6f5ec); border-color: var(--accent); color: var(--text); }
+
 /* ─── Form grid ─── */
 .form-grid { display: grid; gap: 1rem; }
 .g2 { grid-template-columns: 1fr 1fr; }
